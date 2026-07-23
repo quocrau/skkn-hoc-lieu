@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trạm Không Gian Phân Số - Học liệu tương tác</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --header-gradient: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            --primary-blue: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-light: #f0f6fc;
+            --text-muted: #8b949e;
+            --fraction1-color: #ff4d6d;
+            --fraction2-color: #3b82f6;
+            --result-color: #10b981;
+            --warning-color: #fbbf24;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            background-image: radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.08) 1px, transparent 1px), radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 100px 100px;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--header-gradient);
+            text-align: center;
+            padding: 20px 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .school-badge {
+            background-color: var(--warning-color);
+            color: #000;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            margin: 5px 0 0;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: var(--panel-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #30363d;
+        }
+
+        .icons {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-top: -45px;
+            margin-bottom: 20px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            background-color: transparent;
+            color: var(--text-light);
+            border: 1px solid #30363d;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background-color: #21262d;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            font-weight: bold;
+        }
+
+        /* Section Toggles */
+        .section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Workspace (Khám phá) */
+        .workspace {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .fraction-card {
+            flex: 1;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .fraction-card h3 {
+            margin-top: 0;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 1rem;
+        }
+
+        .pie-chart {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: #21262d;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .operator {
+            font-size: 3rem;
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+
+        .fraction-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .fraction-input input {
+            width: 60px;
+            text-align: center;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: white;
+            font-size: 1.5rem;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .fraction-line {
+            width: 80px;
+            height: 3px;
+            background-color: var(--text-muted);
+        }
+
+        .result-card {
+            flex: 1.2;
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: var(--result-color);
+        }
+
+        .result-card h3 {
+            color: var(--result-color);
+        }
+
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--primary-blue);
+            border-radius: 0 8px 8px 0;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        /* Challenge Section */
+        .challenge-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #30363d;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-blue);
+            width: 10%;
+            transition: width 0.3s;
+        }
+
+        .question-box {
+            font-size: 2.5rem;
+            margin: 30px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .fraction-display {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+        }
+
+        .fraction-display span {
+            padding: 5px 15px;
+        }
+
+        .fraction-display .num { border-bottom: 3px solid white; }
+        
+        .answer-input-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .answer-input-box input {
+            width: 80px;
+            font-size: 2rem;
+            text-align: center;
+            background: #0d1117;
+            border: 2px solid var(--primary-blue);
+            color: white;
+            border-radius: 8px;
+            padding: 5px;
+        }
+
+        .btn-submit {
+            background-color: var(--result-color);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #059669;
+        }
+
+        /* Score Board Screen */
+        .score-board {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(145deg, #161b22, #0d1117);
+            border: 2px dashed var(--warning-color);
+            border-radius: 15px;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+        }
+
+        .feedback-text {
+            font-size: 1.5rem;
+            color: var(--warning-color);
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="school-badge">TRƯỜNG TIỂU HỌC MINH HÒA</div>
+        <h1>TRẠM KHÔNG GIAN PHÂN SỐ</h1>
+        <p>Học liệu khám phá & Luyện tập Toán học - Dành cho Học sinh Khối 4</p>
+    </div>
+
+    <div class="container">
+        <div class="icons">👦 🚀 🛸</div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('explore')" id="btn-explore">Khám Phá (Nhân, Chia)</button>
+            <button class="tab-btn" onclick="switchTab('challenge')" id="btn-challenge">Thử Thách Luyện Tập</button>
+        </div>
+
+        <div id="section-explore" class="section active">
+            <div class="tabs" style="border-bottom: 1px solid #30363d; padding-bottom: 15px;">
+                <button class="tab-btn active" onclick="setOperation('multiply')" id="tab-multiply" style="font-size:0.9rem">Phép Nhân (x)</button>
+                <button class="tab-btn" onclick="setOperation('divide')" id="tab-divide" style="font-size:0.9rem">Phép Chia (:)</button>
+            </div>
+
+            <div class="workspace">
+                <div class="fraction-card">
+                    <h3>Phân số 1</h3>
+                    <div class="pie-chart" id="pie1"></div>
+                    <div class="fraction-input">
+                        <input type="number" id="num1" value="1" min="0" oninput="calculate()">
+                        <div class="fraction-line"></div>
+                        <input type="number" id="den1" value="2" min="1" oninput="calculate()">
+                    </div>
+                </div>
+
+                <div class="operator" id="operator-sign">x</div>
+
+                <div class="fraction-card">
+                    <h3>Phân số 2</h3>
+                    <div class="pie-chart" id="pie2"></div>
+                    <div class="fraction-input">
+                        <input type="number" id="num2" value="3" min="0" oninput="calculate()">
+                        <div class="fraction-line"></div>
+                        <input type="number" id="den2" value="4" min="1" oninput="calculate()">
+                    </div>
+                </div>
+
+                <div class="operator">=</div>
+
+                <div class="fraction-card result-card">
+                    <h3>Kết quả (Đã rút gọn)</h3>
+                    <div class="pie-chart" id="pie-result"></div>
+                    <div class="fraction-input">
+                        <input type="number" id="num-res" readonly>
+                        <div class="fraction-line"></div>
+                        <input type="number" id="den-res" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="explanation" id="explanation-text"></div>
+        </div>
+
+        <div id="section-challenge" class="section">
+            <div class="challenge-container" id="challenge-active">
+                <h2 style="margin-top:0">Nhiệm vụ Không Gian: Hoàn thành 10 câu hỏi</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                <div style="text-align: left; color: var(--text-muted);" id="q-counter">Câu hỏi: 1/10</div>
+
+                <div class="question-box">
+                    <div class="fraction-display">
+                        <span class="num" id="q-num1">1</span>
+                        <span class="den" id="q-den1">2</span>
+                    </div>
+                    <div class="operator" id="q-operator" style="font-size: 2.5rem; margin: 0 10px;">+</div>
+                    <div class="fraction-display">
+                        <span class="num" id="q-num2">1</span>
+                        <span class="den" id="q-den2">4</span>
+                    </div>
+                    <div class="operator" style="font-size: 2.5rem; margin: 0 10px;">=</div>
+                    
+                    <div class="answer-input-box">
+                        <input type="number" id="ans-num" placeholder="Tử" autocomplete="off">
+                        <div class="fraction-line" style="width: 100px;"></div>
+                        <input type="number" id="ans-den" placeholder="Mẫu" autocomplete="off">
+                    </div>
+                </div>
+                <p style="color: var(--warning-color); font-size: 0.9rem;">* Lưu ý: Rút gọn phân số về tối giản nếu có thể!</p>
+                <button class="btn-submit" onclick="checkAnswer()">Kiểm tra & Tiếp tục</button>
+            </div>
+
+            <div class="score-board" id="score-board">
+                <h2>BÁO CÁO NHIỆM VỤ</h2>
+                <p>Mã định danh Học sinh: Khối 4</p>
+                <div class="score-circle" id="final-score">8/10</div>
+                <div class="feedback-text" id="feedback">Xuất sắc! Em đã sẵn sàng làm phi hành gia!</div>
+                <button class="btn-submit" onclick="startChallenge()">Làm lại thử thách</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- CHỨC NĂNG KHÁM PHÁ (Đã có) ---
+        let currentOp = 'multiply';
+        function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+        
+        function setOperation(op) {
+            currentOp = op;
+            document.getElementById('tab-multiply').classList.remove('active');
+            document.getElementById('tab-divide').classList.remove('active');
+            if(op === 'multiply') {
+                document.getElementById('tab-multiply').classList.add('active');
+                document.getElementById('operator-sign').innerText = 'x';
+            } else {
+                document.getElementById('tab-divide').classList.add('active');
+                document.getElementById('operator-sign').innerText = ':';
+            }
+            calculate();
+        }
+
+        function updatePie(elementId, num, den, color) {
+            const el = document.getElementById(elementId);
+            if(den == 0 || num > den) { el.style.background = '#21262d'; return; }
+            const percentage = (num / den) * 100;
+            el.style.background = `conic-gradient(${color} ${percentage}%, #21262d 0)`;
+        }
+
+        function calculate() {
+            let n1 = parseInt(document.getElementById('num1').value) || 0;
+            let d1 = parseInt(document.getElementById('den1').value) || 1;
+            let n2 = parseInt(document.getElementById('num2').value) || 0;
+            let d2 = parseInt(document.getElementById('den2').value) || 1;
+            if(d1 === 0) d1 = 1; if(d2 === 0) d2 = 1;
+
+            updatePie('pie1', n1, d1, 'var(--fraction1-color)');
+            updatePie('pie2', n2, d2, 'var(--fraction2-color)');
+
+            let resNum = 0, resDen = 1, explanation = '';
+            if (currentOp === 'multiply') {
+                resNum = n1 * n2; resDen = d1 * d2;
+                explanation = `<strong>Cách tính:</strong> ${n1} x ${n2} = ${resNum}, ${d1} x ${d2} = ${resDen}.`;
+            } else {
+                resNum = n1 * d2; resDen = d1 * n2;
+                explanation = `<strong>Cách tính:</strong> ${n1} x ${d2} = ${resNum}, ${d1} x ${n2} = ${resDen}.`;
+            }
+
+            if(resDen === 0) {
+                document.getElementById('num-res').value = "Lỗi"; document.getElementById('den-res').value = "Lỗi";
+                return;
+            }
+
+            let divisor = gcd(resNum, resDen);
+            let simplifiedNum = resNum / divisor;
+            let simplifiedDen = resDen / divisor;
+
+            document.getElementById('num-res').value = simplifiedNum;
+            document.getElementById('den-res').value = simplifiedDen;
+            document.getElementById('explanation-text').innerHTML = explanation;
+            updatePie('pie-result', simplifiedNum, simplifiedDen, 'var(--result-color)');
+        }
+
+        // --- CHỨC NĂNG CHUYỂN TAB ---
+        function switchTab(tabName) {
+            document.getElementById('section-explore').classList.remove('active');
+            document.getElementById('section-challenge').classList.remove('active');
+            document.getElementById('btn-explore').classList.remove('active');
+            document.getElementById('btn-challenge').classList.remove('active');
+
+            if(tabName === 'explore') {
+                document.getElementById('section-explore').classList.add('active');
+                document.getElementById('btn-explore').classList.add('active');
+                calculate();
+            } else {
+                document.getElementById('section-challenge').classList.add('active');
+                document.getElementById('btn-challenge').classList.add('active');
+                startChallenge();
+            }
+        }
+
+        // --- CHỨC NĂNG THỬ THÁCH (Mới thêm) ---
+        let score = 0;
+        let currentQuestion = 1;
+        const totalQuestions = 10;
+        let correctNum = 0;
+        let correctDen = 1;
+
+        function startChallenge() {
+            score = 0;
+            currentQuestion = 1;
+            document.getElementById('score-board').style.display = 'none';
+            document.getElementById('challenge-active').style.display = 'block';
+            generateQuestion();
+        }
+
+        function generateQuestion() {
+            // Cập nhật tiến trình
+            document.getElementById('q-counter').innerText = `Câu hỏi: ${currentQuestion}/${totalQuestions}`;
+            document.getElementById('progress').style.width = `${(currentQuestion / totalQuestions) * 100}%`;
+            
+            // Xóa input cũ
+            document.getElementById('ans-num').value = '';
+            document.getElementById('ans-den').value = '';
+
+            // Tạo số ngẫu nhiên cho học sinh lớp 4 (số nhỏ, dễ tính)
+            const ops = ['+', '-', 'x', ':'];
+            const op = ops[Math.floor(Math.random() * ops.length)];
+            
+            let n1 = Math.floor(Math.random() * 5) + 1;
+            let d1 = Math.floor(Math.random() * 4) + 2;
+            let n2 = Math.floor(Math.random() * 5) + 1;
+            let d2 = Math.floor(Math.random() * 4) + 2;
+
+            // Xử lý phép trừ tránh số âm
+            if (op === '-') {
+                if ((n1/d1) < (n2/d2)) {
+                    // Hoán đổi nếu phân số 1 nhỏ hơn phân số 2
+                    let tempN = n1, tempD = d1;
+                    n1 = n2; d1 = d2;
+                    n2 = tempN; d2 = tempD;
+                }
+            }
+
+            document.getElementById('q-num1').innerText = n1;
+            document.getElementById('q-den1').innerText = d1;
+            document.getElementById('q-num2').innerText = n2;
+            document.getElementById('q-den2').innerText = d2;
+            document.getElementById('q-operator').innerText = op;
+
+            // Tính toán đáp án đúng nội bộ
+            let rawNum = 0, rawDen = 1;
+            if(op === '+') { rawNum = n1*d2 + n2*d1; rawDen = d1*d2; }
+            else if(op === '-') { rawNum = n1*d2 - n2*d1; rawDen = d1*d2; }
+            else if(op === 'x') { rawNum = n1*n2; rawDen = d1*d2; }
+            else if(op === ':') { rawNum = n1*d2; rawDen = d1*n2; }
+
+            // Rút gọn đáp án
+            let divisor = gcd(Math.abs(rawNum), Math.abs(rawDen));
+            correctNum = rawNum / divisor;
+            correctDen = rawDen / divisor;
+
+            // Focus vào ô nhập tử số
+            document.getElementById('ans-num').focus();
+        }
+
+        function checkAnswer() {
+            let userNum = parseInt(document.getElementById('ans-num').value);
+            let userDen = parseInt(document.getElementById('ans-den').value);
+
+            // Kiểm tra xem đã nhập đủ chưa
+            if(isNaN(userNum) || isNaN(userDen)) {
+                alert("Vui lòng nhập đầy đủ Tử số và Mẫu số!");
+                return;
+            }
+
+            // Rút gọn đáp án của học sinh để so sánh (Phòng trường hợp HS không rút gọn)
+            let userDivisor = gcd(Math.abs(userNum), Math.abs(userDen));
+            let simUserNum = userNum / userDivisor;
+            let simUserDen = userDen / userDivisor;
+
+            if (simUserNum === correctNum && simUserDen === correctDen) {
+                score++;
+            }
+
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++;
+                generateQuestion();
+            } else {
+                endChallenge();
+            }
+        }
+
+        function endChallenge() {
+            document.getElementById('challenge-active').style.display = 'none';
+            document.getElementById('score-board').style.display = 'block';
+            document.getElementById('final-score').innerText = `${score}/10`;
+            
+            let feedbackText = "";
+            if(score === 10) feedbackText = "Xuất sắc tuyệt đối! Em là một phi hành gia thiên tài!";
+            else if(score >= 8) feedbackText = "Rất tốt! Em nắm vững kiến thức Không gian phân số.";
+            else if(score >= 5) feedbackText = "Khá tốt! Hãy cố gắng luyện tập thêm nhé.";
+            else feedbackText = "Đừng buồn, hãy vào phần 'Khám phá' để học lại luật chơi nha!";
+            
+            document.getElementById('feedback').innerText = feedbackText;
+        }
+
+        // Khởi tạo ban đầu
+        calculate();
+    </script>
+</body>
+</html>
