@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bữa Tiệc Pizza & Biệt Đội Phân Số</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Playful Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            background: radial-gradient(circle, #fef08a 0%, #fef3c7 50%, #fde68a 100%);
+            touch-action: manipulation;
+        }
+        .pizza-slice {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .pizza-slice:hover {
+            filter: brightness(1.15) drop-shadow(0px 0px 8px rgba(245, 158, 11, 0.6));
+            transform: scale(1.02);
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #ffffff transparent;
+            display: block;
+            width: 0;
+        }
+        .speech-bubble-right::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #ffffff transparent;
+            display: block;
+            width: 0;
+        }
+        /* Sparkle animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+        .float-animation {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden text-slate-800 selection:bg-amber-300">
+
+<script>
+    // Sound Effects Engine using Web Audio API
+    class AudioEngine {
+        constructor() {
+            this.ctx = null;
+        }
+        init() {
+            if (!this.ctx) {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        playTone(freq, type, duration, vol = 0.1) {
+            this.init();
+            if (!this.ctx) return;
+            try {
+                let osc = this.ctx.createOscillator();
+                let gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            } catch (e) { console.log("Audio play error", e); }
+        }
+        playCorrect() {
+            this.playTone(523.25, 'triangle', 0.1, 0.15); // C5
+            setTimeout(() => this.playTone(659.25, 'triangle', 0.15, 0.15), 100); // E5
+            setTimeout(() => this.playTone(783.99, 'triangle', 0.3, 0.2), 200); // G5
+        }
+        playError() {
+            this.playTone(220, 'sawtooth', 0.15, 0.15); // A3
+            setTimeout(() => this.playTone(180, 'sawtooth', 0.25, 0.15), 150);
+        }
+        playPop() {
+            this.playTone(600, 'sine', 0.08, 0.1);
+        }
+        playClick() {
+            this.playTone(400, 'sine', 0.05, 0.1);
+        }
+        playVictory() {
+            const notes = [523, 587, 659, 698, 783, 880, 987, 1046];
+            notes.forEach((note, idx) => {
+                setTimeout(() => this.playTone(note, 'sine', 0.2, 0.15), idx * 100);
+            });
+        }
+    }
+    const audio = new AudioEngine();
+</script>
+
+<div class="hidden">
+    <!-- SVG Character Assets defined for reusable easy rendering -->
+    <!-- Robot Icon -->
+    <svg id="svg-robot" viewBox="0 0 100 100" class="w-full h-full">
+        <rect x="25" y="30" width="50" height="40" rx="12" fill="#22c55e" stroke="#15803d" stroke-width="3" />
+        <!-- Screen -->
+        <rect x="32" y="37" width="36" height="20" rx="6" fill="#1e293b" />
+        <!-- Eyes -->
+        <circle cx="43" cy="47" r="4" fill="#a8f051" />
+        <circle cx="57" cy="47" r="4" fill="#a8f051" />
+        <!-- Antenna -->
+        <line x1="50" y1="30" x2="50" y2="15" stroke="#15803d" stroke-width="4" />
+        <circle cx="50" cy="15" r="5" fill="#eab308" />
+        <!-- Mouth -->
+        <path d="M 45 52 Q 50 55 55 52" stroke="#a8f051" stroke-width="2" fill="none" />
+        <!-- Body base -->
+        <rect x="40" y="70" width="20" height="15" fill="#15803d" />
+        <circle cx="50" cy="88" r="8" fill="#475569" />
+        <!-- Cute cheeks -->
+        <circle cx="36" cy="51" r="2" fill="#ef4444" />
+        <circle cx="64" cy="51" r="2" fill="#ef4444" />
+    </svg>
+
+    <!-- Mi Icon (Little Sister in Striped Shirt) -->
+    <svg id="svg-mi" viewBox="0 0 100 100" class="w-full h-full">
+        <!-- Hair back -->
+        <circle cx="50" cy="48" r="32" fill="#451a03" />
+        <circle cx="28" cy="30" r="12" fill="#451a03" />
+        <circle cx="72" cy="30" r="12" fill="#451a03" />
+        <!-- Face -->
+        <circle cx="50" cy="52" r="24" fill="#fed7aa" />
+        <!-- Hair front/bangs -->
+        <path d="M 26 44 Q 50 28 74 44 C 70 34 30 34 26 44 Z" fill="#451a03" />
+        <!-- Hair buns accessories (yellow ribbons) -->
+        <circle cx="28" cy="36" r="4" fill="#eab308" />
+        <circle cx="72" cy="36" r="4" fill="#eab308" />
+        <!-- Eyes -->
+        <circle cx="42" cy="54" r="3.5" fill="#1e293b" />
+        <circle cx="58" cy="54" r="3.5" fill="#1e293b" />
+        <circle cx="43.5" cy="52.5" r="1" fill="#ffffff" />
+        <circle cx="59.5" cy="52.5" r="1" fill="#ffffff" />
+        <!-- Cheeks -->
+        <circle cx="38" cy="59" r="3" fill="#f87171" opacity="0.6" />
+        <circle cx="62" cy="59" r="3" fill="#f87171" opacity="0.6" />
+        <!-- Smile -->
+        <path d="M 46 62 Q 50 66 54 62" stroke="#b45309" stroke-width="2" fill="none" stroke-linecap="round" />
+        <!-- Collar/Shirt (Striped orange) -->
+        <path d="M 35 74 Q 50 82 65 74 L 65 95 L 35 95 Z" fill="#f97316" />
+        <!-- Yellow stripes on shirt -->
+        <path d="M 35 80 L 65 80 M 35 88 L 65 88" stroke="#facc15" stroke-width="3" />
+    </svg>
+
+    <!-- Nam Icon (Boy in Blue Shirt) -->
+    <svg id="svg-nam" viewBox="0 0 100 100" class="w-full h-full">
+        <!-- Hair back -->
+        <path d="M 24 45 Q 50 15 76 45 Z" fill="#1e293b" />
+        <!-- Face -->
+        <circle cx="50" cy="52" r="24" fill="#fed7aa" />
+        <!-- Spiky Hair front -->
+        <path d="M 26 42 Q 35 28 42 36 Q 50 25 58 36 Q 66 28 74 42 Q 50 35 26 42 Z" fill="#1e293b" />
+        <!-- Eyes -->
+        <circle cx="42" cy="52" r="3.5" fill="#1e293b" />
+        <circle cx="58" cy="52" r="3.5" fill="#1e293b" />
+        <!-- Smile -->
+        <path d="M 44 60 Q 50 67 56 60" stroke="#b45309" stroke-width="2" fill="none" stroke-linecap="round" />
+        <!-- Collar/Blue shirt -->
+        <path d="M 35 74 Q 50 82 65 74 L 65 95 L 35 95 Z" fill="#0284c7" />
+    </svg>
+</div>
+
+<!-- HEADER BAR -->
+<header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-amber-200 py-3 px-4 sticky top-0 z-50 transition-all">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="goToScreen('welcome')">
+            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center border-2 border-amber-400 p-1">
+                <!-- Mini Pizza icon -->
+                <svg viewBox="0 0 100 100" class="w-full h-full">
+                    <circle cx="50" cy="50" r="45" fill="#eab308" />
+                    <circle cx="50" cy="50" r="39" fill="#fee2e2" />
+                    <circle cx="50" cy="50" r="36" fill="#ef4444" />
+                    <circle cx="35" cy="35" r="6" fill="#f97316" />
+                    <circle cx="65" cy="45" r="7" fill="#f97316" />
+                    <circle cx="45" cy="65" r="5" fill="#f97316" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black text-amber-600 tracking-tight leading-none">BIỆT ĐỘI PHÂN SỐ</h1>
+                <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Học toán siêu vui cùng Robot</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <!-- Score Counter -->
+            <div class="bg-amber-100 border-2 border-amber-400 px-3 py-1.5 rounded-full flex items-center space-x-2 shadow-inner">
+                <span class="text-amber-500 text-lg">⭐</span>
+                <span id="score-display" class="font-bold text-amber-700 text-lg">0</span>
+            </div>
+            <!-- Restart Button -->
+            <button onclick="resetGame()" class="hidden md:flex bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-4 py-2 rounded-xl text-sm transition border border-slate-300">
+                Chơi Lại Từ Đầu
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN GAME CONTAINER -->
+<main class="max-w-5xl mx-auto px-4 py-6 flex-grow flex items-center justify-center w-full">
+    
+    <!-- WELCOME SCREEN -->
+    <div id="screen-welcome" class="w-full text-center max-w-2xl mx-auto bg-white/90 backdrop-blur-lg rounded-3xl p-6 md:p-10 shadow-2xl border-4 border-amber-300 relative overflow-hidden transition-all duration-300 transform scale-100">
+        <!-- Floating Pizzas and Stars in background -->
+        <div class="absolute -top-10 -left-10 w-32 h-32 opacity-10 float-animation" style="animation-delay: 0s;">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#eab308"/></svg>
+        </div>
+        <div class="absolute -bottom-10 -right-10 w-32 h-32 opacity-10 float-animation" style="animation-delay: 1.5s;">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#eab308"/></svg>
+        </div>
+
+        <div class="relative z-10">
+            <!-- Main Illustration with group and Green Robot -->
+            <div class="flex justify-center space-x-4 mb-6">
+                <div class="w-20 h-20 md:w-28 md:h-28 bg-green-50 rounded-2xl border-2 border-green-300 p-2 float-animation" style="animation-delay: 0.5s;">
+                    <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#svg-robot"></use></svg>
+                </div>
+                <div class="w-20 h-20 md:w-28 md:h-28 bg-orange-50 rounded-2xl border-2 border-orange-300 p-2 float-animation" style="animation-delay: 1s;">
+                    <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#svg-mi"></use></svg>
+                </div>
+                <div class="w-20 h-20 md:w-28 md:h-28 bg-sky-50 rounded-2xl border-2 border-sky-300 p-2 float-animation" style="animation-delay: 1.5s;">
+                    <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#svg-nam"></use></svg>
+                </div>
+            </div>
+
+            <span class="bg-amber-100 text-amber-800 text-sm font-extrabold px-4 py-1.5 rounded-full uppercase tracking-widest border border-amber-300">
+                Toán Lớp 3 & 4 • Chủ đề 10
+            </span>
+            
+            <h2 class="text-3xl md:text-5xl font-black text-amber-600 mt-4 mb-2 leading-tight drop-shadow-sm">
+                Bữa Tiệc Pizza &<br>Biệt Đội Phân Số
+            </h2>
+            
+            <p class="text-slate-600 text-base md:text-lg mb-8 max-w-md mx-auto font-medium">
+                Chào mừng bạn đến với thế giới phân số trực quan lấy cảm hứng từ câu chuyện chia bánh pizza trong tài liệu <span class="font-bold text-amber-600">kn ph.png</span>! Hãy học cách chia bánh và chinh phục các thử thách toán học hấp dẫn cùng nhóm bạn nhỏ và Robot nhé!
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button onclick="startStoryMode()" class="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xl px-8 py-4 rounded-2xl shadow-lg hover:shadow-orange-300/50 transform hover:-translate-y-1 transition duration-200">
+                    📖 Khám Phá Câu Chuyện
+                </button>
+                <button onclick="goToScreen('game-select')" class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-extrabold text-xl px-8 py-4 rounded-2xl shadow-lg hover:shadow-emerald-300/50 transform hover:-translate-y-1 transition duration-200">
+                    🎮 Chơi Thử Thách Ngay!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE STORY MODE -->
+    <div id="screen-story" class="hidden w-full max-w-4xl mx-auto bg-white/95 rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-amber-300 transition-all duration-300">
+        <!-- Progress Steps Tracker -->
+        <div class="flex justify-between items-center mb-6 overflow-x-auto pb-2 border-b border-amber-100">
+            <div id="story-steps" class="flex space-x-2 w-full justify-between px-2">
+                <!-- Generated dynamically, 6 steps matching 6 panels of kn ph.png -->
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[350px]">
+            <!-- Visual Dynamic Scene Panel (Left) -->
+            <div class="lg:col-span-7 bg-amber-50 rounded-2xl p-4 border-2 border-amber-200 flex flex-col items-center justify-center min-h-[320px] relative overflow-hidden">
+                <!-- Dynamic Interactive Canvas / SVG -->
+                <div id="story-visual-canvas" class="w-full flex items-center justify-center">
+                    <!-- Loaded dynamically via javascript based on slide index -->
+                </div>
+            </div>
+
+            <!-- Dialogue and Learning Panel (Right) -->
+            <div class="lg:col-span-5 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div id="story-speaker-avatar" class="w-12 h-12 bg-white rounded-xl border border-amber-200 p-1">
+                            <!-- Speaker SVG -->
+                        </div>
+                        <div>
+                            <span id="story-speaker-name" class="font-extrabold text-lg text-amber-600">Robot Thông Minh</span>
+                            <span class="text-xs text-slate-400 block font-semibold uppercase">Đang giải thích</span>
+                        </div>
+                    </div>
+
+                    <div id="story-speech-bubble" class="bg-amber-100 border-2 border-amber-200 rounded-2xl p-4 text-slate-700 font-medium text-base md:text-lg mb-6 shadow-sm relative">
+                        <!-- Dynamic bubble content matching the story script -->
+                    </div>
+                </div>
+
+                <!-- Next/Prev Buttons -->
+                <div class="flex items-center justify-between mt-auto">
+                    <button id="story-btn-prev" onclick="prevStorySlide()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold px-5 py-3 rounded-xl transition border border-slate-300 flex items-center space-x-2">
+                        <span>⬅️ Trước</span>
+                    </button>
+                    <button id="story-btn-next" onclick="nextStorySlide()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold px-6 py-3 rounded-xl shadow-md transition flex items-center space-x-2">
+                        <span id="story-next-text">Tiếp tục ➡️</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME SELECTOR -->
+    <div id="screen-game-select" class="hidden w-full max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl md:text-4xl font-black text-amber-600 mb-2">Thử Thách Phân Số</h2>
+        <p class="text-slate-600 mb-8 max-w-lg mx-auto font-semibold">Chọn một trò chơi dưới đây để thử tài phân số của bạn và ghi điểm cao nhất trên bảng xếp hạng!</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Game 1: Share Pizza with Friends -->
+            <div class="bg-white/90 rounded-3xl p-6 shadow-xl border-2 border-amber-200 hover:border-amber-400 hover:scale-105 transition-all duration-300 flex flex-col justify-between items-center group">
+                <div class="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center p-3 mb-4 group-hover:bg-orange-100 transition">
+                    <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#svg-mi"></use></svg>
+                </div>
+                <h3 class="text-xl font-extrabold text-amber-600 mb-2">Chia Bánh Cho Bạn</h3>
+                <p class="text-sm text-slate-500 mb-6">Đọc yêu cầu phân số của các bạn nhỏ và chia chiếc bánh pizza thành số phần chính xác nhé!</p>
+                <button onclick="startGame(1)" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold py-3 rounded-xl shadow-md hover:shadow-orange-300 transition transform active:scale-95">
+                    🎮 Chơi Ngay!
+                </button>
+            </div>
+
+            <!-- Game 2: Numerator & Denominator Hunt -->
+            <div class="bg-white/90 rounded-3xl p-6 shadow-xl border-2 border-green-200 hover:border-green-400 hover:scale-105 transition-all duration-300 flex flex-col justify-between items-center group">
+                <div class="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center p-3 mb-4 group-hover:bg-green-100 transition">
+                    <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#svg-robot"></use></svg>
+                </div>
+                <h3 class="text-xl font-extrabold text-green-600 mb-2">Thợ Săn Tử & Mẫu Số</h3>
+                <p class="text-sm text-slate-500 mb-6">Trò chơi trắc nghiệm phản xạ nhanh. Giúp Robot bắn phá và nhận diện đâu là Tử số và Mẫu số!</p>
+                <button onclick="startGame(2)" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-extrabold py-3 rounded-xl shadow-md hover:shadow-green-300 transition transform active:scale-95">
+                    🎮 Chơi Ngay!
+                </button>
+            </div>
+
+            <!-- Game 3: Pizza Colorist -->
+            <div class="bg-white/90 rounded-3xl p-6 shadow-xl border-2 border-sky-200 hover:border-sky-400 hover:scale-105 transition-all duration-300 flex flex-col justify-between items-center group">
+                <div class="w-24 h-24 bg-sky-50 rounded-full flex items-center justify-center p-3 mb-4 group-hover:bg-sky-100 transition">
+                    <!-- Customized SVG Pizza Wheel -->
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <circle cx="50" cy="50" r="45" fill="#facc15" stroke="#ca8a04" stroke-width="2" />
+                        <path d="M 50 50 L 50 5 A 45 45 0 0 1 95 50 Z" fill="#ef4444" opacity="0.8" />
+                        <path d="M 50 50 L 95 50 A 45 45 0 0 1 50 95 Z" fill="#e2e8f0" />
+                        <path d="M 50 50 L 50 95 A 45 45 0 0 1 5 50 Z" fill="#e2e8f0" />
+                        <path d="M 50 50 L 5 50 A 45 45 0 0 1 50 5 Z" fill="#e2e8f0" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-extrabold text-sky-600 mb-2">Họa Sĩ Tô Màu Pizza</h3>
+                <p class="text-sm text-slate-500 mb-6">Robot hiển thị phân số, bạn cần nhấp vào các phần bánh tương ứng để tô đúng màu phân số mục tiêu!</p>
+                <button onclick="startGame(3)" class="w-full bg-gradient-to-r from-sky-500 to-blue-500 text-white font-extrabold py-3 rounded-xl shadow-md hover:shadow-sky-300 transition transform active:scale-95">
+                    🎮 Chơi Ngay!
+                </button>
+            </div>
+        </div>
+
+        <button onclick="goToScreen('welcome')" class="mt-8 text-slate-500 hover:text-slate-800 font-extrabold flex items-center justify-center mx-auto space-x-2 transition">
+            <span>⬅️ Trở về màn hình chính</span>
+        </button>
+    </div>
+
+    <!-- GAME 1 SCREEN: SHARE PIZZA -->
+    <div id="screen-game-share" class="hidden w-full max-w-3xl mx-auto bg-white/95 rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-amber-300 transition-all duration-300">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Game 1: Chia Bánh Cho Bạn</span>
+                <h3 class="text-2xl font-black text-amber-600 mt-1">Đáp Ứng Yêu Cầu!</h3>
+            </div>
+            <div class="bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200">
+                <span class="text-slate-500 text-sm font-semibold">Màn: </span>
+                <span id="g1-level" class="font-extrabold text-amber-700">1 / 5</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            <!-- Client Request card (Left) -->
+            <div class="md:col-span-5 flex flex-col items-center text-center">
+                <div class="w-32 h-32 bg-amber-50 rounded-2xl border border-amber-200 p-3 mb-4 relative shadow-sm">
+                    <div id="g1-character-avatar" class="w-full h-full">
+                        <!-- Dynamic Character -->
+                    </div>
+                    <!-- Bubble speech -->
+                    <div class="absolute -right-16 top-4 w-32 bg-white border-2 border-slate-200 rounded-xl p-2 text-xs font-bold shadow-md text-left speech-bubble-right" id="g1-character-bubble">
+                        Tớ muốn lấy 1 phần 6 cái bánh!
+                    </div>
+                </div>
+                <h4 id="g1-character-name" class="font-bold text-slate-700 text-lg">Bạn Mi</h4>
+                <div class="bg-amber-100 border border-amber-300 rounded-xl p-3 mt-4 w-full">
+                    <p class="text-xs text-amber-800 font-bold uppercase tracking-wider mb-1">Mục tiêu cần chia</p>
+                    <div id="g1-target-fraction" class="text-3xl font-black text-amber-700 flex flex-col items-center">
+                        <div>1</div>
+                        <div class="w-10 h-1 bg-amber-700 my-1"></div>
+                        <div>6</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interative Pizza Slice Tool (Right) -->
+            <div class="md:col-span-7 flex flex-col items-center justify-center">
+                <div class="relative w-64 h-64 md:w-80 md:h-80 bg-slate-50 rounded-full border border-slate-200 shadow-inner flex items-center justify-center p-4">
+                    <svg id="g1-pizza-svg" viewBox="0 0 200 200" class="w-full h-full">
+                        <!-- Slices generated dynamically -->
+                    </svg>
+                </div>
+                
+                <p class="text-slate-500 text-xs font-medium mt-4 text-center">Nhấn vào các phần bánh để tô màu phần muốn chia cho bạn nhỏ nhé!</p>
+
+                <div class="flex items-center space-x-4 mt-6 w-full max-w-sm">
+                    <button onclick="g1ResetPizza()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition border border-slate-300">
+                        Xóa Hết
+                    </button>
+                    <button onclick="g1SubmitPizza()" class="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold py-3 rounded-xl shadow-lg hover:shadow-orange-300/50 transition">
+                        Gửi Bánh! 🍕
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME 2 SCREEN: NUMERATOR/DENOMINATOR HUNT -->
+    <div id="screen-game-match" class="hidden w-full max-w-3xl mx-auto bg-white/95 rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-green-300 transition-all duration-300">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Game 2: Săn Tử Số & Mẫu Số</span>
+                <h3 class="text-2xl font-black text-green-600 mt-1">Phản Xạ Nhanh</h3>
+            </div>
+            <div class="bg-green-50 px-3 py-1.5 rounded-xl border border-green-200">
+                <span class="text-slate-500 text-sm font-semibold">Đúng liên tiếp: </span>
+                <span id="g2-streak" class="font-extrabold text-green-700">0</span>
+            </div>
+        </div>
+
+        <div class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+                <div class="w-24 h-24 bg-green-50 rounded-2xl border border-green-200 p-2 relative">
+                    <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#svg-robot"></use></svg>
+                </div>
+            </div>
+            
+            <div class="inline-block bg-green-100 border-2 border-green-300 rounded-2xl px-6 py-4 mb-6">
+                <p id="g2-question-text" class="text-slate-700 font-extrabold text-lg mb-2">Tìm Tử số hoặc Mẫu số của phân số:</p>
+                <div id="g2-fraction-box" class="text-5xl font-black text-green-700 flex flex-col items-center">
+                    <span id="g2-num">3</span>
+                    <div class="w-14 h-1 bg-green-700 my-1"></div>
+                    <span id="g2-den">7</span>
+                </div>
+            </div>
+
+            <h4 id="g2-prompt" class="text-xl font-bold text-slate-800 mb-6">Hãy chọn <span class="text-green-600 underline">TỬ SỐ</span> của phân số trên:</h4>
+
+            <!-- Grid of floating choices -->
+            <div id="g2-choices-grid" class="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+                <!-- Buttons dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME 3 SCREEN: PIZZA COLORIST -->
+    <div id="screen-game-color" class="hidden w-full max-w-3xl mx-auto bg-white/95 rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-sky-300 transition-all duration-300">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <span class="bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Game 3: Họa Sĩ Tô Màu Pizza</span>
+                <h3 class="text-2xl font-black text-sky-600 mt-1">Đạt Chỉ Tiêu Phân Số</h3>
+            </div>
+            <div class="bg-sky-50 px-3 py-1.5 rounded-xl border border-sky-200">
+                <span class="text-slate-500 text-sm font-semibold">Cấp độ: </span>
+                <span id="g3-level" class="font-extrabold text-sky-700">1</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            <!-- Instructions and Goal -->
+            <div class="md:col-span-5 flex flex-col items-center text-center">
+                <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 w-full">
+                    <span class="text-xs text-sky-600 font-extrabold uppercase tracking-wider">Tô màu tương ứng phân số</span>
+                    <div id="g3-target-fraction" class="text-6xl font-black text-sky-600 my-4 flex flex-col items-center">
+                        <span id="g3-num">2</span>
+                        <div class="w-16 h-1.5 bg-sky-600 my-1"></div>
+                        <span id="g3-den">5</span>
+                    </div>
+                    <p class="text-slate-500 text-sm font-semibold">Tô màu bánh sao cho đúng với phân số trên để được cộng điểm nhé!</p>
+                </div>
+                
+                <div class="mt-6 flex flex-col items-center space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-100 w-full">
+                    <span class="text-xs font-bold text-slate-400">Trạng thái hiện tại</span>
+                    <div class="flex items-center space-x-2">
+                        <span id="g3-current-count" class="font-black text-2xl text-sky-500">0</span>
+                        <span class="text-slate-400 text-xl">/</span>
+                        <span id="g3-total-count" class="font-black text-2xl text-slate-500">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Drawing Pizza Canvas -->
+            <div class="md:col-span-7 flex flex-col items-center justify-center">
+                <div class="relative w-64 h-64 md:w-80 md:h-80 bg-sky-50 rounded-full border-4 border-sky-200 shadow-inner flex items-center justify-center p-4">
+                    <svg id="g3-pizza-svg" viewBox="0 0 200 200" class="w-full h-full">
+                        <!-- Interactive pizza generated dynamically -->
+                    </svg>
+                </div>
+
+                <div class="flex items-center space-x-4 mt-6 w-full max-w-sm">
+                    <button onclick="g3Reset()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition border border-slate-300">
+                        Xóa Màu
+                    </button>
+                    <button onclick="g3Submit()" class="flex-1 bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 text-white font-extrabold py-3 rounded-xl shadow-lg hover:shadow-sky-300/50 transition">
+                        Nộp Bài 🧑‍🎨
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VICTORY / RESULTS SCREEN -->
+    <div id="screen-victory" class="hidden w-full max-w-md mx-auto bg-white/95 rounded-3xl p-8 shadow-2xl border-4 border-amber-300 text-center relative overflow-hidden transition-all duration-300">
+        <div class="absolute -top-10 -right-10 w-24 h-24 opacity-10 float-animation">
+            <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#facc15"/></svg>
+        </div>
+
+        <div class="relative z-10">
+            <div class="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center p-2 mx-auto mb-4 border border-amber-200 float-animation">
+                <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#svg-robot"></use></svg>
+            </div>
+
+            <h3 class="text-3xl font-black text-amber-600 mb-2">Chúc Mừng Bạn! 🎉</h3>
+            <p class="text-slate-500 font-semibold mb-6">Bạn đã hoàn thành xuất sắc các thử thách phân số cùng Biệt đội Robot!</p>
+
+            <div class="bg-amber-100 border border-amber-300 rounded-2xl p-6 mb-8 shadow-inner">
+                <span class="text-xs text-amber-800 font-bold uppercase tracking-wider block mb-1">Điểm số đạt được</span>
+                <div id="victory-score" class="text-5xl font-black text-amber-600">120</div>
+                
+                <span class="text-xs text-slate-500 font-bold uppercase tracking-wider block mt-4 mb-2">Huy hiệu chiến thắng</span>
+                <div id="victory-badge" class="bg-white border-2 border-amber-400 text-amber-700 font-extrabold px-4 py-2 rounded-xl inline-block shadow-sm">
+                    🥇 Vua Phân Số
+                </div>
+            </div>
+
+            <div class="flex flex-col space-y-3">
+                <button onclick="goToScreen('game-select')" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold py-4 rounded-xl shadow-md transition">
+                    🎮 Tiếp Tục Thử Thách Khác
+                </button>
+                <button onclick="goToScreen('welcome')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition">
+                    🏠 Quay Về Màn Hình Chính
+                </button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- FLOATING FEEDBACK BOX (Instead of alert()) -->
+<div id="feedback-toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/90 text-white px-6 py-3 rounded-2xl shadow-xl transition-all duration-300 translate-y-24 opacity-0 z-50 flex items-center space-x-3 max-w-sm w-11/12">
+    <span id="feedback-icon" class="text-xl">🌟</span>
+    <p id="feedback-message" class="font-bold text-sm leading-tight">Chính xác! Bạn được cộng điểm!</p>
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-white/40 border-t border-amber-100 py-3 text-center text-xs text-slate-500 font-semibold">
+    <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+        <p>© 2026 Biệt Đội Phân Số - Học Toán Vui Vẻ</p>
+        <p>Lấy cảm hứng từ câu chuyện chia bánh trong tệp <span class="text-amber-600">"kn ph.png"</span></p>
+    </div>
+</footer>
+
+<!-- MAIN APP SCRIPT -->
+<script>
+    // State management
+    const state = {
+        score: 0,
+        currentScreen: 'welcome',
+        storyIndex: 0,
+        game1: {
+            level: 1,
+            slicesSelected: [],
+            pizzaSlicesCount: 6,
+            targetNum: 1,
+            targetDen: 6,
+            character: 'mi'
+        },
+        game2: {
+            streak: 0,
+            correctAnswer: 0,
+            questionType: 'numerator', // numerator or denominator
+            currentNum: 0,
+            currentDen: 0
+        },
+        game3: {
+            level: 1,
+            slicesSelected: [],
+            pizzaSlicesCount: 8,
+            targetNum: 3,
+            targetDen: 8
+        }
+    };
+
+    // Screens navigation
+    function goToScreen(screenId) {
+        audio.playClick();
+        const screens = [
+            'screen-welcome', 'screen-story', 'screen-game-select', 
+            'screen-game-share', 'screen-game-match', 'screen-game-color', 'screen-victory'
+        ];
+        
+        screens.forEach(id => {
+            const el = document.getElementById(id);
+            if (id === `screen-${screenId}`) {
+                el.classList.remove('hidden');
+                el.classList.add('block');
+            } else {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            }
+        });
+        
+        state.currentScreen = screenId;
+        
+        // Trigger initialization based on screen
+        if (screenId === 'game-select') {
+            document.body.className = "min-h-screen flex flex-col justify-between overflow-x-hidden text-slate-800 selection:bg-amber-300";
+        }
+    }
+
+    // Toast alert feedback function
+    function showFeedback(message, isCorrect = true) {
+        const toast = document.getElementById('feedback-toast');
+        const icon = document.getElementById('feedback-icon');
+        const msg = document.getElementById('feedback-message');
+        
+        msg.textContent = message;
+        if (isCorrect) {
+            icon.textContent = "⭐️";
+            toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-2xl shadow-xl transition-all duration-300 z-50 flex items-center space-x-3 max-w-sm w-11/12 translate-y-0 opacity-100";
+            audio.playCorrect();
+        } else {
+            icon.textContent = "❌";
+            toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-rose-500 to-red-500 text-white px-6 py-3 rounded-2xl shadow-xl transition-all duration-300 z-50 flex items-center space-x-3 max-w-sm w-11/12 translate-y-0 opacity-100";
+            audio.playError();
+        }
+        
+        setTimeout(() => {
+            toast.className = "fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/90 text-white px-6 py-3 rounded-2xl shadow-xl transition-all duration-300 translate-y-24 opacity-0 z-50 flex items-center space-x-3 max-w-sm w-11/12";
+        }, 2000);
+    }
+
+    // Add score points
+    function addPoints(amount) {
+        state.score += amount;
+        document.getElementById('score-display').textContent = state.score;
+        document.getElementById('victory-score').textContent = state.score;
+    }
+
+    function resetGame() {
+        state.score = 0;
+        document.getElementById('score-display').textContent = 0;
+        goToScreen('welcome');
+    }
+</script>
+
+<script>
+    // Story data (Directly mapped from panel 1 to 6 in "kn ph.png")
+    const storySlides = [
+        {
+            speaker: "Robot Thông Minh",
+            avatar: "#svg-robot",
+            bg: "bg-green-50",
+            text: "Xin chào các bạn! Hôm nay tụi mình tổ chức một bữa tiệc Pizza siêu ngon lành. Chiếc bánh Pizza của tụi mình được chia thành 6 phần bằng nhau!",
+            visual: `
+                <div class="flex flex-col items-center">
+                    <div class="relative w-48 h-48 mb-4">
+                        <svg viewBox="0 0 100 100" class="w-full h-full float-animation">
+                            <circle cx="50" cy="50" r="45" fill="#facc15" stroke="#eab308" stroke-width="4" />
+                            <circle cx="50" cy="50" r="39" fill="#fecaca" />
+                            <!-- 6 Slices Lines -->
+                            <line x1="50" y1="5" x2="50" y2="95" stroke="#ca8a04" stroke-width="2" />
+                            <line x1="11.03" y1="27.5" x2="88.97" y2="72.5" stroke="#ca8a04" stroke-width="2" />
+                            <line x1="11.03" y1="72.5" x2="88.97" y2="27.5" stroke="#ca8a04" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <p class="text-xs font-bold text-slate-500 bg-amber-100 px-3 py-1 rounded-full uppercase">Hình 1: Pizza chia thành 6 phần bằng nhau</p>
+                </div>
+            `
+        },
+        {
+            speaker: "Nam",
+            avatar: "#svg-nam",
+            bg: "bg-sky-50",
+            text: "Đúng rồi! Mình đã chia cái bánh thành 6 phần bằng nhau, mỗi bạn lấy 1 phần nhé! Ưu tiên em Mi được hẳn 2 phần bánh nhé!",
+            visual: `
+                <div class="flex flex-col items-center">
+                    <div class="flex space-x-6 items-center mb-4">
+                        <div class="w-16 h-16 bg-white border rounded-xl p-1"><svg viewBox="0 0 100 100"><use href="#svg-nam"></use></svg></div>
+                        <div class="text-slate-400 font-extrabold text-2xl">➕</div>
+                        <div class="w-16 h-16 bg-white border rounded-xl p-1"><svg viewBox="0 0 100 100"><use href="#svg-mi"></use></svg></div>
+                    </div>
+                    <div class="text-center font-bold text-slate-700 bg-orange-100 px-4 py-2 rounded-2xl">
+                        Mi được ưu tiên 2 phần bánh!
+                    </div>
+                </div>
+            `
+        },
+        {
+            speaker: "Robot Thông Minh",
+            avatar: "#svg-robot",
+            bg: "bg-green-50",
+            text: "Nếu tô màu 1 phần của chiếc bánh pizza 6 phần. Ta nói: Đã tô màu một phần sáu hình tròn. Một phần sáu viết là 1/6.",
+            visual: `
+                <div class="flex flex-col items-center">
+                    <div class="relative w-48 h-48 mb-4">
+                        <svg viewBox="0 0 100 100" class="w-full h-full">
+                            <circle cx="50" cy="50" r="45" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="2" />
+                            <!-- 1 Slice Colored Blue -->
+                            <path d="M 50 50 L 50 5 A 45 45 0 0 1 88.97 27.5 Z" fill="#3b82f6" />
+                            <!-- 6 Slices Lines -->
+                            <line x1="50" y1="5" x2="50" y2="95" stroke="#94a3b8" stroke-width="2" />
+                            <line x1="11.03" y1="27.5" x2="88.97" y2="72.5" stroke="#94a3b8" stroke-width="2" />
+                            <line x1="11.03" y1="72.5" x2="88.97" y2="27.5" stroke="#94a3b8" stroke-width="2" />
+                        </svg>
+                        <!-- Badge 1/6 -->
+                        <div class="absolute bottom-2 right-2 bg-blue-600 text-white font-extrabold text-sm px-2 py-1 rounded-lg">1/6</div>
+                    </div>
+                    <p class="text-xs font-bold text-slate-500 bg-blue-100 text-blue-700 px-3 py-1 rounded-full uppercase">Hình 2: Một phần sáu (1/6)</p>
+                </div>
+            `
+        },
+        {
+            speaker: "Robot Thông Minh",
+            avatar: "#svg-robot",
+            bg: "bg-green-50",
+            text: "Tương tự, nếu tô màu 2 phần dành cho em Mi. Ta nói: Đã tô màu hai phần sáu hình tròn. Hai phần sáu viết là 2/6.",
+            visual: `
+                <div class="flex flex-col items-center">
+                    <div class="relative w-48 h-48 mb-4">
+                        <svg viewBox="0 0 100 100" class="w-full h-full">
+                            <circle cx="50" cy="50" r="45" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="2" />
+                            <!-- 2 Slices Colored Blue -->
+                            <path d="M 50 50 L 50 5 A 45 45 0 0 1 88.97 72.5 Z" fill="#3b82f6" />
+                            <!-- 6 Slices Lines -->
+                            <line x1="50" y1="5" x2="50" y2="95" stroke="#94a3b8" stroke-width="2" />
+                            <line x1="11.03" y1="27.5" x2="88.97" y2="72.5" stroke="#94a3b8" stroke-width="2" />
+                            <line x1="11.03" y1="72.5" x2="88.97" y2="27.5" stroke="#94a3b8" stroke-width="2" />
+                        </svg>
+                        <!-- Badge 2/6 -->
+                        <div class="absolute bottom-2 right-2 bg-blue-600 text-white font-extrabold text-sm px-2 py-1 rounded-lg">2/6</div>
+                    </div>
+                    <p class="text-xs font-bold text-slate-500 bg-blue-100 text-blue-700 px-3 py-1 rounded-full uppercase">Hình 3: Hai phần sáu (2/6)</p>
+                </div>
+            `
+        },
+        {
+            speaker: "Robot Thông Minh",
+            avatar: "#svg-robot",
+            bg: "bg-green-50",
+            text: "Bên dưới là cấu tạo của phân số. Phân số gồm Tử số viết bên trên gạch ngang, chỉ số phần đã tô màu. Mẫu số là số tự nhiên khác 0 viết dưới gạch ngang, chỉ tổng số phần bằng nhau.",
+            visual: `
+                <div class="flex flex-col items-center justify-center p-4 bg-amber-50 rounded-2xl border border-amber-300 w-full">
+                    <div class="text-center">
+                        <div class="text-5xl font-black text-blue-600 mb-1">2</div>
+                        <div class="w-20 h-1.5 bg-amber-500 my-1 mx-auto rounded"></div>
+                        <div class="text-5xl font-black text-amber-500">6</div>
+                    </div>
+                    <div class="mt-4 text-xs font-bold text-slate-600 text-left space-y-2">
+                        <p class="flex items-center"><span class="w-3 h-3 bg-blue-600 rounded-full mr-2"></span> Số 2: Tử số, chỉ số phần đã tô màu</p>
+                        <p class="flex items-center"><span class="w-3 h-3 bg-amber-500 rounded-full mr-2"></span> Số 6: Mẫu số, chỉ tổng số phần bằng nhau</p>
+                    </div>
+                </div>
+            `
+        },
+        {
+            speaker: "Robot Thông Minh",
+            avatar: "#svg-robot",
+            bg: "bg-green-50",
+            text: "Tuyệt vời! Bây giờ các bạn đã hiểu rõ về phân số rồi đúng không? Hãy cùng tham gia Thử thách Biệt đội Phân Số để kiểm tra kiến thức của mình nào!",
+            visual: `
+                <div class="flex flex-col items-center">
+                    <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center p-3 mb-4 border-2 border-green-400">
+                        <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#svg-robot"></use></svg>
+                    </div>
+                    <button onclick="goToScreen('game-select')" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-extrabold text-lg px-6 py-3 rounded-2xl shadow-md transition">
+                        Bắt Đầu Chơi Ngay! 🎮
+                    </button>
+                </div>
+            `
+        }
+    ];
+
+    function startStoryMode() {
+        state.storyIndex = 0;
+        goToScreen('story');
+        renderStorySlide();
+    }
+
+    function renderStorySlide() {
+        const slide = storySlides[state.storyIndex];
+        
+        // Update steps indicator
+        const stepsContainer = document.getElementById('story-steps');
+        stepsContainer.innerHTML = '';
+        for (let i = 0; i < storySlides.length; i++) {
+            const stepEl = document.createElement('div');
+            stepEl.className = `flex-1 h-3 rounded-full mx-0.5 transition-all ${i <= state.storyIndex ? 'bg-amber-500' : 'bg-slate-200'}`;
+            stepsContainer.appendChild(stepEl);
+        }
+
+        // Update speaker avatar and bubble
+        const avatarContainer = document.getElementById('story-speaker-avatar');
+        avatarContainer.innerHTML = `<svg viewBox="0 0 100 100" class="w-full h-full"><use href="${slide.avatar}"></use></svg>`;
+        
+        document.getElementById('story-speaker-name').textContent = slide.speaker;
+        document.getElementById('story-speech-bubble').textContent = slide.text;
+        
+        // Update visual screen
+        const canvas = document.getElementById('story-visual-canvas');
+        canvas.innerHTML = slide.visual;
+
+        // Update footer button texts
+        if (state.storyIndex === 0) {
+            document.getElementById('story-btn-prev').disabled = true;
+            document.getElementById('story-btn-prev').classList.add('opacity-50');
+        } else {
+            document.getElementById('story-btn-prev').disabled = false;
+            document.getElementById('story-btn-prev').classList.remove('opacity-50');
+        }
+
+        if (state.storyIndex === storySlides.length - 1) {
+            document.getElementById('story-next-text').textContent = "Chơi Trò Chơi 🎮";
+        } else {
+            document.getElementById('story-next-text').textContent = "Tiếp tục ➡️";
+        }
+    }
+
+    function nextStorySlide() {
+        audio.playClick();
+        if (state.storyIndex < storySlides.length - 1) {
+            state.storyIndex++;
+            renderStorySlide();
+        } else {
+            // End of story, go to games!
+            goToScreen('game-select');
+        }
+    }
+
+    function prevStorySlide() {
+        audio.playClick();
+        if (state.storyIndex > 0) {
+            state.storyIndex--;
+            renderStorySlide();
+        }
+    }
+</script>
+
+<script>
+    // Game 1 configurations
+    const g1Levels = [
+        { denominator: 6, numerator: 1, character: 'nam', charName: 'Nam', bubble: 'Tớ muốn lấy một phần sáu (1/6) cái bánh!' },
+        { denominator: 6, numerator: 2, character: 'mi', charName: 'Mi', bubble: 'Ưu tiên tớ hai phần sáu (2/6) cái bánh nhé!' },
+        { denominator: 4, numerator: 3, character: 'nam', charName: 'Minh', bubble: 'Tớ muốn ba phần tư (3/4) cái bánh này!' },
+        { denominator: 8, numerator: 5, character: 'mi', charName: 'Vy', bubble: 'Hãy cho tớ năm phần tám (5/8) chiếc bánh!' },
+        { denominator: 5, numerator: 2, character: 'nam', charName: 'Hoàng', bubble: 'Hãy giúp tớ lấy hai phần năm (2/5) cái bánh!' }
+    ];
+
+    function startGame(gameId) {
+        if (gameId === 1) {
+            state.game1.level = 1;
+            g1LoadLevel();
+            goToScreen('game-share');
+        } else if (gameId === 2) {
+            state.game2.streak = 0;
+            document.getElementById('g2-streak').textContent = 0;
+            g2GenerateQuestion();
+            goToScreen('game-match');
+        } else if (gameId === 3) {
+            state.game3.level = 1;
+            document.getElementById('g3-level').textContent = 1;
+            g3LoadLevel();
+            goToScreen('game-color');
+        }
+    }
+
+    function g1LoadLevel() {
+        const levelData = g1Levels[state.game1.level - 1];
+        state.game1.targetNum = levelData.numerator;
+        state.game1.targetDen = levelData.denominator;
+        state.game1.slicesSelected = [];
+        
+        // UI updates
+        document.getElementById('g1-level').textContent = `${state.game1.level} / ${g1Levels.length}`;
+        document.getElementById('g1-character-name').textContent = levelData.charName;
+        document.getElementById('g1-character-bubble').textContent = levelData.bubble;
+        
+        // Avatar rendering
+        const avatarEl = document.getElementById('g1-character-avatar');
+        const svgRef = levelData.character === 'mi' ? '#svg-mi' : '#svg-nam';
+        avatarEl.innerHTML = `<svg viewBox="0 0 100 100" class="w-full h-full"><use href="${svgRef}"></use></svg>`;
+
+        // Target fraction update
+        const fracBox = document.getElementById('g1-target-fraction');
+        fracBox.innerHTML = `
+            <div>${levelData.numerator}</div>
+            <div class="w-10 h-1 bg-amber-700 my-1"></div>
+            <div>${levelData.denominator}</div>
+        `;
+
+        g1RenderPizza();
+    }
+
+    function g1RenderPizza() {
+        const svg = document.getElementById('g1-pizza-svg');
+        svg.innerHTML = '';
+        
+        const segments = state.game1.targetDen;
+        const radius = 90;
+        const cx = 100;
+        const cy = 100;
+
+        // Base plate (shadow crust)
+        const plate = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        plate.setAttribute("cx", cx);
+        plate.setAttribute("cy", cy);
+        plate.setAttribute("r", radius);
+        plate.setAttribute("fill", "#d97706");
+        svg.appendChild(plate);
+
+        const innerCrust = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        innerCrust.setAttribute("cx", cx);
+        innerCrust.setAttribute("cy", cy);
+        innerCrust.setAttribute("r", radius - 5);
+        innerCrust.setAttribute("fill", "#fee2e2");
+        svg.appendChild(innerCrust);
+
+        // Generating interactive dynamic SVG slices
+        for (let i = 0; i < segments; i++) {
+            const angleStep = 360 / segments;
+            const startAngle = i * angleStep - 90; // Rotate starting point to top
+            const endAngle = (i + 1) * angleStep - 90;
+
+            const radStart = (startAngle * Math.PI) / 180;
+            const radEnd = (endAngle * Math.PI) / 180;
+
+            const x1 = cx + (radius - 8) * Math.cos(radStart);
+            const y1 = cy + (radius - 8) * Math.sin(radStart);
+            const x2 = cx + (radius - 8) * Math.cos(radEnd);
+            const y2 = cy + (radius - 8) * Math.sin(radEnd);
+
+            const isSelected = state.game1.slicesSelected.includes(i);
+            const fillColor = isSelected ? "#ef4444" : "#fef08a"; // Red with pepperoni if selected, cheese yellow otherwise
+
+            // Slice path
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            const d = `M ${cx} ${cy} L ${x1} ${y1} A ${radius - 8} ${radius - 8} 0 0 1 ${x2} ${y2} Z`;
+            path.setAttribute("d", d);
+            path.setAttribute("fill", fillColor);
+            path.setAttribute("stroke", "#b45309");
+            path.setAttribute("stroke-width", "2");
+            path.setAttribute("class", "pizza-slice");
+            
+            // Interaction hook
+            path.addEventListener('click', () => g1ToggleSlice(i));
+            svg.appendChild(path);
+
+            // Pepperoni dots inside slice to look like a real pizza!
+            if (isSelected) {
+                const midAngle = startAngle + angleStep / 2;
+                const radMid = (midAngle * Math.PI) / 180;
+                const dotX = cx + (radius / 2) * Math.cos(radMid);
+                const dotY = cy + (radius / 2) * Math.sin(radMid);
+                
+                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                dot.setAttribute("cx", dotX);
+                dot.setAttribute("cy", dotY);
+                dot.setAttribute("r", "5");
+                dot.setAttribute("fill", "#991b1b");
+                svg.appendChild(dot);
+            }
+        }
+    }
+
+    function g1ToggleSlice(index) {
+        audio.playPop();
+        const pos = state.game1.slicesSelected.indexOf(index);
+        if (pos === -1) {
+            state.game1.slicesSelected.push(index);
+        } else {
+            state.game1.slicesSelected.splice(pos, 1);
+        }
+        g1RenderPizza();
+    }
+
+    function g1ResetPizza() {
+        audio.playClick();
+        state.game1.slicesSelected = [];
+        g1RenderPizza();
+    }
+
+    function g1SubmitPizza() {
+        const count = state.game1.slicesSelected.length;
+        if (count === state.game1.targetNum) {
+            addPoints(20);
+            showFeedback("Đúng rồi! Bạn chia bánh chuẩn xác lắm!", true);
+            
+            setTimeout(() => {
+                if (state.game1.level < g1Levels.length) {
+                    state.game1.level++;
+                    g1LoadLevel();
+                } else {
+                    // Game finished! Show victory screen
+                    goToScreen('victory');
+                }
+            }, 1500);
+        } else {
+            showFeedback(`Chưa chính xác rồi. Bạn nhỏ muốn lấy ${state.game1.targetNum}/${state.game1.targetDen} cái bánh!`, false);
+        }
+    }
+</script>
+
+<script>
+    function g2GenerateQuestion() {
+        const num = Math.floor(Math.random() * 8) + 1; // 1 to 8
+        const den = num + Math.floor(Math.random() * 5) + 1; // den > num
+        
+        state.game2.currentNum = num;
+        state.game2.currentDen = den;
+        
+        // Randomly ask for Numerator (Tử số) or Denominator (Mẫu số)
+        const type = Math.random() > 0.5 ? 'numerator' : 'denominator';
+        state.game2.questionType = type;
+        
+        // UI values
+        document.getElementById('g2-num').textContent = num;
+        document.getElementById('g2-den').textContent = den;
+        
+        const promptEl = document.getElementById('g2-prompt');
+        if (type === 'numerator') {
+            promptEl.innerHTML = 'Hãy chọn <span class="text-blue-600 underline font-black">TỬ SỐ</span> của phân số trên:';
+            state.game2.correctAnswer = num;
+        } else {
+            promptEl.innerHTML = 'Hãy chọn <span class="text-amber-600 underline font-black">MẪU SỐ</span> của phân số trên:';
+            state.game2.correctAnswer = den;
+        }
+
+        // Generate choices (correct one + 3 random fake ones)
+        let choices = [state.game2.correctAnswer];
+        while (choices.length < 4) {
+            const fake = Math.floor(Math.random() * 15) + 1;
+            if (!choices.includes(fake)) {
+                choices.push(fake);
+            }
+        }
+        
+        // Shuffle choices array
+        choices.sort(() => Math.random() - 0.5);
+
+        // Render buttons
+        const grid = document.getElementById('g2-choices-grid');
+        grid.innerHTML = '';
+        choices.forEach(val => {
+            const btn = document.createElement('button');
+            btn.className = "bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-green-400 font-extrabold text-2xl py-4 rounded-2xl shadow-sm transition transform active:scale-95 text-slate-700 hover:text-green-600";
+            btn.textContent = val;
+            btn.onclick = () => g2CheckAnswer(val);
+            grid.appendChild(btn);
+        });
+    }
+
+    function g2CheckAnswer(value) {
+        if (value === state.game2.correctAnswer) {
+            state.game2.streak++;
+            document.getElementById('g2-streak').textContent = state.game2.streak;
+            addPoints(10);
+            showFeedback("Hoàn hảo! Trả lời xuất sắc!", true);
+            
+            if (state.game2.streak >= 8) {
+                setTimeout(() => {
+                    goToScreen('victory');
+                }, 1500);
+            } else {
+                setTimeout(g2GenerateQuestion, 1500);
+            }
+        } else {
+            state.game2.streak = 0;
+            document.getElementById('g2-streak').textContent = 0;
+            showFeedback(`Sai rồi! ${state.game2.questionType === 'numerator' ? 'Tử số' : 'Mẫu số'} chính là ${state.game2.correctAnswer}!`, false);
+            setTimeout(g2GenerateQuestion, 2000);
+        }
+    }
+</script>
+
+<script>
+    // Game 3 fractions bank
+    const g3Levels = [
+        { num: 2, den: 5 },
+        { num: 3, den: 6 },
+        { num: 5, den: 8 },
+        { num: 1, den: 4 },
+        { num: 4, den: 10 }
+    ];
+
+    function g3LoadLevel() {
+        const idx = (state.game3.level - 1) % g3Levels.length;
+        const data = g3Levels[idx];
+        
+        state.game3.targetNum = data.num;
+        state.game3.targetDen = data.den;
+        state.game3.slicesSelected = [];
+        
+        // UI update
+        document.getElementById('g3-num').textContent = data.num;
+        document.getElementById('g3-den').textContent = data.den;
+        document.getElementById('g3-current-count').textContent = 0;
+        document.getElementById('g3-total-count').textContent = data.den;
+
+        g3RenderPizza();
+    }
+
+    function g3RenderPizza() {
+        const svg = document.getElementById('g3-pizza-svg');
+        svg.innerHTML = '';
+        
+        const segments = state.game3.targetDen;
+        const radius = 90;
+        const cx = 100;
+        const cy = 100;
+
+        // Base plate (shadow crust)
+        const plate = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        plate.setAttribute("cx", cx);
+        plate.setAttribute("cy", cy);
+        plate.setAttribute("r", radius);
+        plate.setAttribute("fill", "#78350f");
+        svg.appendChild(plate);
+
+        const innerCrust = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        innerCrust.setAttribute("cx", cx);
+        innerCrust.setAttribute("cy", cy);
+        innerCrust.setAttribute("r", radius - 5);
+        innerCrust.setAttribute("fill", "#fee2e2");
+        svg.appendChild(innerCrust);
+
+        // Generating interactive dynamic SVG slices for drawing
+        for (let i = 0; i < segments; i++) {
+            const angleStep = 360 / segments;
+            const startAngle = i * angleStep - 90;
+            const endAngle = (i + 1) * angleStep - 90;
+
+            const radStart = (startAngle * Math.PI) / 180;
+            const radEnd = (endAngle * Math.PI) / 180;
+
+            const x1 = cx + (radius - 8) * Math.cos(radStart);
+            const y1 = cy + (radius - 8) * Math.sin(radStart);
+            const x2 = cx + (radius - 8) * Math.cos(radEnd);
+            const y2 = cy + (radius - 8) * Math.sin(radEnd);
+
+            const isSelected = state.game3.slicesSelected.includes(i);
+            const fillColor = isSelected ? "#38bdf8" : "#f1f5f9"; // Beautiful Sky Blue paint when clicked, default white canvas otherwise
+
+            // Slice path
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            const d = `M ${cx} ${cy} L ${x1} ${y1} A ${radius - 8} ${radius - 8} 0 0 1 ${x2} ${y2} Z`;
+            path.setAttribute("d", d);
+            path.setAttribute("fill", fillColor);
+            path.setAttribute("stroke", "#0284c7");
+            path.setAttribute("stroke-width", "2");
+            path.setAttribute("class", "pizza-slice");
+            
+            // Interaction hook
+            path.addEventListener('click', () => g3ToggleSlice(i));
+            svg.appendChild(path);
+        }
+    }
+
+    function g3ToggleSlice(index) {
+        audio.playPop();
+        const pos = state.game3.slicesSelected.indexOf(index);
+        if (pos === -1) {
+            state.game3.slicesSelected.push(index);
+        } else {
+            state.game3.slicesSelected.splice(pos, 1);
+        }
+        
+        // Update live indicator
+        document.getElementById('g3-current-count').textContent = state.game3.slicesSelected.length;
+        g3RenderPizza();
+    }
+
+    function g3Reset() {
+        audio.playClick();
+        state.game3.slicesSelected = [];
+        document.getElementById('g3-current-count').textContent = 0;
+        g3RenderPizza();
+    }
+
+    function g3Submit() {
+        const count = state.game3.slicesSelected.length;
+        if (count === state.game3.targetNum) {
+            addPoints(25);
+            showFeedback("Tuyệt vời! Bạn là một họa sĩ phân số thực thụ!", true);
+            
+            setTimeout(() => {
+                if (state.game3.level < 5) {
+                    state.game3.level++;
+                    document.getElementById('g3-level').textContent = state.game3.level;
+                    g3LoadLevel();
+                } else {
+                    // Win game 3
+                    goToScreen('victory');
+                }
+            }, 1500);
+        } else {
+            showFeedback(`Chưa đúng rồi. Bạn cần tô chính xác ${state.game3.targetNum} trên tổng số ${state.game3.targetDen} phần!`, false);
+        }
+    }
+</script>
+
+<script>
+    // Audio initial triggers on user's very first interaction
+    document.addEventListener('click', () => {
+        audio.init();
+    }, { once: true });
+</script>
+
+</body>
+</html>
