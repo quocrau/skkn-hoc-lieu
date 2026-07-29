@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Học Liệu Số: Tô Màu Phân Số 1/4</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f8ff; padding-top: 50px; }
+        .circle { width: 300px; height: 300px; border-radius: 50%; border: 5px solid #333; margin: 0 auto; position: relative; overflow: hidden; background: white; }
+        .slice { position: absolute; width: 150px; height: 150px; transform-origin: bottom right; background: white; border: 1px solid #333; cursor: pointer; transition: 0.3s; }
+        .slice.active { background: #ffaa00; }
+        /* Positioning 4 slices */
+        .s1 { top: 0; left: 0; }
+        .s2 { top: 0; left: 150px; transform-origin: bottom left; }
+        .s3 { top: 150px; left: 0; transform-origin: top right; }
+        .s4 { top: 150px; left: 150px; transform-origin: top left; }
+        .message { font-size: 24px; color: #ff5500; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Học liệu AI: Hãy nhấp chuột để tô màu biểu diễn phân số 1/4</h2>
+    <div class="circle">
+        <div class="slice s1" onclick="colorSlice(this)"></div>
+        <div class="slice s2" onclick="colorSlice(this)"></div>
+        <div class="slice s3" onclick="colorSlice(this)"></div>
+        <div class="slice s4" onclick="colorSlice(this)"></div>
+    </div>
+    <div class="message" id="msg">Đã tô màu: 0/4</div>
+
+    <script>
+        let count = 0;
+        function colorSlice(element) {
+            if(!element.classList.contains('active')) {
+                element.classList.add('active'); count++;
+            } else {
+                element.classList.remove('active'); count--;
+            }
+            document.getElementById('msg').innerText = "Đã tô màu: " + count + "/4";
+            if(count === 1) { document.getElementById('msg').innerText += " -> Rất tốt! Đây là phân số 1/4"; }
+        }
+    </script>
+</body>
+</html>

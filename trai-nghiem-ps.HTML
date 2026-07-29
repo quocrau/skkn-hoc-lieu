@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Khám phá Phân số - Cô Phương</title>
+    <style>
+        body { font-family: Arial; text-align: center; background: #f0f9ff; }
+        #circle { width: 200px; height: 200px; border-radius: 50%; border: 2px solid #333; margin: 20px auto; position: relative; overflow: hidden; background: white; }
+        .slice { position: absolute; width: 100%; height: 100%; transform-origin: 50% 50%; background: #ff9f43; display: none; }
+    </style>
+</head>
+<body>
+    <h1>Em hãy chọn mẫu số!</h1>
+    <input type="range" id="parts" min="1" max="10" value="1" oninput="updateFraction()">
+    <p>Mẫu số là: <span id="val">1</span></p>
+    <div id="circle"></div>
+    <script>
+        function updateFraction() {
+            let n = document.getElementById('parts').value;
+            document.getElementById('val').innerText = n;
+            let circle = document.getElementById('circle');
+            circle.innerHTML = '';
+            for(let i=0; i<n; i++) {
+                let slice = document.createElement('div');
+                slice.style.position = 'absolute';
+                slice.style.width = '100%'; slice.style.height = '100%';
+                slice.style.border = '1px solid black';
+                slice.style.clipPath = `polygon(50% 50%, ${50 + 50 * Math.cos(2 * Math.PI * i / n)}% ${50 + 50 * Math.sin(2 * Math.PI * i / n)}%, ${50 + 50 * Math.cos(2 * Math.PI * (i + 1) / n)}% ${50 + 50 * Math.sin(2 * Math.PI * (i + 1) / n)}%)`;
+                slice.style.backgroundColor = i % 2 == 0 ? '#ff9f43' : '#feca57';
+                circle.appendChild(slice);
+            }
+        }
+        updateFraction();
+    </script>
+</body>
+</html>

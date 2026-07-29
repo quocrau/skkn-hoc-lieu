@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="vi" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUOCRAU FRACTION GAME - 12 Lượt Phân Số Tuần Tự</title>
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --accent-color: #FFE66D;
+            --bg-color: #EBF4F6;
+            --text-color: #2F3E46;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .game-container {
+            background: #FFFFFF;
+            border: 6px solid var(--secondary-color);
+            border-radius: 30px;
+            padding: 30px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        .game-title {
+            color: #D35400;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            margin-top: 15px;
+            text-shadow: 2px 2px 0px var(--accent-color);
+        }
+
+        .progress-container {
+            background: #BDC3C7;
+            border-radius: 15px;
+            height: 24px;
+            width: 65%;
+            margin: 10px auto 20px auto;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #95A5A6;
+        }
+
+        .progress-bar {
+            background: #2ECC71;
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 3px; left: 0;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #000;
+        }
+
+        .challenge-box {
+            background: #FFF9E6;
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            border: 2px solid var(--accent-color);
+        }
+
+        .highlight {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #C0392B;
+        }
+
+        .visual-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 25px 0;
+        }
+
+        .plate-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, #3a86c8 60%, #1a5276 95%, #0e3147 100%);
+            border: 6px solid #2980b9;
+            border-radius: 50%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pizza-svg {
+            width: 92%;
+            height: 92%;
+        }
+
+        .pizza-group {
+            cursor: pointer;
+        }
+
+        .pizza-group:hover {
+            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.25));
+        }
+
+        .control-panel {
+            background: #F0F4F8;
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+
+        .counter-label {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2C3E50;
+        }
+
+        .instruction {
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .btn-main {
+            background: #27AE60;
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1E8449;
+        }
+
+        .btn-main:active {
+            box-shadow: none;
+            transform: translateY(5px);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .feedback.correct { background-color: #D4EDDA; color: #155724; }
+        .feedback.wrong { background-color: #F8D7DA; color: #721C24; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <header>
+            <h1 class="game-title">🍕 TRÒ CHƠI PHÂN SỐ 12 LƯỢT 🍕</h1>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-fill"></div>
+                <span class="progress-text" id="progress-text">Thử thách: 0/12</span>
+            </div>
+            <div class="challenge-box">
+                <h2>Em hãy chọn đúng số phần bánh: <span id="target-fraction" class="highlight">1/12</span></h2>
+            </div>
+        </header>
+
+        <main class="game-main">
+            <div class="visual-area">
+                <div class="plate-container">
+                    <svg id="pizza-svg" class="pizza-svg" viewBox="0 0 200 200"></svg>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <span class="counter-label">Đĩa bánh được chia làm cố định: 12 phần</span>
+                <p class="instruction">Bấm chọn vào các miếng bánh để chuyển thành màu kem nhạt (Tử số: <span id="numerator-counter">0</span>/12)</p>
+            </div>
+        </main>
+
+        <footer>
+            <button id="btn-submit" class="btn-main">KIỂM TRA KẾT QUẢ 🎉</button>
+            <div id="feedback-message" class="feedback hidden"></div>
+        </footer>
+    </div>
+
+    <script>
+        // Cài đặt chỉ số thử thách bắt đầu từ lượt số 1
+        let currentChallengeIndex = 1;
+        const MAX_CHALLENGES = 12;
+        const PIZZA_SLICES = 12;
+        
+        let selectedSlicesCount = 0;
+        let selectedArray = [];
+
+        const pizzaSvg = document.getElementById('pizza-svg');
+        const numeratorCounter = document.getElementById('numerator-counter');
+        const targetFractionText = document.getElementById('target-fraction');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        function initGame() {
+            document.getElementById('btn-submit').addEventListener('click', checkResult);
+            setupChallenge();
+        }
+
+        // Hàm thiết lập thử thách chạy TUẦN TỰ theo chỉ số tăng dần của tử số
+        function setupChallenge() {
+            targetFractionText.innerText = `${currentChallengeIndex}/${PIZZA_SLICES}`;
+            resetSlices();
+            feedbackMessage.classList.add('hidden');
+        }
+
+        function resetSlices() {
+            selectedSlicesCount = 0;
+            numeratorCounter.innerText = selectedSlicesCount;
+            selectedArray = new Array(PIZZA_SLICES).fill(false);
+            renderPizza(PIZZA_SLICES);
+        }
+
+        function renderPizza(slices) {
+            pizzaSvg.innerHTML = '';
+            const radius = 95;
+            const cx = 100, cy = 100;
+
+            for (let i = 0; i < slices; i++) {
+                const startAngle = (i * 360) / slices - 90;
+                const endAngle = ((i + 1) * 360) / slices - 90;
+                
+                const startRad = (Math.PI * startAngle) / 180;
+                const endRad = (Math.PI * endAngle) / 180;
+                
+                const x1 = cx + radius * Math.cos(startRad);
+                const y1 = cy + radius * Math.sin(startRad);
+                const x2 = cx + radius * Math.cos(endRad);
+                const y2 = cy + radius * Math.sin(endRad);
+                
+                const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                group.setAttribute('class', 'pizza-group');
+
+                const pathData = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
+
+                // Lớp viền nướng giòn bánh
+                const crust = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                crust.setAttribute('d', pathData);
+                crust.setAttribute('fill', '#D35400');
+                group.appendChild(crust);
+
+                // Lớp phô mai chảy bên trong
+                const innerRadius = radius - 4;
+                const ix1 = cx + innerRadius * Math.cos(startRad);
+                const iy1 = cy + innerRadius * Math.sin(startRad);
+                const ix2 = cx + innerRadius * Math.cos(endRad);
+                const iy2 = cy + innerRadius * Math.sin(endRad);
+                const innerPathData = `M ${cx} ${cy} L ${ix1} ${iy1} A ${innerRadius} ${innerRadius} 0 0 1 ${ix2} ${iy2} Z`;
+
+                const cheesePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                cheesePath.setAttribute('d', innerPathData);
+                cheesePath.setAttribute('fill', selectedArray[i] ? '#FFF3E0' : '#F4D03F');
+                cheesePath.setAttribute('stroke', '#E67E22');
+                cheesePath.setAttribute('stroke-width', '1');
+                group.appendChild(cheesePath);
+
+                // Lát nhân xúc xích
+                const midAngle = (startAngle + endAngle) / 2;
+                const midRad = (Math.PI * midAngle) / 180;
+                
+                const tx1 = cx + (radius * 0.45) * Math.cos(midRad);
+                const ty1 = cy + (radius * 0.45) * Math.sin(midRad);
+                const topping1 = createTopping(tx1, ty1);
+                group.appendChild(topping1);
+
+                const tx2 = cx + (radius * 0.7) * Math.cos(midRad);
+                const ty2 = cy + (radius * 0.7) * Math.sin(midRad);
+                const topping2 = createTopping(tx2, ty2);
+                group.appendChild(topping2);
+
+                group.addEventListener('click', function() {
+                    selectedArray[i] = !selectedArray[i];
+                    if (selectedArray[i]) {
+                        cheesePath.setAttribute('fill', '#FFF3E0');
+                        topping1.setAttribute('opacity', '0.15');
+                        topping2.setAttribute('opacity', '0.15');
+                        selectedSlicesCount++;
+                    } else {
+                        cheesePath.setAttribute('fill', '#F4D03F');
+                        topping1.setAttribute('opacity', '1');
+                        topping2.setAttribute('opacity', '1');
+                        selectedSlicesCount--;
+                    }
+                    numeratorCounter.innerText = selectedSlicesCount;
+                });
+                
+                pizzaSvg.appendChild(group);
+            }
+        }
+
+        function createTopping(x, y) {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', x);
+            circle.setAttribute('cy', y);
+            circle.setAttribute('r', '5');
+            circle.setAttribute('fill', '#C0392B');
+            circle.setAttribute('stroke', '#7B241C');
+            circle.setAttribute('stroke-width', '1');
+            return circle;
+        }
+
+        function checkResult() {
+            feedbackMessage.classList.remove('hidden');
+            if (selectedSlicesCount === currentChallengeIndex) {
+                progressFill.style.width = `${(currentChallengeIndex / MAX_CHALLENGES) * 100}%`;
+                progressText.innerText = `Thử thách: ${currentChallengeIndex}/${MAX_CHALLENGES}`;
+                feedbackMessage.className = "feedback correct";
+                feedbackMessage.innerText = "Chính xác rồi! Con chọn bánh giỏi quá! 🎉🍕";
+                
+                if (currentChallengeIndex >= MAX_CHALLENGES) {
+                    feedbackMessage.innerText = "🏆 TUYỆT VỜI! Con đã hoàn thành xuất sắc toàn bộ khóa 12 lượt thử thách!";
+                    document.getElementById('btn-submit').disabled = true;
+                } else {
+                    currentChallengeIndex++; // Tăng lượt tuần tự lên bài toán tiếp theo
+                    setTimeout(setupChallenge, 1800);
+                }
+            } else {
+                feedbackMessage.className = "feedback wrong";
+                feedbackMessage.innerText = `Chưa đúng rồi. Đề bài yêu cầu ${currentChallengeIndex}/12 nhưng con đang chọn ${selectedSlicesCount}/12. Thử lại nhé! 💪`;
+            }
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
