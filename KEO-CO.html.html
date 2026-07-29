@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kéo Co - Trò chơi lớp học</title>
+<style>
+:root{
+  --bg:#071326;--panel:#0f1f3a;--panel2:#14284a;--card:#ffffff;--text:#eef6ff;--muted:#9fb4d0;
+  --blue:#1473ff;--red:#f30b1d;--green:#28e58a;--yellow:#ffd22e;--purple:#7867ff;--line:#274366;
+  --shadow:0 18px 55px rgba(0,0,0,.28);--radius:22px;
+}
+*{box-sizing:border-box}
+html,body{font-size:18px;margin:0;width:100%;height:100%;overflow:hidden;font-family:'Times New Roman',Times,serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font-family:inherit}
+.screen{width:100vw;height:100vh;overflow:hidden;background:radial-gradient(circle at 15% 10%,#1b3d72 0,#071326 42%,#050b16 100%)}
+.hidden{display:none!important}
+.app-shell{height:100%;display:flex;flex-direction:column;padding:14px;gap:12px}
+.header{height:76px;background:rgba(15,31,58,.92);border:1px solid rgba(255,255,255,.08);border-radius:22px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:26px}
+.brand h1{margin:0;font-size:26px;line-height:1}.brand p{margin:4px 0 0;color:var(--muted);font-weight:700}
+.header-actions{display:flex;gap:10px;align-items:center}
+.btn{border:0;border-radius:14px;padding:12px 18px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(20,115,255,.22)}
+.btn.secondary{background:#1c3359;color:#dceaff;border:1px solid rgba(255,255,255,.1);box-shadow:none}.btn.green{background:linear-gradient(135deg,#08a66c,#28e58a);color:#052415}.btn.red{background:linear-gradient(135deg,#d60a18,#ff5562)}
+.main{flex:1;min-height:0;display:grid;grid-template-columns:1.05fr .95fr;gap:12px}
+.panel{background:rgba(15,31,58,.94);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);min-height:0;overflow:hidden}
+.panel h2{margin:0 0 12px;font-size:22px}.panel h3{margin:0 0 8px;font-size:18px;color:#cfe0ff}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.field label{display:block;font-weight:900;color:#dceaff;margin-bottom:7px;font-size:15px}
+.field input,.field select,.field textarea{width:100%;border:1px solid #31527d;border-radius:13px;background:#0b1a31;color:#fff;padding:0 12px;font-size:16px;outline:none}
+.field input,.field select{height:44px}.field textarea{height:110px;resize:none;padding:10px;line-height:1.35}
+.card{background:#0b1a31;border:1px solid #274366;border-radius:18px;padding:13px}
+.card-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:9px 13px;border-radius:999px;background:#12294c;border:1px solid #31527d;color:#dceaff;font-weight:800}
+input[type=file]{padding:10px;height:auto}
+.tabbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tab{border:1px solid #31527d;background:#0b1a31;color:#dceaff;border-radius:13px;padding:10px 13px;font-weight:900;cursor:pointer}.tab.active{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:transparent}
+.lesson-list{height:calc(100% - 42px);overflow:auto;padding-right:4px}.lesson-item{padding:12px;border-radius:16px;background:#0b1a31;border:1px solid #274366;margin-bottom:9px;display:flex;justify-content:space-between;gap:8px;align-items:center}.lesson-item b{display:block}.lesson-item small{color:var(--muted)}
+.help{font-size:13px;color:var(--muted);line-height:1.35}.code-box{max-width:560px;margin:auto;text-align:center}.code-box input{text-align:center;font-size:28px;letter-spacing:7px;font-weight:900;height:58px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#ffffff;color:#0b1a31;border-radius:999px;padding:12px 20px;font-weight:900;box-shadow:var(--shadow);z-index:50;display:none}
+
+/* PLAY */
+#play{display:none}
+.game-wrap{display:grid;grid-template-columns:45% 55%;height:100vh;width:100vw;background:#071326}
+.quiz-side{background:#0f1f3a;padding:10px 24px 14px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.progress-wrap{height:24px;display:flex;align-items:center;gap:12px;color:#aeb8ca;font-weight:900;font-size:13px}
+.progress{height:4px;background:#253a61;flex:1;border-radius:99px;overflow:hidden}.bar{height:100%;width:0;background:var(--green)}
+.question-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;min-height:0}
+#qText{font-size:clamp(25px,3.15vw,44px);line-height:1.18;text-align:center;font-weight:950;margin:0;max-width:96%}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:15px;width:100%;max-width:820px}
+.answer{font-size:28px;height:116px;background:#192d4e;border:1px solid #2b4b75;border-radius:22px;color:#fff;display:grid;grid-template-columns:58px 1fr;align-items:center;padding:12px 20px;cursor:pointer;transition:.2s;font-weight:900;font-size:clamp(16px,1.25vw,22px)}
+.answer:hover{transform:translateY(-2px);background:#224066}.key{width:48px;height:48px;border-radius:50%;background:#0a1528;display:flex;align-items:center;justify-content:center;font-size:22px}
+.guide{height:98px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end}.gbtn{height:76px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:#10294d;color:#fff;font-weight:950;font-size:22px;display:flex;flex-direction:column;align-items:center;justify-content:center}.gbtn span{font-size:15px;color:#62b8ff;margin-top:4px}
+.arena{position:relative;overflow:hidden;background:radial-gradient(circle at center,rgba(255,255,255,.12),rgba(0,0,0,.35)),linear-gradient(90deg,rgba(20,115,255,.42),rgba(243,11,29,.42));}
+.arena:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.06) 0 49.9%,rgba(255,255,255,.36) 50%,rgba(255,255,255,.06) 50.1%);z-index:2;pointer-events:none}
+.score-card{position:absolute;top:6px;width:112px;height:172px;background:#182944;border-radius:11px;overflow:hidden;text-align:center;z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.3)}.score-card.left{left:26px}.score-card.right{right:26px}
+.team-head{height:32px;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:12px}.left .team-head{background:var(--blue)}.right .team-head{background:var(--red)}
+.big-score{font-size:42px;font-weight:950;margin-top:16px}.score-card small{color:#79b4ff;font-weight:950}.score-card.right small{color:#ff7b86}
+.top-actions{position:absolute;top:6px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:6}.round{width:42px;height:42px;border:0;border-radius:13px;background:#ef1422;color:#fff;font-size:21px;font-weight:950;cursor:pointer}.round.gray{background:rgba(255,255,255,.18)}
+.timer{position:absolute;top:6px;left:35%;font-size:28px;font-weight:950;color:#47f08a;text-shadow:0 0 12px #47f08a;z-index:6}.zone{position:absolute;top:26%;width:36%;height:47%;border:4px solid rgba(255,255,255,.35);z-index:2}.zone.left{left:7%;border-right:0;border-color:rgba(38,169,255,.55)}.zone.right{right:7%;border-left:0}
+.zone-label{position:absolute;top:25%;padding:6px 16px;border-radius:999px;background:rgba(0,0,0,.55);font-size:12px;font-weight:950;letter-spacing:1px;color:#d8f2ff}.zone-label.left{left:23%}.zone-label.right{right:23%}
+.rope{position:absolute;left:7%;right:7%;top:69%;height:5px;background:#ff6b00;box-shadow:0 0 8px #ff6b00;z-index:3}.center-token{position:absolute;top:calc(69% - 20px);left:50%;width:42px;height:42px;border-radius:50%;background:var(--yellow);border:4px solid #fff;transform:translateX(-50%);z-index:4;display:flex;align-items:center;justify-content:center;font-size:22px;transition:left .22s}
+.players{position:absolute;top:61%;display:flex;gap:7px;z-index:4;transition:transform .22s}.players.left{left:27%}.players.right{right:27%;flex-direction:row-reverse}.person{width:38px;height:58px;position:relative}.head{width:28px;height:28px;border-radius:50%;background:#ffd9a3;border:4px solid #fff;margin:auto;text-align:center;line-height:18px;color:#0d1628;font-weight:900}.body{font-size:18px;width:32px;height:32px;border-radius:8px 8px 2px 2px;margin:-2px auto 0}.blue .body{font-size:18px;background:var(--blue)}.red .body{font-size:18px;background:var(--red)}.foot{position:absolute;bottom:0;width:11px;height:13px;background:#ffd9a3;border-radius:6px}.foot.l{left:6px}.foot.r{right:6px}
+.lock-btn{position:absolute;bottom:18%;left:50%;transform:translateX(-50%);height:60px;min-width:240px;padding:0 34px;border-radius:999px;border:3px solid var(--green);background:rgba(24,138,77,.25);color:#63ff9d;font-weight:950;font-size:17px;letter-spacing:3px;cursor:pointer;z-index:6}.play-bottom{position:absolute;bottom:10px;right:14px;display:flex;gap:10px;z-index:6}.play-bottom button{border:0;border-radius:12px;padding:10px 14px;background:#fff;color:#111827;font-weight:900;cursor:pointer}
+.overlay{position:absolute;inset:0;background:rgba(6,10,20,.72);display:none;align-items:center;justify-content:center;z-index:20}.modal{background:#fff;color:#111827;border-radius:24px;padding:26px;width:min(620px,92vw);text-align:center;box-shadow:0 20px 80px rgba(0,0,0,.45)}.modal h2{font-size:40px;margin:0 0 12px}.modal p{font-size:22px;line-height:1.35}.modal button{border:0;border-radius:14px;padding:14px 24px;background:#10b981;color:#fff;font-size:20px;font-weight:950;cursor:pointer;margin:8px}.modal button.secondary{background:#64748b}
+#confetti{position:absolute;inset:0;pointer-events:none;z-index:30}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}.shake{animation:shake .25s linear 2}
+
+.arena-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:.78;transform:scaleX(-1);background:#071326}
+.arena-camera-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;transform:scaleX(-1)}
+.arena:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,115,255,.24),rgba(243,11,29,.24)),radial-gradient(circle at center,rgba(255,255,255,.06),rgba(0,0,0,.34));z-index:1;pointer-events:none}
+.cam-badge{position:absolute;top:54px;left:50%;transform:translateX(-50%);z-index:8;background:rgba(0,0,0,.48);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:7px 14px;color:#dceaff;font-size:12px;font-weight:950;letter-spacing:.5px}
+.gesture-dot{position:absolute;width:18px;height:18px;border-radius:50%;background:#28e58a;border:3px solid #fff;box-shadow:0 0 18px #28e58a;z-index:9;display:none;pointer-events:none}
+
+
+.team-pad{position:absolute;bottom:86px;width:210px;display:grid;grid-template-columns:1fr 1fr;gap:10px;z-index:9}
+.team-pad.left{left:24px}.team-pad.right{right:24px}
+.team-pad-title{grid-column:1/3;text-align:center;font-size:12px;font-weight:950;letter-spacing:.8px;padding:6px 8px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff}
+.team-answer{height:58px;border-radius:16px;border:2px solid rgba(255,255,255,.28);color:#fff;font-weight:950;font-size:24px;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.22)}
+.team-pad.left .team-answer{background:rgba(20,115,255,.78)}
+.team-pad.right .team-answer{background:rgba(243,11,29,.78)}
+.team-answer:hover{filter:brightness(1.18);transform:translateY(-1px)}
+.team-answer.active-choice{outline:4px solid #28e58a;box-shadow:0 0 24px #28e58a}
+.hold-meter{position:absolute;left:50%;bottom:158px;transform:translateX(-50%);width:250px;height:10px;background:rgba(255,255,255,.16);border-radius:99px;overflow:hidden;z-index:10;display:none}
+.hold-meter span{display:block;height:100%;width:0;background:#28e58a;transition:width .15s}
+
+
+.bank-editor{display:flex;flex-direction:column;gap:10px}
+.bank-editor h2{flex:0 0 auto}
+.bank-fields{flex:0 0 auto}
+.question-field{flex:1 1 auto;min-height:0;margin-top:0!important;display:flex;flex-direction:column}
+.question-field label{flex:0 0 auto}
+.question-field textarea{flex:1 1 auto;height:auto!important;min-height:220px}
+.bank-actions{flex:0 0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:4px}
+.bank-actions .btn{min-width:150px}
+
+
+.choice-confirm{position:absolute;top:116px;width:112px;height:72px;border-radius:0 0 11px 11px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:950;font-size:34px;z-index:6}
+.choice-confirm small{font-size:10px;margin-top:4px;letter-spacing:.8px}
+.choice-confirm.left{left:26px;background:rgba(20,115,255,.5);color:#fff}
+.choice-confirm.right{right:26px;background:rgba(243,11,29,.5);color:#fff}
+.choice-confirm.choice-ok{background:rgba(40,229,138,.72)!important;box-shadow:0 0 22px rgba(40,229,138,.8)}
+.choice-confirm.choice-bad{background:rgba(243,11,29,.72)!important;box-shadow:0 0 22px rgba(243,11,29,.8)}
+.answer.selected-blue{border-color:#2f8cff;background:rgba(20,115,255,.23);box-shadow:0 0 0 2px rgba(20,115,255,.25)}
+.answer.selected-red{border-color:#ff4352;background:rgba(243,11,29,.2);box-shadow:0 0 0 2px rgba(243,11,29,.25)}
+.answer.correct-flash{border-color:#28e58a;background:rgba(40,229,138,.23)}
+.answer.wrong-flash{border-color:#ff4352;background:rgba(243,11,29,.23)}
+
+
+.theme-panel{position:fixed;inset:0;background:rgba(4,8,16,.72);display:none;align-items:center;justify-content:center;z-index:80}
+.theme-box{width:min(980px,94vw);max-height:92vh;background:#0f1f3a;border:1px solid rgba(255,255,255,.12);border-radius:26px;box-shadow:var(--shadow);padding:18px;color:#eef6ff;overflow:hidden}
+.theme-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.theme-head h2{margin:0;font-size:30px}.theme-content{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.theme-card{background:#0b1a31;border:1px solid #31527d;border-radius:18px;padding:14px}.sound-grid{display:grid;gap:12px}
+.palette-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.palette{border:2px solid #31527d;border-radius:18px;padding:12px;background:#0b1a31;color:#fff;cursor:pointer;font-weight:950;text-align:left;font-size:18px}
+.palette.active{border-color:#28e58a;box-shadow:0 0 0 3px rgba(40,229,138,.18)}
+.swatches{display:flex;gap:7px;margin-top:9px}.swatches span{height:24px;flex:1;border-radius:999px;border:1px solid rgba(255,255,255,.3)}
+.theme-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+
+@media(max-width:900px){.main{grid-template-columns:1fr}.game-wrap{grid-template-columns:1fr}.arena{display:none}.answers{grid-template-columns:1fr}.answer{font-size:28px;height:88px}}
+
+.bank-actions{
+  justify-content:flex-start;
+  align-items:center;
+  gap:14px!important;
+  padding:12px 0 0!important;
+  border-top:1px solid rgba(255,255,255,.12);
+}
+.bank-actions .btn{
+  font-size:20px!important;
+  padding:14px 22px!important;
+  min-width:150px;
+}
+#quickPlay{
+  font-size:30px!important;
+  font-weight:950!important;
+  text-transform:uppercase!important;
+  letter-spacing:2px!important;
+  padding:16px 30px!important;
+  border-radius:18px!important;
+  background:linear-gradient(135deg,#28e58a,#00c3ff,#7867ff)!important;
+  color:#04111f!important;
+  box-shadow:0 0 16px rgba(40,229,138,.9),0 0 36px rgba(0,195,255,.65),0 0 60px rgba(120,103,255,.45)!important;
+  animation:quickPlayGlow 1s infinite alternate!important;
+}
+#quickPlay::after{content:"";display:inline-block;width:8px}
+@keyframes quickPlayGlow{
+  from{transform:scale(1);filter:brightness(1);box-shadow:0 0 12px rgba(40,229,138,.75),0 0 28px rgba(0,195,255,.5)}
+  to{transform:scale(1.04);filter:brightness(1.18);box-shadow:0 0 24px rgba(40,229,138,1),0 0 52px rgba(0,195,255,.85),0 0 82px rgba(120,103,255,.65)}
+}
+
+
+.method-badge{
+  position:absolute;
+  bottom:8%;
+  left:50%;
+  transform:translateX(-50%);
+  min-width:260px;
+  height:60px;
+  padding:0 26px;
+  border-radius:999px;
+  border:3px solid var(--green);
+  background:rgba(24,138,77,.25);
+  color:#63ff9d;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:950;
+  letter-spacing:3px;
+  z-index:6;
+  box-shadow:0 0 22px rgba(40,229,138,.45);
+}
+.method-badge.manual{
+  border-color:#ffd22e;
+  color:#ffe88c;
+  background:rgba(122,88,0,.28);
+  box-shadow:0 0 22px rgba(255,210,46,.45);
+}
+
+
+.final-popup .modal{
+  background:linear-gradient(135deg,#fff7ad,#ffffff 45%,#dffcff)!important;
+  border:6px solid #ffd22e!important;
+  width:min(760px,94vw)!important;
+}
+.final-popup #modalTitle{
+  font-size:58px!important;
+  color:#e11d48!important;
+  text-shadow:2px 2px 0 #fff,0 0 18px rgba(255,210,46,.8)!important;
+}
+.final-popup #modalText{
+  font-size:42px!important;
+  line-height:1.25!important;
+  color:#07213f!important;
+  font-weight:950!important;
+}
+.final-popup #modalText b{
+  font-size:52px!important;
+  color:#0f8b4c!important;
+  text-shadow:1px 1px 0 #fff,0 0 16px rgba(40,229,138,.45)!important;
+}
+.final-winner{
+  display:block;
+  margin:14px 0;
+  padding:16px 20px;
+  border-radius:24px;
+  background:linear-gradient(135deg,#28e58a,#d9fff0);
+  color:#052415!important;
+  font-size:58px!important;
+  font-weight:950!important;
+  box-shadow:0 0 28px rgba(40,229,138,.6);
+}
+.final-draw{
+  display:block;
+  margin:14px 0;
+  padding:16px 20px;
+  border-radius:24px;
+  background:linear-gradient(135deg,#60a5fa,#e0f2fe);
+  color:#06233f!important;
+  font-size:54px!important;
+  font-weight:950!important;
+  box-shadow:0 0 28px rgba(96,165,250,.6);
+}
+.final-score{
+  display:inline-block;
+  margin-top:8px;
+  padding:12px 24px;
+  border-radius:999px;
+  background:#111827;
+  color:#ffd22e!important;
+  font-size:48px!important;
+  font-weight:950!important;
+  letter-spacing:2px;
+}
+
+</style>
+</head>
+<body>
+<div id="home" class="screen">
+  <div class="app-shell">
+    <header class="header">
+      <div class="brand"><div class="logo">🪢</div><div><h1>Kéo Co</h1><p>Ai nhanh hơn sẽ thắng!</p></div></div>
+      <div class="header-actions">
+        <button id="openSettings" class="btn secondary">⚙️ Cài đặt</button>
+        <button id="enterBank" class="btn secondary">🔐 Ngân hàng câu hỏi</button>
+        <button id="quickPlay" class="btn green">▶️ VÀO CHƠI</button>
+      </div>
+    </header>
+    <main class="main">
+      <section class="panel">
+        <h2>🎮 Sẵn sàng thi đấu</h2>
+        <div class="grid2">
+          <div class="card"><h3>Bài đang chọn</h3><div id="currentLesson" style="font-size:26px;font-weight:950">Chưa có bài</div><p class="help" id="currentLessonInfo">Vào Ngân hàng câu hỏi để tạo bài theo môn học.</p></div>
+          <div class="card"><h3>Cấu hình nhanh</h3><p class="help" id="quickInfo">60 giây • Thắng khi chênh 3 điểm • Đội Xanh vs Đội Đỏ</p></div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <h3>🎛️ Âm thanh & màu giao diện</h3>
+          <p class="help" id="audioSaveStatus">Nhạc sẽ được lưu trực tiếp trong trò chơi sau 1 lần tải. Lần sau mở lại vẫn còn, trừ khi thầy/cô thay nhạc khác.</p>
+          <button id="openSoundTheme" class="btn secondary" type="button">🎛️ Mở cài đặt âm thanh & màu</button>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <h3>📌 Luật chơi dễ hiểu</h3>
+          <p class="help"><b>1.</b> Hai đội cùng xem 1 câu hỏi. <b>2.</b> Mỗi đội bấm đáp án A/B/C/D của đội mình. <b>3.</b> Đúng được +1 điểm, sai bị -1 điểm. <b>4.</b> Đội nào kéo ngôi sao lệch đủ mốc thắng hoặc cao điểm hơn khi hết giờ sẽ thắng.</p>
+          <p class="help"><b>Nhận diện chỉ tay:</b> A = 1 ngón, B = 2 ngón, C = 3 ngón, D = 4 ngón. Đội nào giơ tay ổn định nhanh hơn sẽ được hệ thống chấm đúng/sai ngay và tự chuyển câu.</p>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>📚 Danh sách bài đã lưu</h2>
+        <div id="homeLessonList" class="lesson-list"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="settings" class="screen hidden">
+  <div class="app-shell">
+    <header class="header"><div class="brand"><div class="logo">⚙️</div><div><h1>Cài đặt game</h1><p>Lưu cấu hình dùng cho từng lượt chơi</p></div></div><div class="header-actions"><button class="btn secondary goHome">⬅️ Trang đầu</button><button id="saveSettings" class="btn green">💾 Lưu cài đặt</button></div></header>
+    <main class="main">
+      <section class="panel">
+        <h2>⚙️ Cấu hình thi đấu</h2>
+        <div class="grid2">
+          <div class="field"><label>Tiêu đề trò chơi</label><input id="gameTitle" value="Kéo Co"></div>
+          <div class="field"><label>Thời gian thi đấu</label><select id="timeLimit"><option value="30">30 giây</option><option value="60" selected>60 giây</option><option value="90">90 giây</option><option value="120">2 phút</option><option value="180">3 phút</option><option value="240">4 phút</option><option value="300">5 phút</option><option value="600">10 phút</option></select></div>
+          <div class="field"><label>Số điểm chênh lệch để thắng</label><select id="winGap"><option value="3" selected>3 điểm</option><option value="5">5 điểm</option><option value="10">10 điểm</option><option value="20">20 điểm</option><option value="30">30 điểm</option><option value="50">50 điểm</option></select></div>
+          <div class="field"><label>Điểm mỗi câu đúng</label><select id="pointValue"><option value="1" selected>1 điểm</option><option value="5">5 điểm</option><option value="10">10 điểm</option></select></div>
+          <div class="field"><label>Thời gian đóng băng khi sai</label><select id="freezeTime"><option value="5">5 giây</option><option value="10" selected>10 giây</option><option value="15">15 giây</option></select></div>
+          <div class="field"><label>Tên Đội 1</label><input id="team1" value="Đội Xanh"></div>
+          <div class="field"><label>Tên Đội 2</label><input id="team2" value="Đội Đỏ"></div>
+          <div class="field"><label>Chế độ chơi</label><select id="mode"><option value="same">Cùng câu hỏi</option><option value="default">Mỗi đội độc lập</option><option value="target">Chạm mốc thì thắng</option></select></div>
+          <div class="field"><label>Phương thức chơi</label><select id="playMethod"><option value="auto" selected>Chấm tự động</option><option value="manual">Chốt đáp án</option></select></div>
+          <div class="field"><label>Thứ tự câu hỏi</label><select id="orderMode"><option value="shuffle">Đảo ngẫu nhiên</option><option value="keep">Giữ nguyên</option></select></div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>🔐 Mã bảo vệ ngân hàng</h2>
+        <div class="card">
+          <div class="field"><label>Mã quản trị dự phòng</label><input id="bankCodeSet" value="1234" maxlength="12" type="password"></div>
+          
+          
+        </div>
+        <div class="card" style="margin-top:12px">
+          <h3>Tuỳ chọn</h3>
+          <label class="pill"><input id="noShuffleAns" type="checkbox"> Không đảo thứ tự đáp án</label>
+          <label class="pill"><input id="endWhenOut" type="checkbox"> Hết câu thì hết game</label>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="bankLock" class="screen hidden">
+  <div class="app-shell">
+    <header class="header"><div class="brand"><div class="logo">🔐</div><div><h1>Vào ngân hàng câu hỏi</h1><p>Nhập mã để chỉnh sửa nội dung</p></div></div><div class="header-actions"><button class="btn secondary goHome">⬅️ Trang đầu</button></div></header>
+    <main class="panel" style="display:flex;align-items:center;justify-content:center">
+      <div class="code-box">
+        <h2>Nhập mã code quy định</h2>
+        <input id="bankCodeInput" placeholder="••••" maxlength="12">
+        <p class="help">Mỗi mã chỉ cần kích hoạt 1 lần trên 1 máy. Những lần sau bấm Ngân hàng câu hỏi sẽ vào thẳng.</p>
+        <button id="unlockBank" class="btn green">Mở ngân hàng</button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="bank" class="screen hidden">
+  <div class="app-shell">
+    <header class="header"><div class="brand"><div class="logo">📚</div><div><h1>Ngân hàng câu hỏi</h1><p>Lưu nội dung theo từng môn và bài học</p></div></div><div class="header-actions"><button class="btn secondary goHome">⬅️ Trang đầu</button></div></header>
+    <main class="main">
+      <section class="panel bank-editor">
+        <h2>📝 Nội dung bài</h2>
+        <div class="grid2 bank-fields">
+          <div class="field"><label>Môn học</label><input id="subjectInput" placeholder="Ví dụ: Khoa học 5"></div>
+          <div class="field"><label>Tên bài</label><input id="lessonInput" placeholder="Ví dụ: Hạt trần và Hạt kín"></div>
+        </div>
+        <div class="field question-field"><label>Bộ câu hỏi: mỗi dòng theo dạng Câu hỏi | Đúng | Sai 1 | Sai 2 | Sai 3</label><textarea id="questionBox" placeholder="Đặc điểm nào giúp phân biệt ngành Hạt trần và ngành Hạt kín? | Vị trí của hạt | Khả năng quang hợp | Có mạch dẫn hay chưa | Môi trường sống"></textarea></div>
+        <div class="bank-actions">
+          <button id="newLesson" class="btn secondary">➕ BÀI MỚI</button>
+          <button id="saveLesson" class="btn green">💾 LƯU BÀI</button>
+          <button id="deleteLesson" class="btn red">🗑️ XÓA BÀI</button>
+          <button id="sampleBtn" class="btn secondary">📌 TẠO MẪU 5 CÂU</button>
+          <span class="pill">Số câu: <b id="qCount">0</b></span>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>📂 Bài đã lưu</h2>
+        <div id="bankLessonList" class="lesson-list"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="play" class="screen">
+  <audio id="bgAudio" loop></audio><audio id="rightAudio"></audio><audio id="wrongAudio"></audio>
+  <canvas id="confetti"></canvas>
+  <div class="game-wrap">
+    <section class="quiz-side">
+      <div class="progress-wrap"><div class="progress"><div id="bar" class="bar"></div></div><span id="counter">CÂU 1 / 5</span></div>
+      <div class="question-area"><h1 id="qText">Câu hỏi</h1><div class="answers"><button class="answer" data-i="0"><span class="key">A</span><span></span></button><button class="answer" data-i="1"><span class="key">B</span><span></span></button><button class="answer" data-i="2"><span class="key">C</span><span></span></button><button class="answer" data-i="3"><span class="key">D</span><span></span></button></div></div>
+      <div class="guide"><div class="gbtn">☝️<span>A</span></div><div class="gbtn">✌️<span>B</span></div><div class="gbtn">🤟<span>C</span></div><div class="gbtn">🖐️<span>D</span></div></div>
+    </section>
+    <section class="arena">
+      <div class="timer" id="timer">60s</div><div class="top-actions"><button id="soundBtn" class="round">🔊</button><button id="handBtn" class="round gray">🖐️</button></div>
+      <div class="score-card left"><div class="team-head" id="blueName">ĐỘI XANH</div><div id="score1" class="big-score">0</div><small>ĐIỂM SỐ</small><br><br><small>❔ ĐÁP ÁN</small></div>
+      <div id="choice1" class="choice-confirm left">?<small>ĐÁP ÁN</small></div>
+      <div class="score-card right"><div class="team-head" id="redName">ĐỘI ĐỎ</div><div id="score2" class="big-score">0</div><small>ĐIỂM SỐ</small><br><br><small>❔ ĐÁP ÁN</small></div>
+      <div id="choice2" class="choice-confirm right">?<small>ĐÁP ÁN</small></div>
+      <div class="zone left"></div><div class="zone right"></div><div class="zone-label left">KHU VỰC ĐỘI XANH</div><div class="zone-label right">KHU VỰC ĐỘI ĐỎ</div>
+      <div class="rope"></div><div id="token" class="center-token">⭐</div><div id="pLeft" class="players left"></div><div id="pRight" class="players right"></div>
+      <button id="lockBtn" class="lock-btn">TỰ ĐỘNG CHẤM</button>
+      <video id="camVideo" class="arena-video" autoplay playsinline muted></video>
+      <canvas id="camCanvas" class="arena-camera-canvas"></canvas>
+      <div id="gestureDot" class="gesture-dot"></div>
+      <div id="camStatus" class="cam-badge">📷 A=1 ngón • B=2 ngón • C=3 ngón • D=4 ngón • Giơ nhanh để tự chấm</div>
+      <div class="team-pad left">
+        <div class="team-pad-title" id="padLeftTitle">ĐỘI XANH CHỌN</div>
+        <button class="team-answer" data-team="1" data-i="0">A</button><button class="team-answer" data-team="1" data-i="1">B</button>
+        <button class="team-answer" data-team="1" data-i="2">C</button><button class="team-answer" data-team="1" data-i="3">D</button>
+      </div>
+      <div class="team-pad right">
+        <div class="team-pad-title" id="padRightTitle">ĐỘI ĐỎ CHỌN</div>
+        <button class="team-answer" data-team="2" data-i="0">A</button><button class="team-answer" data-team="2" data-i="1">B</button>
+        <button class="team-answer" data-team="2" data-i="2">C</button><button class="team-answer" data-team="2" data-i="3">D</button>
+      </div>
+      <div id="holdMeter" class="hold-meter"><span></span></div>
+      <div class="play-bottom"><button id="camBtn">📷 Bật/Tắt nhận diện</button><button id="backHome">🏠 Trang đầu</button><button id="resetBtn">🔄 Reset</button></div>
+    </section>
+  </div>
+  <div id="overlay" class="overlay"><div class="modal"><h2 id="modalTitle">Kết quả</h2><p id="modalText"></p><button id="closeModal" class="secondary">Đóng</button></div></div>
+</div>
+
+<div id="soundThemePanel" class="theme-panel">
+  <div class="theme-box">
+    <div class="theme-head">
+      <div><h2>🎛️ Cài đặt âm thanh & màu giao diện</h2><p class="help">Tải nhạc nền, nhạc đúng/sai và chọn bảng màu cho trò chơi.</p></div>
+      <button id="closeSoundTheme" class="btn secondary" type="button">✖ Đóng</button>
+    </div>
+    <div class="theme-content">
+      <section class="theme-card">
+        <h3>🎵 Âm thanh</h3>
+        <div class="sound-grid">
+          <div class="field"><label>Nhạc nền xuyên suốt</label><input id="bgMusicFile" type="file" accept="audio/*"></div>
+          <div class="field"><label>Nhạc trả lời đúng</label><input id="rightMusicFile" type="file" accept="audio/*"></div>
+          <div class="field"><label>Nhạc trả lời sai</label><input id="wrongMusicFile" type="file" accept="audio/*"></div>
+        </div>
+        <p class="help" id="audioSaveStatus2">Âm thanh đã lưu sẽ tự chạy ở lần mở sau.</p>
+      </section>
+      <section class="theme-card">
+        <h3>🎨 Bảng màu giao diện</h3>
+        <div class="palette-grid">
+          <button class="palette" data-theme="default"><b>Mặc định</b><div class="swatches"><span style="background:#071326"></span><span style="background:#1473ff"></span><span style="background:#f30b1d"></span><span style="background:#28e58a"></span></div></button>
+          <button class="palette" data-theme="ocean"><b>Đại dương</b><div class="swatches"><span style="background:#06283d"></span><span style="background:#00a8ff"></span><span style="background:#ff5c8a"></span><span style="background:#00f5d4"></span></div></button>
+          <button class="palette" data-theme="forest"><b>Rừng xanh</b><div class="swatches"><span style="background:#102418"></span><span style="background:#2dd36f"></span><span style="background:#ffb703"></span><span style="background:#90ee90"></span></div></button>
+          <button class="palette" data-theme="purple"><b>Tím hiện đại</b><div class="swatches"><span style="background:#1b1235"></span><span style="background:#8b5cf6"></span><span style="background:#fb7185"></span><span style="background:#34d399"></span></div></button>
+        </div>
+      </section>
+    </div>
+    <div class="theme-actions"><button id="saveSoundTheme" class="btn green" type="button">💾 Lưu lựa chọn</button></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const STORE="keoCoProData_v2";
+const AUDIO_DB="keoCoAudioDB_v1";
+const AUDIO_STORE="audioFiles";
+const MACHINE_CODES=["KD-UKKS-29GB","KD-PP44-ZCEN","KD-RGSN-GL4W","KD-RZKP-E962","KD-RZM5-DGST","KD-GPBQ-CSTX","KD-37LS-GVMS","KD-HXMQ-3T2L","KD-JKQ4-E6CU","KD-PCNF-P7VB","KD-ETFR-UFRJ","KD-D5SG-MBD7","KD-Z6FX-X5VD","KD-NYLB-6XPK","KD-9G33-NY33","KD-4BAL-CN4A","KD-KYEF-6MAM","KD-EC7S-X2RD","KD-AZK8-N6FM","KD-C3XG-R7PK","KD-H4NW-N9NK","KD-AFLE-KMFG","KD-JSWS-N99U","KD-DUP4-XYU6","KD-A7P2-8CJU","KD-G4S2-K56C","KD-98DY-HNBG","KD-WJN3-6952","KD-43GZ-N7LS","KD-Z476-EBEE","KD-ECW8-QJD4","KD-MLRR-QPXH","KD-QTAR-82QY","KD-JH2E-LXUL","KD-CK47-3898","KD-SN65-CKWP","KD-FX9M-GJMM","KD-KSNJ-FKNK","KD-W3PC-XZUS","KD-QDH5-B7JE","KD-ADTY-RQWU","KD-2F5T-Z5BT","KD-MLJD-BVLC","KD-XATX-JZAR","KD-ELJW-5558","KD-NMY4-DRX4","KD-6YBM-6FTU","KD-G4UH-E4TL","KD-F34A-2Q5C","KD-GCWW-R6T7","KD-Y2LQ-M6DX","KD-SN9Y-JRSN","KD-Q3QC-8G4L","KD-JSLR-MNSV","KD-H7VS-5N2K","KD-B3RJ-WQN4","KD-644W-U79Q","KD-8JEZ-ZWMM","KD-ATNS-XEYL","KD-W8D5-CY7A","KD-WLS5-2U9H","KD-NY4S-ZW6F","KD-BCBS-ZYAN","KD-ACGC-SXSX","KD-XFFQ-5BK4","KD-PS97-CTHF","KD-M2BZ-XZ75","KD-SW6U-V9XL","KD-AM3M-D3LC","KD-K862-C7TB","KD-MY5P-JYAP","KD-Z226-5F35","KD-DCNJ-MA42","KD-WDRY-6DEU","KD-TUPP-6SR7","KD-T6LH-EXG7","KD-XY43-6LRZ","KD-QG3R-5EWF","KD-T9PF-QRX3","KD-JTFQ-228S","KD-NPNR-XLDS","KD-G532-7AMG","KD-SWB4-ZHSQ","KD-NP24-R38K","KD-M6YN-P7ZD","KD-WVT3-HWXW","KD-8NKS-AHVH","KD-FJ7A-G3AD","KD-HR48-BN3W","KD-PF6C-UX6E","KD-AG7J-6KNS","KD-QLN6-P83R","KD-8DTP-2W96","KD-USXM-LMQ6","KD-D8BZ-2SAW","KD-AM5T-S7ND","KD-ZHA7-ULFP","KD-BP7N-2VAF","KD-HB6Q-ULKU","KD-GWYE-NSHB","KD-MGAB-T75D","KD-YUU7-AHKT","KD-XMV2-ZCTQ","KD-HB64-TKKX","KD-U6EC-F4NJ","KD-MFQX-K3BP","KD-TYB6-M3XG","KD-NP3C-UZQ7","KD-RBDN-8YLB","KD-5C98-WLRW","KD-PN4W-YAN3","KD-A56W-EP5U","KD-PYQU-ZHHS","KD-2CNN-67Q8","KD-TCZ6-NG8Q","KD-FL3E-693X","KD-V4TY-HEWE","KD-NQVA-VVWG","KD-7K8E-5TED","KD-VXQ3-VR7Q","KD-LPV3-T5BD","KD-NVSC-FP7K","KD-ZMGS-XN5J","KD-3D57-3T64","KD-TP7U-B56H","KD-4RUC-PRET","KD-BWBH-UG2U","KD-5GBW-8QTH","KD-7D99-YU9B","KD-PJRK-2Y77","KD-UZUG-9F7Q","KD-SHAU-3A9R","KD-S2T3-CA3A","KD-UWNW-GSGR","KD-E57M-Z9U5","KD-XHMZ-5YSK","KD-RSNZ-F3RJ","KD-4BQM-7ZRC","KD-X3K8-6U3E","KD-XCVL-8324","KD-VWVM-J3ZD","KD-DA55-BTUB","KD-YPE5-D2EA","KD-AUCM-YH6Z","KD-AP5G-3GKV","KD-ARG9-DPET","KD-LG9T-CLJK","KD-LDKH-9AL7","KD-SZ5G-N2YW","KD-N3TX-CY4S","KD-VRS9-7E3V","KD-2STT-ZN4W","KD-U6AP-D5KQ","KD-JRVL-D22T","KD-6MAU-23MG","KD-K26F-83QL","KD-9BCD-E48G","KD-TU8E-YXXV","KD-YKRX-A5E6","KD-U5XY-VK59","KD-JCSY-P6RL","KD-3925-YRRN","KD-ZR7P-2HQL","KD-QRNY-4UDH","KD-YQAT-ADYJ","KD-YMUA-2AUT","KD-YNM6-S8JZ","KD-2VQH-EQLR","KD-X6Q8-DGA6","KD-6B4R-EVAE","KD-LL55-ZM8R","KD-K3XJ-FGMJ","KD-P8T8-WFPZ","KD-47UL-GBBS","KD-TVVX-CGLW","KD-45YD-VRPS","KD-HXQE-UYHN","KD-QY6G-LV4E","KD-M7C3-9ZMM","KD-NTDC-757T","KD-QS4D-EM6D","KD-XEFX-4BXT","KD-9KPQ-YFEY","KD-GV2H-NQSY","KD-5472-SZNP","KD-E9A9-RDF2","KD-JPZQ-PJYH","KD-ZBJ2-HMMX","KD-EX8H-J23H","KD-KTZ3-A34B","KD-HYD7-TZU7","KD-25VB-VEK6","KD-6ZPM-DCFL","KD-FEW3-GGHD","KD-RUM4-RXWU","KD-BGJU-BQGW","KD-2AQQ-W7ZH","KD-Y96R-YKNU","KD-YWCX-5TRT","KD-BQ89-T8TP","KD-9G4K-Y8YE","KD-NGRD-W8Z6","KD-EBE2-2T7W","KD-QYYX-DMSM","KD-D8V3-SFT2","KD-LYGM-4EZD","KD-UDJE-LGGN","KD-WZUB-RGNK","KD-77NU-Z4C3","KD-VP8Z-RXAZ","KD-B4GU-EBHC","KD-TG4Y-7BAJ","KD-Q8SA-QWTZ","KD-6S4B-D4CJ","KD-NQPH-4LS9","KD-6J96-LTU4","KD-QYUM-D997","KD-87EY-TVJG","KD-LA32-U68J","KD-UML2-Z6ET","KD-FWLS-8GEF","KD-SCLX-YJKT","KD-8CUH-AH63","KD-J562-T6MZ","KD-7UAG-NNNB","KD-P6W2-EZWG","KD-K7NS-QJNX","KD-YNBA-6CSU","KD-ZC2Z-DG6B","KD-924Q-MJAZ","KD-U4C6-8KQE","KD-VP7T-NM7Y","KD-7UDX-PTQ3","KD-SRJK-2GCZ","KD-WTJJ-4F2F","KD-QWQK-EQXN","KD-49YA-VACL","KD-5K6T-34JW","KD-EUM2-KAX9","KD-62A6-NFNK","KD-KXDA-N6XB","KD-FU96-2WT3","KD-EE72-7U98","KD-SFUZ-LWXA","KD-D9N3-QRZU","KD-P3K3-6DKE","KD-HNEB-CGMS","KD-HY9G-XZ77","KD-NA2N-LHNW","KD-7NTM-ABWF","KD-PK4V-3AZ7","KD-8KKS-F34G","KD-5EM5-JHDE","KD-QSPX-MEY4","KD-BKRD-6DKL","KD-HE6C-R2GW","KD-H2PL-NA8J","KD-J5KS-A5SR","KD-FW5Y-QBJT","KD-HBQK-7SWY","KD-8V6J-2XVH","KD-DERR-3FHG","KD-FLSF-BP3L","KD-DXPA-DKG5","KD-CN6J-VGTA","KD-ZW8B-HLQS","KD-ZKCB-28P5","KD-83WR-ZXWU","KD-YXUL-385H","KD-9BVG-GFR4","KD-W39S-D3XL","KD-VFGZ-RPCM","KD-UJJS-FDQX","KD-T7EF-5H7R","KD-3LKD-CJDG","KD-3EHQ-MJP9","KD-G7B4-XXEH","KD-VDMA-CGGD","KD-WE7Q-VQ8J","KD-UUGQ-WFJA","KD-JG24-Q3X8","KD-WGJH-AAVS","KD-F233-G35J","KD-WRFN-8FFM","KD-YN3D-P684","KD-QE3D-X5UZ","KD-F9NE-LGL2","KD-K8V6-GS9U","KD-PKBD-HM9C","KD-KBFK-5FNR","KD-P8ZR-FMUS","KD-8RJK-EPEC","KD-U7TW-CA2N","KD-J4X6-VSYG","KD-XHHG-5DZG","KD-WJLU-3854","KD-GHEP-DXZ7","KD-93KW-QCWG","KD-3GW7-4TVS","KD-M4YC-KYGP","KD-BFTD-V57P","KD-98UK-VE4B","KD-G34P-LVZB","KD-4AMM-2WD7","KD-KVUN-LZDM","KD-2QQU-LTXE","KD-WLDM-MRK6","KD-YTGN-WD8E","KD-EPRQ-QSQD","KD-HZNG-DQYC","KD-AL7D-8MXM","KD-RGH5-4AUU","KD-FAPJ-M6C8","KD-RYXT-U6T9","KD-A9Q7-4WMJ","KD-8FP8-YGHA","KD-ZKD7-7WWC","KD-94X5-MHG7","KD-V2RL-C3G8","KD-44JC-TKND","KD-7XR9-SEHX","KD-TMGJ-RKXW","KD-UDQH-Y6M2","KD-3ES6-AFTY","KD-BC8D-EX3W","KD-BR7Z-JGU4","KD-6Q7D-FBMF","KD-UE2Y-MUQG","KD-Z8VB-RQLV","KD-73RY-T2PB","KD-T57Y-ALS5","KD-46RQ-59TT","KD-76J5-VHLU","KD-32FG-KU3T","KD-S2RQ-TWAF","KD-JDZM-V8FB","KD-WGHS-KNY6","KD-29DS-ZHWH","KD-KX4B-EDY7","KD-UX3Z-F9KQ","KD-AFW4-FM3W","KD-PFA6-HFQZ","KD-2XYM-EY66","KD-X4U5-3DJX","KD-8SQZ-PLBZ","KD-8WEC-AYBE","KD-ZYVH-XNWJ","KD-MYF8-C8GP","KD-XZ83-NTGV","KD-A8UL-GNC4","KD-8W8A-45X9","KD-7QCK-9DX6","KD-AKS7-RFZW","KD-VAJN-8S7G","KD-3TL8-UDXU","KD-DD26-NJBR","KD-QWYT-UGT9","KD-DTQJ-9S8J","KD-BWK4-RLYQ","KD-N556-RTMS","KD-BVX9-CTBE","KD-6UBA-SQNY","KD-L78Q-8J6T","KD-3M78-WHFV","KD-JHFF-MA9U","KD-XQV3-R6GE","KD-QW9U-9AFC","KD-4342-YJ27","KD-T53P-E9PE","KD-7ZEN-997D","KD-ZZPB-HEVK","KD-ZUVZ-DDHD","KD-S8PY-QULK","KD-QWEB-43DH","KD-TZ6U-6ZEB","KD-XDCE-UV2F","KD-M2CB-WSTU","KD-LYHQ-9R66","KD-KCKV-5Q8U","KD-HDC9-46H4","KD-RX72-EAQJ","KD-55Y2-VTHL","KD-5FJ3-7WCE","KD-8UCC-NGVQ","KD-WVDP-JBEJ","KD-KR3G-3XTW","KD-LRG6-PVH5","KD-29DT-NGBZ","KD-32EW-VQV9","KD-K76A-XER4","KD-VJXD-NRS8","KD-BAEP-CCXV","KD-M9UK-TUSB","KD-XPZE-ZXLP","KD-9GQC-KQMK","KD-2KSD-AT6R","KD-X9HZ-AJJA","KD-5BY9-WUBR","KD-Q4SX-M5PD","KD-9522-SDKT","KD-ZRME-XQKK","KD-L53Q-LYHW","KD-DBV9-6PRR","KD-FWC9-2KCX","KD-7PQH-YCGF","KD-YAJL-7HNW","KD-FM82-SYGL","KD-ZR6Y-ERJH","KD-W9GW-ZBPX","KD-67MW-77VQ","KD-CWKH-EL6Y","KD-H5LB-9PUF","KD-4ACK-PFXM","KD-XRJE-HXAU","KD-9AR3-B5P6","KD-UZ8K-PZKE","KD-R4PL-BCE3","KD-8LYW-WFNJ","KD-R2E3-QEXE","KD-267E-CN4W","KD-BBA9-2Y3C","KD-GFTD-KGLE","KD-E6HT-SFTM","KD-QA3H-ENJ5","KD-RZTW-W7CL","KD-XJ59-8ZJQ","KD-VUBJ-Y2M9","KD-5NFY-QCVV","KD-QFLZ-DCKN","KD-ZRZZ-YFBE","KD-T4DV-W2CZ","KD-ER78-LVGD","KD-XALZ-9H68","KD-V3XX-55VH","KD-EAQ4-3GJM","KD-JFCN-66GK","KD-7NPB-K2AG","KD-WHK7-D3D8","KD-9TTK-WDHX","KD-HBLY-TUW8","KD-S7RY-YE22","KD-RU4F-S5RV","KD-Y62Q-NSZF","KD-ZBC7-G7EA","KD-NUTB-8U7E","KD-R6KD-WNZ6","KD-GGVG-EZZ6","KD-TYCK-JGZP","KD-G4EX-FCXQ","KD-TJL7-HM5N","KD-8GK2-VZ77","KD-B449-VS6A","KD-VZ2A-SUGR","KD-VZ8K-5ZRT","KD-7W85-HHAV","KD-HTCR-4M4S","KD-XANR-8FEM","KD-C8SH-HV6E","KD-8692-FMTM","KD-EALV-K3AK","KD-RREJ-XKRT","KD-LGTT-DE8W","KD-AZZ9-KZ92","KD-XTTK-3T37","KD-ZTEU-JBU7","KD-KCD8-ASCN","KD-LAFX-VQR7","KD-QK4J-EALG","KD-V9YL-348H","KD-MXWL-GTNF","KD-PYZU-85PY","KD-UGV6-PR9N","KD-HBHN-KQBU","KD-5UXU-823F","KD-X4W2-QU2V","KD-BQF9-E8CN","KD-H32C-NT9Z","KD-2K47-LVQ5","KD-24TM-KQY5","KD-W3DZ-CSR3","KD-FSQM-VPJ7","KD-6BMV-RJN8","KD-ZKGY-CE7U","KD-GPCX-BHFE","KD-832X-EX55","KD-JHS8-A3UH","KD-RV6W-MY8W","KD-5JX4-RPGT","KD-VMY9-VGW7","KD-WK6C-SWG2","KD-PJ58-4996","KD-GU95-4VWG","KD-B4BE-K6JE","KD-PEHH-6BTU","KD-MRUQ-UPBZ","KD-Z8BD-XY7J","KD-KNNY-8DVB","KD-Y8C7-QBJW","KD-FVPB-2W2D","KD-8V2Q-HGB9"];
+const DEVICE_KEY_STORE="keoCoDeviceKey_v2";
+const BINDING_STORE="keoCoCodeBindings_v2";
+const BANK_ACTIVATED_STORE="keoCoBankActivated_v2";
+const BANK_ACTIVATED_CODE_STORE="keoCoBankActivatedCode_v2";
+const defaultData={settings:{title:"Kéo Co",time:60,winGap:3,pointValue:1,freeze:10,team1:"Đội Xanh",team2:"Đội Đỏ",mode:"same",playMethod:"auto",orderMode:"shuffle",noShuffleAns:false,endWhenOut:false,bankCode:"1234"},lessons:[],currentLessonId:null,audio:{bg:null,right:null,wrong:null,bgName:"",rightName:"",wrongName:""}};
+let data=loadData(), editId=null;
+let state={questions:[],idx:0,score1:0,score2:0,answerOrder:[],timeLeft:60,timer:null,ended:false,muted:false,choice1:null,choice2:null,autoLocked:false};
+const randInt=max=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%max}
+const shuffle=arr=>{let a=[...arr];for(let i=a.length-1;i>0;i--){let j=randInt(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function loadData(){try{return {...defaultData,...JSON.parse(localStorage.getItem(STORE)||"{}")}}catch(e){return defaultData}}
+function saveData(){try{localStorage.setItem(STORE,JSON.stringify(data))}catch(e){toast("Bộ nhớ trình duyệt không đủ để lưu file nhạc lớn.")}}
+function openAudioDB(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(AUDIO_DB,1);
+    req.onupgradeneeded=()=>{req.result.createObjectStore(AUDIO_STORE)};
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function saveAudioBlob(key,file){
+  const db=await openAudioDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(AUDIO_STORE,"readwrite");
+    tx.objectStore(AUDIO_STORE).put(file,key);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+async function loadAudioBlob(key){
+  const db=await openAudioDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(AUDIO_STORE,"readonly");
+    const req=tx.objectStore(AUDIO_STORE).get(key);
+    req.onsuccess=()=>resolve(req.result||null);
+    req.onerror=()=>reject(req.error);
+  });
+}
+function getDeviceKey(){let k=localStorage.getItem(DEVICE_KEY_STORE); if(!k){k="DEV-"+Date.now()+"-"+Math.random().toString(36).slice(2); localStorage.setItem(DEVICE_KEY_STORE,k)} return k}
+function getBindings(){try{return JSON.parse(localStorage.getItem(BINDING_STORE)||"{}")}catch(e){return {}}}
+function saveBindings(b){localStorage.setItem(BINDING_STORE,JSON.stringify(b))}
+function checkMachineCode(code){
+  code=(code||"").trim().toUpperCase();
+  if(code===data.settings.bankCode) return true;
+  if(!MACHINE_CODES.includes(code)) return false;
+  const dev=getDeviceKey(), bindings=getBindings();
+  if(!bindings[code]){bindings[code]=dev; saveBindings(bindings); return true}
+  return bindings[code]===dev;
+}
+function isBankActivated(){
+  return localStorage.getItem(BANK_ACTIVATED_STORE)==="1";
+}
+function activateBank(code){
+  localStorage.setItem(BANK_ACTIVATED_STORE,"1");
+  localStorage.setItem(BANK_ACTIVATED_CODE_STORE,(code||"").trim().toUpperCase());
+}
+function toast(t){$("#toast").textContent=t;$("#toast").style.display="block";setTimeout(()=>$("#toast").style.display="none",2200)}
+
+function applyTheme(name){
+  const themes={
+    default:{bg:"#071326",panel:"#0f1f3a",panel2:"#14284a",blue:"#1473ff",red:"#f30b1d",green:"#28e58a",purple:"#7867ff",line:"#274366"},
+    ocean:{bg:"#06283d",panel:"#0b3554",panel2:"#114b73",blue:"#00a8ff",red:"#ff5c8a",green:"#00f5d4",purple:"#48cae4",line:"#2b6f91"},
+    forest:{bg:"#102418",panel:"#17351f",panel2:"#21512e",blue:"#2dd36f",red:"#ffb703",green:"#90ee90",purple:"#80ed99",line:"#3a6b47"},
+    purple:{bg:"#1b1235",panel:"#281a4d",panel2:"#36206b",blue:"#8b5cf6",red:"#fb7185",green:"#34d399",purple:"#a78bfa",line:"#5b4b8a"}
+  };
+  const t=themes[name]||themes.default;
+  Object.entries(t).forEach(([k,v])=>document.documentElement.style.setProperty("--"+k,v));
+  $$(".palette").forEach(p=>p.classList.toggle("active",p.dataset.theme===name));
+}
+function updateAudioStatusPanels(){
+  const a=data.audio||{};
+  const text=`Đã lưu: ${a.bgName||a.bg?"Có nhạc nền":"Chưa có nhạc nền"} • ${a.rightName||a.right?"Có nhạc đúng":"Chưa có nhạc đúng"} • ${a.wrongName||a.wrong?"Có nhạc sai":"Chưa có nhạc sai"}.`;
+  const e1=$("#audioSaveStatus"), e2=$("#audioSaveStatus2"); if(e1)e1.textContent=text+" Tải file mới nếu muốn thay nhạc."; if(e2)e2.textContent=text;
+}
+
+function show(id){["home","settings","bankLock","bank","play"].forEach(x=>{$("#"+x).classList.add("hidden");$("#"+x).style.display=""});$("#"+id).classList.remove("hidden"); if(id==="play") $("#play").style.display="block"; renderHome();}
+$$(".goHome").forEach(b=>b.onclick=()=>show("home"));
+$("#openSettings").onclick=()=>{fillSettings();show("settings")}
+$("#enterBank").onclick=()=>{ 
+  if(isBankActivated()){renderBank();show("bank");return}
+  $("#bankCodeInput").value=""; show("bankLock") 
+}
+$("#unlockBank").onclick=()=>{const code=$("#bankCodeInput").value;if(checkMachineCode(code)){activateBank(code);renderBank();show("bank");toast("Đã kích hoạt ngân hàng câu hỏi trên máy này.")}else toast("Mã không đúng hoặc đã được kích hoạt trên máy khác.")}
+function fillSettings(){let s=data.settings; $("#gameTitle").value=s.title;$("#timeLimit").value=s.time;$("#winGap").value=s.winGap;$("#pointValue").value=s.pointValue||1;$("#freezeTime").value=s.freeze;$("#team1").value=s.team1;$("#team2").value=s.team2;$("#mode").value=s.mode;$("#playMethod").value=s.playMethod||"auto";$("#orderMode").value=s.orderMode;$("#bankCodeSet").value=s.bankCode;$("#noShuffleAns").checked=s.noShuffleAns;$("#endWhenOut").checked=s.endWhenOut;}
+$("#saveSettings").onclick=()=>{data.settings={title:$("#gameTitle").value||"Kéo Co",time:+$("#timeLimit").value,winGap:+$("#winGap").value,freeze:+$("#freezeTime").value,pointValue:+$("#pointValue").value,team1:$("#team1").value||"Đội Xanh",team2:$("#team2").value||"Đội Đỏ",mode:$("#mode").value,playMethod:$("#playMethod").value,orderMode:$("#orderMode").value,bankCode:$("#bankCodeSet").value||"1234",noShuffleAns:$("#noShuffleAns").checked,endWhenOut:$("#endWhenOut").checked};saveData();toast("Đã lưu cài đặt.");renderHome();show("home")}
+
+function parseQuestions(raw=$("#questionBox").value.trim()){if(!raw)return[];return raw.split(/\n+/).map(line=>{const p=line.split("|").map(x=>x.trim()).filter(Boolean);return p.length<5?null:{q:p[0],correct:p[1],options:[p[1],p[2],p[3],p[4]]}}).filter(Boolean)}
+function updateCount(){$("#qCount").textContent=parseQuestions().length}
+$("#questionBox").addEventListener("input",updateCount);
+function renderLessons(container,selectable=false){
+  const el=$(container); if(!data.lessons.length){el.innerHTML='<div class="card help">Chưa có bài nào. Vào Ngân hàng câu hỏi để tạo bài mới.</div>';return}
+  el.innerHTML=data.lessons.map(l=>`<div class="lesson-item"><div><b>${l.subject||"Chưa có môn"} - ${l.name||"Chưa đặt tên"}</b><small>${l.questions.length} câu hỏi</small></div><div class="card-row"><button class="btn secondary" data-load="${l.id}">${selectable?"Chọn":"Sửa"}</button></div></div>`).join("");
+  el.querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>{selectable?selectLesson(b.dataset.load):editLesson(b.dataset.load)})
+}
+function renderHome(){
+  const lesson=data.lessons.find(l=>l.id===data.currentLessonId);
+  $("#currentLesson").textContent=lesson?`${lesson.subject} - ${lesson.name}`:"Chưa có bài";
+  $("#currentLessonInfo").textContent=lesson?`${lesson.questions.length} câu hỏi đã sẵn sàng.`:"Vào Ngân hàng câu hỏi để tạo bài theo môn học.";
+  let s=data.settings; $("#quickInfo").textContent=`${s.time} giây • Đúng +${s.pointValue||1} điểm • Thắng khi chênh ${s.winGap} điểm • ${s.team1} vs ${s.team2}`;
+  renderLessons("#homeLessonList",true);
+  updateAudioStatusPanels();
+}
+function renderBank(){renderLessons("#bankLessonList",false); updateCount();}
+function selectLesson(id){data.currentLessonId=id;saveData();toast("Đã chọn bài để chơi.");renderHome()}
+function editLesson(id){const l=data.lessons.find(x=>x.id===id); if(!l)return; editId=id; $("#subjectInput").value=l.subject;$("#lessonInput").value=l.name;$("#questionBox").value=l.raw;updateCount();}
+$("#newLesson").onclick=()=>{editId=null;$("#subjectInput").value="";$("#lessonInput").value="";$("#questionBox").value="";updateCount()}
+$("#sampleBtn").onclick=()=>{$("#subjectInput").value=$("#subjectInput").value||"Khoa học 5";$("#lessonInput").value=$("#lessonInput").value||"Hạt trần và Hạt kín";$("#questionBox").value=[
+"Đặc điểm nào dưới đây giúp phân biệt ngành Hạt trần và ngành Hạt kín? | Vị trí của hạt | Khả năng quang hợp | Có mạch dẫn hay chưa | Môi trường sống trên cạn hay dưới nước",
+"Cơ quan sinh sản của cây thông là gì? | Nón | Hoa | Rễ | Lá",
+"Thực vật Hạt kín thường có đặc điểm nào? | Có hoa và quả | Không có mạch dẫn | Chỉ sống dưới nước | Không tạo hạt",
+"Bộ phận nào bảo vệ hạt ở cây Hạt kín? | Quả | Lá | Thân | Rễ",
+"Ví dụ nào thuộc nhóm Hạt trần? | Cây thông | Cây xoài | Cây lúa | Cây đậu"].join("\n");updateCount()}
+$("#saveLesson").onclick=()=>{const qs=parseQuestions(); if(!$("#subjectInput").value.trim()||!$("#lessonInput").value.trim()||!qs.length){toast("Cần nhập môn, tên bài và câu hỏi đúng định dạng.");return}
+ const lesson={id:editId||("l"+Date.now()),subject:$("#subjectInput").value.trim(),name:$("#lessonInput").value.trim(),raw:$("#questionBox").value.trim(),questions:qs};
+ const i=data.lessons.findIndex(x=>x.id===lesson.id); if(i>=0)data.lessons[i]=lesson;else data.lessons.push(lesson); data.currentLessonId=lesson.id; editId=lesson.id; saveData(); renderBank(); renderHome(); toast("Đã lưu bài và chọn làm bài chơi.");
+}
+$("#deleteLesson").onclick=()=>{if(!editId)return toast("Chưa chọn bài để xóa."); if(confirm("Xóa bài này?")){data.lessons=data.lessons.filter(x=>x.id!==editId); if(data.currentLessonId===editId)data.currentLessonId=null; editId=null; $("#newLesson").click(); saveData(); renderBank();renderHome();toast("Đã xóa bài.")}}
+async function fileToDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+async function handleAudio(input,key){
+  const f=input.files[0]; if(!f)return;
+  try{
+    await saveAudioBlob(key,f);
+    data.audio[key+"Name"]=f.name;
+    // giữ tương thích bản cũ: không lưu base64 lớn vào localStorage nữa
+    data.audio[key]=null;
+    saveData();
+    await applyAudioToElement(key);
+    updateAudioStatusPanels();
+    toast("Đã lưu nhạc vào trò chơi: "+f.name);
+  }catch(e){
+    // dự phòng nếu trình duyệt không hỗ trợ IndexedDB
+    data.audio[key]=await fileToDataURL(f);
+    data.audio[key+"Name"]=f.name;
+    saveData();
+    updateAudioStatusPanels();
+    toast("Đã lưu nhạc dự phòng: "+f.name);
+  }
+}
+function updateAudioStatus(){
+  const a=data.audio||{};
+  const bg=a.bgName||a.bg?"Có nhạc nền":"Chưa có nhạc nền";
+  const r=a.rightName||a.right?"Có nhạc đúng":"Chưa có nhạc đúng";
+  const w=a.wrongName||a.wrong?"Có nhạc sai":"Chưa có nhạc sai";
+  const el=$("#audioSaveStatus"); if(el) el.textContent=`Đã lưu: ${bg} • ${r} • ${w}. Tải file mới nếu muốn thay nhạc.`;
+}
+$("#bgMusicFile").onchange=e=>handleAudio(e.target,"bg");$("#rightMusicFile").onchange=e=>handleAudio(e.target,"right");$("#wrongMusicFile").onchange=e=>handleAudio(e.target,"wrong");
+$("#quickPlay").onclick=startGame;
+
+function updatePlayMethodUI(){
+  const method=(data.settings.playMethod||"auto");
+  const lock=$("#lockBtn"), badge=$("#methodBadge");
+  if(lock){
+    lock.style.display = method==="manual" ? "block" : "none";
+    lock.textContent = "CHỐT ĐÁP ÁN";
+  }
+  if(badge){
+    badge.className="method-badge "+(method==="manual"?"manual":"auto");
+    badge.textContent = method==="manual" ? "🧑‍🏫 CHỐT ĐÁP ÁN" : "⚡ TỰ ĐỘNG CHẤM";
+    badge.style.display = "flex";
+  }
+  const cam=$("#camStatus");
+  if(cam){
+    cam.textContent = method==="manual"
+      ? "📷 A=1 ngón • B=2 ngón • C=3 ngón • D=4 ngón • Giáo viên bấm CHỐT ĐÁP ÁN"
+      : "📷 A=1 ngón • B=2 ngón • C=3 ngón • D=4 ngón • Tự động chấm đội nhanh nhất";
+  }
+}
+
+function startGame(){
+  const lesson=data.lessons.find(l=>l.id===data.currentLessonId);
+  if(!lesson){toast("Thầy/cô cần chọn hoặc tạo một bài trong ngân hàng câu hỏi trước.");return}
+  let qs=[...lesson.questions]; if(data.settings.orderMode==="shuffle") qs=shuffle(qs);
+  state={questions:qs,idx:0,score1:0,score2:0,answerOrder:[],timeLeft:data.settings.time,timer:null,ended:false,muted:false,choice1:null,choice2:null,autoLocked:false};
+  show("play"); $("#lockBtn").style.display=(data.settings.playMethod||"auto")==="manual"?"block":"none"; $("#blueName").textContent=data.settings.team1.toUpperCase(); $("#redName").textContent=data.settings.team2.toUpperCase(); $("#padLeftTitle").textContent=data.settings.team1.toUpperCase()+" CHỌN"; $("#padRightTitle").textContent=data.settings.team2.toUpperCase()+" CHỌN"; renderPeople();setupAudio();renderQuestion();updatePlayMethodUI();startTimer();setTimeout(initCameraAuto,350);
+}
+async function applyAudioToElement(k){
+  const a=$("#"+(k==="bg"?"bgAudio":k==="right"?"rightAudio":"wrongAudio"));
+  try{
+    const blob=await loadAudioBlob(k);
+    if(blob){a.src=URL.createObjectURL(blob); return;}
+  }catch(e){}
+  if(data.audio && data.audio[k]) a.src=data.audio[k];
+}
+async function setupAudio(){
+  for(const k of ["bg","right","wrong"]) await applyAudioToElement(k);
+  const bg=$("#bgAudio"); if(bg.src){bg.volume=.35;bg.play().catch(()=>{})}
+}
+function playSound(kind){if(state.muted)return; const a=kind==="right"?$("#rightAudio"):$("#wrongAudio"); if(a.src){a.currentTime=0;a.play().catch(()=>{})} else beep(kind==="right"?"ok":"bad")}
+function beep(type="ok"){if(state.muted)return;try{const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(); const g=ctx.createGain();o.type= type==="bad"?"sawtooth": type==="win"?"triangle":"sine";o.frequency.value= type==="bad"?160:type==="win"?620:430;g.gain.value=.055;o.connect(g);g.connect(ctx.destination);o.start();setTimeout(()=>{o.stop();ctx.close()}, type==="win"?420:170)}catch(e){}}
+function renderPeople(){const make=cls=>Array.from({length:3},()=>`<div class="person ${cls}"><div class="head">•</div><div class="body"></div><div class="foot l"></div><div class="foot r"></div></div>`).join("");$("#pLeft").innerHTML=make("blue");$("#pRight").innerHTML=make("red")}
+
+function getFinalResultMessage(reason){
+  const ratio = `Tỷ số ${state.score1}-${state.score2}`;
+  if(state.score1===state.score2){
+    return {title:"🎉 KẾT THÚC TRÒ CHƠI 🎉", text:`${reason}<span class="final-draw">🤝 HAI ĐỘI HÒA NHAU!</span><span class="final-score">${ratio}</span>`};
+  }
+  const winner = state.score1>state.score2 ? data.settings.team1 : data.settings.team2;
+  return {title:"🎉 KẾT THÚC TRÒ CHƠI 🎉", text:`${reason}<span class="final-winner">🏆 CHÚC MỪNG ${winner} CHIẾN THẮNG! 🏆</span><span class="final-score">${ratio}</span>`};
+}
+function endGameByQuestionOut(){
+  const r=getFinalResultMessage("Đã hết câu hỏi.");
+  endGame(r.title,r.text);
+}
+
+function renderQuestion(){
+  resetAutoBatch();
+  state.autoLocked=false;
+  state.choice1=null; state.choice2=null;
+  if(state.idx>=state.questions.length){if(data.settings.endWhenOut){endGameByQuestionOut();return} state.idx=0; state.questions=shuffle(state.questions)}
+  const q=state.questions[state.idx], opts=data.settings.noShuffleAns?q.options:shuffle(q.options); state.answerOrder=opts; $("#qText").textContent=q.q;
+  $$(".answer").forEach((b,i)=>{b.querySelector("span:last-child").textContent=opts[i];b.classList.remove("shake")});
+  $("#counter").textContent=`CÂU ${state.idx+1} / ${state.questions.length}`; $("#bar").style.width=(state.idx/state.questions.length*100)+"%"; $("#score1").textContent=state.score1; $("#score2").textContent=state.score2; updateChoices(); updateRope();
+}
+
+function resetAutoBatch(){
+  if(state.autoBatchTimer){clearTimeout(state.autoBatchTimer);state.autoBatchTimer=null;}
+  state.autoBatch=null;
+  state.scoringLocked=false;
+}
+function registerAutoGesture(team,ans){
+  if(state.ended || state.scoringLocked) return;
+  selectAnswer(team,ans);
+  if((data.settings.playMethod||"auto")!=="auto") return;
+  if(!state.autoBatch){
+    state.autoBatch={};
+    state.autoBatch[team]=ans;
+    state.autoBatchTimer=setTimeout(()=>processAutoBatch(),420);
+  }else{
+    state.autoBatch[team]=ans;
+  }
+}
+function processAutoBatch(){
+  if(state.ended || state.scoringLocked || !state.autoBatch) return;
+  state.scoringLocked=true;
+  if(state.autoBatch[1]!=null) state.choice1=state.autoBatch[1];
+  if(state.autoBatch[2]!=null) state.choice2=state.autoBatch[2];
+  lockAnswers();
+}
+
+function selectAnswer(team,idx){
+  if(state.ended)return;
+  if(team===1) state.choice1=idx; else state.choice2=idx;
+  updateChoices();
+}
+function isChoiceCorrect(idx){
+  if(idx==null || !state.questions[state.idx]) return false;
+  return state.answerOrder[idx]===state.questions[state.idx].correct;
+}
+function updateChoices(){
+  $("#choice1").innerHTML=(state.choice1==null?"?":String.fromCharCode(65+state.choice1))+"<small>ĐÃ CHỌN</small>";
+  $("#choice2").innerHTML=(state.choice2==null?"?":String.fromCharCode(65+state.choice2))+"<small>ĐÃ CHỌN</small>";
+  $("#choice1").classList.remove("choice-ok","choice-bad");
+  $("#choice2").classList.remove("choice-ok","choice-bad");
+  $$(".answer").forEach(b=>{b.classList.remove("selected-blue","selected-red","correct-flash","wrong-flash")});
+  if(state.choice1!=null) $$(".answer")[state.choice1].classList.add("selected-blue");
+  if(state.choice2!=null) $$(".answer")[state.choice2].classList.add("selected-red");
+}
+function revealChoicesAfterLock(ok1,ok2){
+  $("#choice1").innerHTML=(state.choice1==null?"?":String.fromCharCode(65+state.choice1))+"<small>"+(state.choice1==null?"CHƯA CHỌN":(ok1?"ĐÚNG":"SAI"))+"</small>";
+  $("#choice2").innerHTML=(state.choice2==null?"?":String.fromCharCode(65+state.choice2))+"<small>"+(state.choice2==null?"CHƯA CHỌN":(ok2?"ĐÚNG":"SAI"))+"</small>";
+  $("#choice1").classList.toggle("choice-ok",state.choice1!=null&&ok1);
+  $("#choice1").classList.toggle("choice-bad",state.choice1!=null&&!ok1);
+  $("#choice2").classList.toggle("choice-ok",state.choice2!=null&&ok2);
+  $("#choice2").classList.toggle("choice-bad",state.choice2!=null&&!ok2);
+  $$(".answer").forEach(b=>{b.classList.remove("selected-blue","selected-red","correct-flash","wrong-flash")});
+  if(state.choice1!=null) $$(".answer")[state.choice1].classList.add(ok1?"correct-flash":"wrong-flash");
+  if(state.choice2!=null) $$(".answer")[state.choice2].classList.add(ok2?"correct-flash":"wrong-flash");
+}
+function lockAnswers(){
+  if(state.ended)return;
+  if(state.choice1==null && state.choice2==null){toast("Hai đội chưa chọn đáp án.");return}
+  const q=state.questions[state.idx];
+  const ok1=state.choice1!=null && state.answerOrder[state.choice1]===q.correct;
+  const ok2=state.choice2!=null && state.answerOrder[state.choice2]===q.correct;
+  let msg="";
+  const pv=data.settings.pointValue||1;
+  revealChoicesAfterLock(ok1,ok2);
+  if(ok1){state.score1+=pv; msg+="Chúc mừng "+data.settings.team1+" trả lời đúng, cộng "+pv+" điểm. ";fireworksForTeam(1);}
+  if(ok2){state.score2+=pv; msg+="Chúc mừng "+data.settings.team2+" trả lời đúng, cộng "+pv+" điểm. ";fireworksForTeam(2);}
+  if(!ok1 && !ok2){msg="Cả hai đội chưa đúng. Đáp án đúng là: "+q.correct;}
+  $$(".answer").forEach((b,i)=>{if(state.answerOrder[i]===q.correct)b.classList.add("correct-flash")});
+  playSound((ok1||ok2)?"right":"wrong");
+  $("#score1").textContent=state.score1;$("#score2").textContent=state.score2;updateRope();
+  const ratio=`Tỷ lệ ${state.score1}-${state.score2}`;
+  $("#camStatus").textContent=(msg||"Đã chốt đáp án.")+" "+ratio;
+  toast((msg||"Đã chốt đáp án.")+" "+ratio);
+  const diff=state.score1-state.score2;
+  if(Math.abs(diff)>=data.settings.winGap){setTimeout(()=>endGame((diff>0?data.settings.team1:data.settings.team2)+" chiến thắng!","Chúc mừng "+(diff>0?data.settings.team1:data.settings.team2)+" chiến thắng, "+ratio),900);return}
+  setTimeout(()=>{state.idx++; state.choice1=null; state.choice2=null; resetAutoBatch(); renderQuestion();},900);
+}
+function autoScoreGesture(g){
+  if(state.ended || state.autoLocked) return;
+  state.autoLocked=true;
+  if(g.team===1){state.choice1=g.ans; state.choice2=null;} else {state.choice2=g.ans; state.choice1=null;}
+  const q=state.questions[state.idx];
+  const ok = state.answerOrder[g.ans]===q.correct;
+  const ok1 = g.team===1 && ok;
+  const ok2 = g.team===2 && ok;
+  revealChoicesAfterLock(g.team===1?ok:false, g.team===2?ok:false);
+  $$(".answer").forEach((b,i)=>{
+    if(state.answerOrder[i]===q.correct) b.classList.add("correct-flash");
+    if(i===g.ans && !ok) b.classList.add("wrong-flash");
+  });
+  const pv=data.settings.pointValue||1;
+  const teamName = g.team===1 ? data.settings.team1 : data.settings.team2;
+  let msg="";
+  if(ok){
+    if(g.team===1) state.score1+=pv; else state.score2+=pv;
+    fireworksForTeam(g.team);
+    playSound("right");
+    msg="✅ "+teamName+" trả lời đúng, cộng "+pv+" điểm.";
+  }else{
+    playSound("wrong");
+    msg="❌ "+teamName+" trả lời sai. Đáp án đúng là: "+q.correct;
+  }
+  $("#score1").textContent=state.score1; $("#score2").textContent=state.score2; updateRope();
+  const ratio=`Tỷ lệ ${state.score1}-${state.score2}`;
+  $("#camStatus").textContent=msg+" "+ratio;
+  toast(msg+" "+ratio);
+  const diff=state.score1-state.score2;
+  if(Math.abs(diff)>=data.settings.winGap){
+    setTimeout(()=>endGame((diff>0?data.settings.team1:data.settings.team2)+" chiến thắng!","Chúc mừng "+(diff>0?data.settings.team1:data.settings.team2)+" chiến thắng, "+ratio),1000);
+    return;
+  }
+  setTimeout(()=>{state.idx++; renderQuestion();},1100);
+}
+function updateRope(){const diff=state.score1-state.score2,gap=data.settings.winGap||3,pct=50+Math.max(-1,Math.min(1,diff/gap))*26;$("#token").style.left=pct+"%";$("#pLeft").style.transform=`translateX(${(pct-50)*.7}%)`;$("#pRight").style.transform=`translateX(${(pct-50)*.7}%)`}
+function startTimer(){clearInterval(state.timer);state.timeLeft=data.settings.time;$("#timer").textContent=state.timeLeft+"s";state.timer=setInterval(()=>{if(state.ended)return;state.timeLeft--;$("#timer").textContent=state.timeLeft+"s";if(state.timeLeft<=0)endGame("Hết giờ!",state.score1===state.score2?"Hai đội hòa nhau.":(state.score1>state.score2?data.settings.team1:data.settings.team2)+" đang dẫn điểm và giành chiến thắng.")},1000)}
+function showRoundMessage(title,text){$("#modalTitle").textContent=title;$("#modalText").innerHTML=text;$("#overlay").style.display="flex";}
+function endGame(title,text){state.ended=true;clearInterval(state.timer);$("#bgAudio").pause();$("#modalTitle").textContent=title;$("#modalText").innerHTML=text;
+  if(String(title).includes("KẾT THÚC") || String(title).includes("chiến thắng") || String(text).includes("final-winner") || String(text).includes("final-draw")){
+    $("#overlay").classList.add("final-popup");
+  }else{
+    $("#overlay").classList.remove("final-popup");
+  }
+  $("#overlay").style.display="flex";confetti();beep("win")}
+$$(".answer").forEach(b=>b.onclick=()=>selectAnswer(1,+b.dataset.i));
+$$(".team-answer").forEach(b=>b.onclick=()=>selectAnswer(+b.dataset.team,+b.dataset.i));
+$("#lockBtn").onclick=()=>{if((data.settings.playMethod||"auto")==="manual") lockAnswers();}; $("#closeModal").onclick=()=>{$("#overlay").style.display="none";$("#overlay").classList.remove("final-popup");};
+$("#soundBtn").onclick=()=>{state.muted=!state.muted;$("#soundBtn").textContent=state.muted?"🔇":"🔊"; if(state.muted)$("#bgAudio").pause();else $("#bgAudio").play().catch(()=>{})}
+$("#resetBtn").onclick=()=>{if(confirm("Reset ván chơi hiện tại?")){state.idx=0;state.score1=0;state.score2=0;state.choice1=null;state.choice2=null;resetAutoBatch();state.autoLocked=false;state.ended=false;stableGesture=null;stableCount=0;clearPadHighlight();$("#overlay").style.display="none";renderQuestion();startTimer();$("#bgAudio").play().catch(()=>{}); }}
+$("#backHome").onclick=()=>{clearInterval(state.timer);$("#bgAudio").pause();stopCamera();show("home")}
+document.addEventListener("keydown",e=>{if($("#play").style.display!=="block")return;const k=e.key.toLowerCase();if(k==="r")$("#resetBtn").click();if(k===" ")$("#lockBtn").click();const map={a:0,b:1,c:2,d:3,q:0,w:1,s:3,o:0,p:1,k:2,l:3,"1":0,"2":1,"3":2,"4":3};if(map[k]!==undefined)selectAnswer((["o","p","k","l","1","2","3","4"].includes(k)?2:1),map[k])})
+
+function fireworksForTeam(team){
+  const c=$("#confetti"),ctx=c.getContext("2d"); c.width=innerWidth;c.height=innerHeight;
+  const sideX = team===1 ? innerWidth*0.62 : innerWidth*0.88;
+  const sideY = innerHeight*0.22;
+  const colors = team===1 ? ["#28e58a","#29b8ff","#ffffff"] : ["#28e58a","#ff4d5b","#ffffff"];
+  const parts=[];
+  for(let burst=0;burst<4;burst++){
+    const cx=sideX+(randInt(120)-60), cy=sideY+(randInt(110)-55);
+    for(let i=0;i<38;i++){
+      const ang=Math.random()*Math.PI*2, sp=2+Math.random()*5;
+      parts.push({x:cx,y:cy,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,r:2+Math.random()*4,life:55+randInt(25),color:colors[randInt(colors.length)]});
+    }
+  }
+  let t=0;function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.055;p.life--;ctx.globalAlpha=Math.max(0,p.life/70);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();});
+    ctx.globalAlpha=1;
+    if(t++<80 && parts.some(p=>p.life>0)) requestAnimationFrame(draw); else ctx.clearRect(0,0,c.width,c.height);
+  } draw();
+}
+
+function confetti(){const c=$("#confetti"),ctx=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;const parts=Array.from({length:150},()=>({x:randInt(c.width),y:-randInt(200),r:3+randInt(7),v:2+randInt(5),a:randInt(360)}));let t=0;function draw(){ctx.clearRect(0,0,c.width,c.height);parts.forEach(p=>{p.y+=p.v;p.x+=Math.sin((p.y+p.a)/25)*2;ctx.fillRect(p.x,p.y,p.r,p.r)});if(t++<120)requestAnimationFrame(draw);else ctx.clearRect(0,0,c.width,c.height)}draw()}
+
+
+
+
+let camStream=null, gestureOn=true, camTimer=null, cameraReady=false, mpHands=null, mpCamera=null;
+let stableGesture=null, stableCount=0, lastGestureTime=0, processingHands=false;
+const HAND_CONNECTIONS_FALLBACK=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+async function initCameraAuto(){
+  try{
+    if(cameraReady) return;
+    camStream=await navigator.mediaDevices.getUserMedia({video:{width:1280,height:720,facingMode:"user"},audio:false});
+    $("#camVideo").srcObject=camStream;
+    cameraReady=true; gestureOn=true;
+    $("#camStatus").textContent=(data.settings.playMethod||"auto")==="auto"?"📷 Chấm tự động: A=1 • B=2 • C=3 • D=4":"📷 Chốt đáp án: giơ tay để chọn, bấm CHỐT để chấm";
+    await initHandRecognition();
+  }catch(e){
+    cameraReady=false; gestureOn=false;
+    $("#camStatus").textContent="📷 Không mở được camera. Vẫn chơi bình thường bằng bảng nút A/B/C/D.";
+  }
+}
+$("#camBtn").onclick=async()=>{
+  if(!cameraReady){await initCameraAuto();return}
+  gestureOn=!gestureOn;
+  stableGesture=null; stableCount=0; clearPadHighlight();
+  $("#camStatus").textContent=gestureOn?((data.settings.playMethod||"auto")==="auto"?"📷 Chấm tự động: A=1 • B=2 • C=3 • D=4":"📷 Chốt đáp án: giơ tay để chọn, bấm CHỐT để chấm"):"📷 Đã tắt nhận diện chỉ tay. Có thể bấm bảng nút A/B/C/D.";
+}
+async function initHandRecognition(){
+  if(window.Hands){
+    mpHands=new Hands({locateFile:(file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+    mpHands.setOptions({maxNumHands:2,modelComplexity:1,minDetectionConfidence:.72,minTrackingConfidence:.72});
+    mpHands.onResults(onHandsResults);
+    mpCamera=new Camera($("#camVideo"),{onFrame:async()=>{if(gestureOn && !state.ended) await mpHands.send({image:$("#camVideo")})},width:1280,height:720});
+    mpCamera.start();
+  }else{
+    $("#camStatus").textContent="📷 Cần internet lần đầu để tải bộ nhận diện bàn tay. Dùng bảng nút A/B/C/D để chơi.";
+  }
+}
+function clearPadHighlight(){
+  $$(".team-answer").forEach(b=>b.classList.remove("active-choice"));
+  const m=$("#holdMeter"); if(m){m.style.display="none"; $("#holdMeter span").style.width="0%";}
+}
+function highlightGesture(g, pct){
+  clearPadHighlight();
+  if(!g) return;
+  const btn=document.querySelector(`.team-answer[data-team="${g.team}"][data-i="${g.ans}"]`);
+  if(btn) btn.classList.add("active-choice");
+  $("#holdMeter").style.display="block";
+  $("#holdMeter span").style.width=Math.min(100,pct)+"%";
+}
+function onHandsResults(results){
+  const c=$("#camCanvas"), ctx=c.getContext("2d"), v=$("#camVideo");
+  c.width=v.videoWidth||1280; c.height=v.videoHeight||720;
+  ctx.clearRect(0,0,c.width,c.height);
+  drawAnswerZones(ctx,c.width,c.height);
+  if(!gestureOn || state.ended || state.autoLocked || !results.multiHandLandmarks) return;
+  let candidates=[];
+  for(const lm of results.multiHandLandmarks){
+    const count=countRaisedFingers(lm);
+    let handColor="#2377ff";
+    if(count>=1 && count<=4){
+      const team=lm[0].x>.5?1:2; // video hiển thị gương: bên trái màn hình là x raw lớn hơn
+      const ans=count-1;
+      const ok=state.questions[state.idx] && state.answerOrder[ans]===state.questions[state.idx].correct;
+      handColor=ok?"#28e58a":"#ff4352";
+      candidates.push({team,ans,count,cx:lm[9].x,cy:lm[9].y,ok});
+    }
+    drawHand(ctx,lm,c.width,c.height,handColor);
+  }
+  if(!candidates.length){stableGesture=null;stableCount=0;clearPadHighlight();return}
+  // Ưu tiên bàn tay ổn định, nằm rõ trong khung. Nếu có 2 đội cùng giơ, hệ thống sẽ lấy tay ổn định trước.
+  let g=candidates[0];
+  if(stableGesture){
+    const same=candidates.find(x=>x.team===stableGesture.team && x.ans===stableGesture.ans);
+    if(same) g=same;
+  }
+  if(stableGesture && g.team===stableGesture.team && g.ans===stableGesture.ans) stableCount++;
+  else {stableGesture=g; stableCount=1}
+  highlightGesture(stableGesture, stableCount*10);
+  drawLockTarget(ctx, stableGesture, c.width, c.height, stableCount);
+  if(stableCount>=12 && Date.now()-lastGestureTime>1200){
+    lastGestureTime=Date.now();
+    const finalG={...stableGesture};
+    $("#camStatus").textContent=(finalG.team===1?data.settings.team1:data.settings.team2)+" chọn "+["A","B","C","D"][finalG.ans]+" → hệ thống đang chấm...";
+    clearPadHighlight(); stableGesture=null; stableCount=0;
+    if((data.settings.playMethod||"auto")==="auto"){autoScoreGesture(finalG)}else{selectAnswer(finalG.team, finalG.ans)};
+  }
+}
+function countRaisedFingers(lm){
+  // Đếm 4 ngón chính: trỏ, giữa, áp út, út. Ngón cái không tính để tránh nhiễu.
+  const fingers=[
+    [8,6],   // trỏ
+    [12,10], // giữa
+    [16,14], // áp út
+    [20,18]  // út
+  ];
+  let count=0;
+  for(const [tip,pip] of fingers){
+    // đầu ngón cao hơn khớp giữa và khoảng cách đủ rõ
+    if(lm[tip].y < lm[pip].y - 0.025) count++;
+  }
+  return count;
+}
+function drawHand(ctx,lm,w,h,color="#2377ff"){
+  ctx.save();
+  ctx.lineWidth=Math.max(4,w/210);
+  ctx.strokeStyle=color;
+  ctx.fillStyle="#e7edf7";
+  for(const [a,b] of HAND_CONNECTIONS_FALLBACK){
+    ctx.beginPath(); ctx.moveTo(lm[a].x*w,lm[a].y*h); ctx.lineTo(lm[b].x*w,lm[b].y*h); ctx.stroke();
+  }
+  for(const p of lm){
+    ctx.beginPath(); ctx.arc(p.x*w,p.y*h,Math.max(5,w/180),0,Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+}
+function drawAnswerZones(ctx,w,h){
+  if(!gestureOn) return;
+  ctx.save();
+  ctx.lineWidth=Math.max(5,Math.floor(w/170));
+  for(let team=0;team<2;team++){
+    ctx.strokeStyle=team===0?"rgba(20,115,255,.72)":"rgba(243,11,29,.72)";
+    const x=team*w/2+w*.07, y=h*.29, ww=w*.36, hh=h*.46;
+    ctx.beginPath();
+    const corner=38;
+    ctx.moveTo(x+corner,y); ctx.lineTo(x,y); ctx.lineTo(x,y+corner);
+    ctx.moveTo(x+ww-corner,y); ctx.lineTo(x+ww,y); ctx.lineTo(x+ww,y+corner);
+    ctx.moveTo(x+corner,y+hh); ctx.lineTo(x,y+hh); ctx.lineTo(x,y+hh-corner);
+    ctx.moveTo(x+ww-corner,y+hh); ctx.lineTo(x+ww,y+hh); ctx.lineTo(x+ww,y+hh-corner);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawLockTarget(ctx,g,w,h,count){
+  if(!g) return;
+  const x=g.cx*w, y=g.cy*h;
+  ctx.save();
+  ctx.strokeStyle=g.ok?"#28e58a":"#ff4352";
+  ctx.fillStyle="rgba(0,0,0,.42)";
+  ctx.lineWidth=6;
+  ctx.beginPath(); ctx.arc(x,y,55,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x,y,13,0,Math.PI*2); ctx.stroke();
+  ctx.fillRect(x-78,y+72,156,54);
+  ctx.fillStyle="#d9f2ff";
+  ctx.font="900 15px Times New Roman";
+  ctx.textAlign="center";
+  ctx.fillText("ĐANG KHÓA MỤC TIÊU",x,y+94);
+  ctx.font="950 25px Times New Roman";
+  ctx.fillText(g.count+" NGÓN",x,y+124);
+  ctx.strokeStyle="#28e58a";
+  ctx.lineWidth=8;
+  ctx.beginPath(); ctx.arc(x,y,68,-Math.PI/2,-Math.PI/2+(Math.PI*2*Math.min(1,count/8))); ctx.stroke();
+  ctx.restore();
+}
+function stopCamera(){
+  clearInterval(camTimer);
+  try{if(mpCamera) mpCamera.stop()}catch(e){}
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null}
+  cameraReady=false; gestureOn=false; stableGesture=null; stableCount=0;
+}
+
+$("#openSoundTheme").onclick=()=>{$("#soundThemePanel").style.display="flex";applyTheme(data.theme||"default");updateAudioStatusPanels()}
+$("#closeSoundTheme").onclick=()=>{$("#soundThemePanel").style.display="none"}
+$$(".palette").forEach(p=>p.onclick=()=>{data.theme=p.dataset.theme;applyTheme(data.theme)})
+$("#saveSoundTheme").onclick=()=>{saveData();applyTheme(data.theme||"default");$("#soundThemePanel").style.display="none";toast("Đã lưu âm thanh và bảng màu giao diện.")}
+
+applyTheme(data.theme||"default");
+renderHome();
+</script>
+</body>
+</html>

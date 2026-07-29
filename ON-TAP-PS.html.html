@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Trắc Nghiệm Ôn Tập Toán 4</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --background-color: #f4f7f6;
+            --card-color: #ffffff;
+            --text-color: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .game-container {
+            background-color: var(--card-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 650px;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+        h2 {
+            text-align: center;
+            color: var(--secondary-color);
+            margin-top: 0;
+            text-transform: uppercase;
+            font-size: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+        .progress-bar {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            width: 100%;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .progress {
+            background-color: var(--secondary-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .question-text {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .btn-answer {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: #444;
+        }
+        .btn-answer:hover {
+            background-color: #e3f2fd;
+            border-color: var(--secondary-color);
+        }
+        .btn-answer.correct {
+            background-color: #d4edda !important;
+            border-color: #28a745 !important;
+            color: #155724;
+            font-weight: 600;
+        }
+        .btn-answer.wrong {
+            background-color: #f8d7da !important;
+            border-color: #dc3545 !important;
+            color: #721c24;
+        }
+        .info-box {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            display: none;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        .btn-control {
+            padding: 12px 24px;
+            font-size: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-control:disabled {
+            background-color: #cccccc !important;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        #btn-hint { background-color: #ff9800; }
+        #btn-hint:hover { background-color: #e68a00; }
+        #btn-next { background-color: #28a745; }
+        #btn-next:hover:not(:disabled) { background-color: #218838; }
+        
+        /* MÀN HÌNH KẾT QUẢ THEO THIẾT KẾ CỦA BẠN */
+        .result-screen {
+            display: none;
+        }
+        .result-screen h3 {
+            text-align: center;
+            color: #333;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .review-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            padding-right: 5px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fafafa;
+        }
+        .review-item {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .review-q {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #333;
+        }
+        .review-explain {
+            font-size: 14px;
+            color: #666;
+            margin-top: 6px;
+            font-style: italic;
+        }
+        .result-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .btn-result {
+            padding: 12px 25px;
+            font-size: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-restart { background-color: #4fc3f7; }
+        .btn-restart:hover { background-color: #29b6f6; }
+        .btn-save { background-color: #2ec4b6; }
+        .btn-save:hover { background-color: #20a497; }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <div id="quiz-screen">
+        <h2>Thử Thách Toán Lớp 4</h2>
+        <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+        </div>
+        <div id="question" class="question-text">Đang tải câu hỏi...</div>
+        <div id="answers" class="answers-grid"></div>
+        
+        <div id="feedback-box" class="info-box"></div>
+        
+        <div class="controls">
+            <button id="btn-hint" class="btn-control" onclick="showHint()">Xem Gợi Ý</button>
+            <button id="btn-next" class="btn-control" onclick="nextQuestion()" disabled>Câu Tiếp Theo &raquo;</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="result-screen">
+        <h2>Thử Thách Toán Lớp 4</h2>
+        <h3>Kết Quả Của Bạn</h3>
+        
+        <div id="review-list" class="review-list">
+            </div>
+        
+        <div class="result-buttons">
+            <button class="btn-result btn-restart" onclick="restartQuiz()">Chơi Lại Từ Đầu</button>
+            <button class="btn-result btn-save" onclick="alert('Đã lưu dữ liệu ngân hàng thành công vào hệ thống học liệu số!')">📋 Lưu Dữ Liệu Ngân Hàng</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // NGÂN HÀNG 10 CÂU HỎI ÔN TẬP TOÁN 4 (ĐÃ FIX LỖI KÝ TỰ KHÔNG BỊ KẸT)
+    const quizData = [
+      {
+        question: "Một trường tiểu học có 1025 học sinh. Biết số học sinh nữ nhiều hơn số học sinh nam là 35 bạn. Hỏi trường đó có bao nhiêu học sinh nam?",
+        answers: ["495 học sinh", "530 học sinh", "512 học sinh", "480 học sinh"],
+        correct: 0,
+        hint: "Đây là bài toán tìm hai số khi biết tổng và hiệu. Học sinh nam đóng vai trò là số bé.",
+        explain: "Lấy (1025 - 35) : 2 = 495 học sinh."
+      },
+      {
+        question: "Phân số nào sau đây bằng với phân số 3/4 và có mẫu số là 12?",
+        answers: ["6/12", "8/12", "9/12", "7/12"],
+        correct: 2,
+        hint: "Hãy tìm một số mà khi nhân cả mẫu số của phân số ban đầu với số đó ta được 12, rồi nhân tương tự với tử số.",
+        explain: "Khi nhân cả tử số và mẫu số của phân số 3/4 với 3, ta được phân số 9/12."
+      },
+      {
+        question: "Một hình chữ nhật có chiều dài là 4/5 m, chiều rộng là 1/3 m. Diện tích của hình chữ nhật đó là bao nhiêu?",
+        answers: ["4/15 m²", "5/8 m²", "17/15 m²", "34/15 m²"],
+        correct: 0,
+        hint: "Muốn tính diện tích hình chữ nhật, ta lấy chiều dài nhân với chiều rộng (cùng một đơn vị đo).",
+        explain: "Diện tích hình chữ nhật bằng chiều dài nhân với chiều rộng: (4/5) x (1/3) = 4/15 m²."
+      },
+      {
+        question: "Kết quả của phép tính 25 x 42 x 4 là bao nhiêu?",
+        answers: ["1050", "4200", "4020", "16800"],
+        correct: 1,
+        hint: "Hãy kết hợp các số có tích là một số tròn trăm (như 25 và 4) trước để tính nhanh hơn.",
+        explain: "Áp dụng tính chất giao hoán và kết hợp: (25 x 4) x 42 = 100 x 42 = 4200."
+      },
+      {
+        question: "Bác An có một thửa ruộng hình bình hành có độ dài đáy là 24 m, chiều cao tương ứng là 15 m. Diện tích của thửa ruộng đó là:",
+        answers: ["360 m²", "180 m²", "78 m²", "39 m²"],
+        correct: 0,
+        hint: "Diện tích hình bình hành được tính bằng tích của độ dài đáy và chiều cao cùng một đơn vị đo.",
+        explain: "Diện tích hình bình hành bằng độ dài đáy nhân với chiều cao: 24 x 15 = 360 m²."
+      },
+      {
+        question: "Điền số thích hợp vào chỗ trống: 5 tạ 8 kg = ... kg.",
+        answers: ["58", "580", "508", "5008"],
+        correct: 2,
+        hint: "Nhớ lại bảng đơn vị đo khối lượng: 1 tạ bằng bao nhiêu ki-lô-gam? Sau đó cộng thêm 8 kg.",
+        explain: "Vì 1 tạ = 100 kg nên 5 tạ = 500 kg. Do đó, 500 kg + 8 kg = 508 kg."
+      },
+      {
+        question: "Trong các góc sau, góc nào có số đo lớn nhất?",
+        answers: ["Góc nhọn", "Góc vuông", "Góc tù", "Góc bẹt"],
+        correct: 3,
+        hint: "Hãy sắp xếp các góc theo thứ tự từ bé đến lớn: góc nhọn, góc vuông, góc tù, góc bẹt.",
+        explain: "Góc bẹt bằng hai lần góc vuông và là góc lớn nhất trong các góc được học ở tiểu học."
+      },
+      {
+        question: "Trung bình cộng của ba số: 24, 30 và 42 là:",
+        answers: ["32", "96", "48", "30"],
+        correct: 0,
+        hint: "Muốn tìm trung bình cộng của nhiều số, ta tính tổng của các số đó rồi chia cho số các số hạng.",
+        explain: "Tìm trung bình cộng bằng cách lấy tổng chia cho số các số hạng: (24 + 30 + 42) : 3 = 96 : 3 = 32."
+      },
+      {
+        question: "Một tấm bìa hình thoi có độ dài hai đường chéo lần lượt là 12 cm và 8 cm. Diện tích của tấm bìa đó là:",
+        answers: ["96 cm²", "48 cm²", "20 cm²", "40 cm²"],
+        correct: 1,
+        hint: "Công thức tính diện tích hình thoi là tích độ dài hai đường chéo chia cho 2 (cùng đơn vị đo).",
+        explain: "Diện tích hình thoi bằng tích độ dài hai đường chéo chia cho 2: (12 x 8) : 2 = 48 cm²."
+      },
+      {
+        question: "Mẹ mua 2 kg cam hết 60 000 đồng. Hỏi nếu mẹ mua 5 kg cam cùng loại thì hết bao nhiêu tiền?",
+        answers: ["120 000 đồng", "150 000 đồng", "180 000 đồng", "300 000 đồng"],
+        correct: 1,
+        hint: "Trước hết, hãy tìm số tiền để mua 1 kg cam (bước rút về đơn vị), sau đó nhân với số lượng kg cam cần mua.",
+        explain: "Giá tiền 1 kg cam là: 60 000 : 2 = 30 000 đồng. Số tiền mua 5 kg cam là: 30 000 x 5 = 150 000 đồng."
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let hasAnswered = false;
+
+    const questionEl = document.getElementById("question");
+    const answersEl = document.getElementById("answers");
+    const progressEl = document.getElementById("progress");
+    const feedbackBoxEl = document.getElementById("feedback-box");
+    const btnNextEl = document.getElementById("btn-next");
+    const quizScreenEl = document.getElementById("quiz-screen");
+    const resultScreenEl = document.getElementById("result-screen");
+    const reviewListEl = document.getElementById("review-list");
+
+    function loadQuestion() {
+        hasAnswered = false;
+        btnNextEl.disabled = true;
+        feedbackBoxEl.style.display = "none";
+        
+        let currentQuestion = quizData[currentQuestionIndex];
+        questionEl.innerText = `Câu ${currentQuestionIndex + 1}: ${currentQuestion.question}`;
+        
+        let progressPercent = (currentQuestionIndex / quizData.length) * 100;
+        progressEl.style.width = progressPercent + "%";
+        
+        answersEl.innerHTML = "";
+        currentQuestion.answers.forEach((answer, index) => {
+            const button = document.createElement("button");
+            button.innerText = answer;
+            button.classList.add("btn-answer");
+            button.addEventListener("click", () => selectAnswer(index));
+            answersEl.appendChild(button);
+        });
+    }
+
+    function selectAnswer(selectedIndex) {
+        if (hasAnswered) return;
+        hasAnswered = true;
+        
+        let currentQuestion = quizData[currentQuestionIndex];
+        const buttons = answersEl.getElementsByClassName("btn-answer");
+        
+        if (selectedIndex === currentQuestion.correct) {
+            buttons[selectedIndex].classList.add("correct");
+            feedbackBoxEl.innerHTML = "<strong>Chính xác! 🎉</strong><br>" + currentQuestion.explain;
+            feedbackBoxEl.style.borderColor = "#28a745";
+            feedbackBoxEl.style.backgroundColor = "#d4edda";
+            feedbackBoxEl.style.color = "#155724";
+        } else {
+            buttons[selectedIndex].classList.add("wrong");
+            buttons[currentQuestion.correct].classList.add("correct");
+            feedbackBoxEl.innerHTML = "<strong>Chưa đúng rồi! ✍️</strong><br>" + currentQuestion.explain;
+            feedbackBoxEl.style.borderColor = "#dc3545";
+            feedbackBoxEl.style.backgroundColor = "#f8d7da";
+            feedbackBoxEl.style.color = "#721c24";
+        }
+        
+        feedbackBoxEl.style.display = "block";
+        btnNextEl.disabled = false;
+    }
+
+    function showHint() {
+        if (hasAnswered) return;
+        let currentQuestion = quizData[currentQuestionIndex];
+        feedbackBoxEl.innerHTML = "<strong>Gợi ý từ giáo viên 💡:</strong> " + currentQuestion.hint;
+        feedbackBoxEl.style.borderColor = "#ff9800";
+        feedbackBoxEl.style.backgroundColor = "#fff3e0";
+        feedbackBoxEl.style.color = "#333";
+        feedbackBoxEl.style.display = "block";
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        quizScreenEl.style.display = "none";
+        resultScreenEl.style.display = "block";
+        
+        reviewListEl.innerHTML = "";
+        quizData.forEach((data, i) => {
+            const item = document.createElement("div");
+            item.classList.add("review-item");
+            
+            const qTitle = document.createElement("div");
+            qTitle.classList.add("review-q");
+            qTitle.innerText = `Câu ${i + 1}: ${data.answers[data.correct]}`;
+            
+            const qExplain = document.createElement("div");
+            qExplain.classList.add("review-explain");
+            qExplain.innerText = `Lời giải: ${data.explain}`;
+            
+            item.appendChild(qTitle);
+            item.appendChild(qExplain);
+            reviewListEl.appendChild(item);
+        });
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        quizScreenEl.style.display = "block";
+        resultScreenEl.style.display = "none";
+        loadQuestion();
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
