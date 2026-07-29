@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trạm Không Gian Phân Số - Học Liệu Tương Tác</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nunito', sans-serif; }
+        body { background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 40px; overflow-x: hidden; }
+        
+        /* Stars Background */
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)), radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0)); background-repeat: repeat; background-size: 200px 200px; animation: twinkling 5s infinite linear; }
+        @keyframes twinkling { 0% { opacity: 0.8; } 50% { opacity: 1; } 100% { opacity: 0.8; } }
+
+        /* Header */
+        header { background: linear-gradient(135deg, #3b82f6, #8b5cf6); width: 100%; text-align: center; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border-bottom: 4px solid #fcd34d; position: relative; }
+        .school-badge { display: inline-block; background: #fcd34d; color: #92400e; padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        header h1 { font-size: 32px; color: white; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); margin-bottom: 5px; }
+        header p { color: #e2e8f0; font-size: 16px; font-style: italic; }
+
+        /* Main Container */
+        .container { max-width: 1000px; width: 95%; background: rgba(30, 41, 59, 0.9); margin: 30px auto; border-radius: 24px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 2px solid #334155; backdrop-filter: blur(10px); }
+        
+        .mascot-area { text-align: center; font-size: 60px; margin-top: -60px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4)); animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        /* Operation Selector */
+        .op-selector { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+        .op-btn { background: #334155; color: white; border: 2px solid #475569; padding: 10px 25px; font-size: 20px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .op-btn:hover { background: #475569; transform: translateY(-2px); }
+        .op-btn.active { background: #3b82f6; border-color: #60a5fa; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+
+        /* Fraction Work Area */
+        .work-area { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 30px; }
+        
+        .fraction-card { background: #1e293b; padding: 20px; border-radius: 16px; border: 2px solid #475569; flex: 1; min-width: 250px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .fraction-card h3 { color: #94a3b8; margin-bottom: 15px; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .operator-display { font-size: 50px; font-weight: bold; color: #fcd34d; text-shadow: 0 0 10px rgba(252, 211, 77, 0.5); }
+
+        /* Visual Pie */
+        .pie-container { width: 160px; height: 160px; border-radius: 50%; background: #0f172a; border: 4px solid #64748b; position: relative; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); margin-bottom: 20px; transition: 0.5s; }
+        .pie-slice { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(#34d399 0deg, transparent 0deg); transition: background 0.5s ease-in-out; }
+        .pie-lines { position: absolute; width: 100%; height: 100%; border-radius: 50%; }
+        .pie-line { position: absolute; top: 0; left: 50%; width: 2px; height: 100%; background: #0f172a; transform-origin: center; }
+
+        /* Fraction Input */
+        .frac-input { display: flex; flex-direction: column; align-items: center; font-size: 30px; font-weight: bold; color: white; }
+        .frac-input input { background: transparent; border: none; color: white; font-size: 30px; font-weight: bold; text-align: center; width: 80px; outline: none; cursor: pointer; transition: 0.2s; }
+        .frac-input input:hover, .frac-input input:focus { background: rgba(255,255,255,0.1); border-radius: 8px; }
+        .frac-input input[type=number]::-webkit-inner-spin-button { opacity: 1; }
+        .frac-divider { width: 80px; height: 4px; background: white; margin: 5px 0; border-radius: 2px; }
+
+        /* Action Panel */
+        .action-panel { text-align: center; margin: 30px 0; padding: 20px; background: rgba(59, 130, 246, 0.1); border-radius: 16px; border: 1px dashed #3b82f6; }
+        .btn-action { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 15px 30px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4); text-transform: uppercase; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 10px; margin: 5px;}
+        .btn-action:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.6); }
+        .btn-action:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        /* Result Area */
+        .result-area { background: #1e293b; padding: 30px; border-radius: 16px; border: 2px solid #10b981; margin-top: 30px; text-align: center; display: none; opacity: 0; transition: opacity 0.5s; }
+        .result-area.visible { display: block; opacity: 1; animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .math-expression { font-size: 28px; color: #f8fafc; margin-top: 20px; font-family: 'Times New Roman', serif; font-style: italic; background: #0f172a; padding: 15px; border-radius: 12px; display: inline-block; border: 1px solid #334155; }
+        .inline-frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1; margin: 0 10px; }
+        .inline-frac .num { border-bottom: 2px solid currentColor; padding: 0 5px 2px; }
+        .inline-frac .den { padding: 2px 5px 0; }
+
+        /* Status text */
+        .status-text { color: #fcd34d; font-size: 18px; margin-bottom: 15px; min-height: 27px; }
+
+        /* Colors for different fractions to distinguish */
+        .pie-slice-1 { background: conic-gradient(#f43f5e 0deg, transparent 0deg); } /* Rose */
+        .pie-slice-2 { background: conic-gradient(#3b82f6 0deg, transparent 0deg); } /* Blue */
+        .pie-slice-res { background: conic-gradient(#8b5cf6 0deg, transparent 0deg); } /* Purple */
+
+        @media (max-width: 768px) {
+            .operator-display { width: 100%; text-align: center; margin: 10px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <header>
+        <div class="school-badge">Trường Tiểu học Minh Hòa</div>
+        <h1>Trạm Không Gian Phân Số</h1>
+        <p>Học liệu khám phá quy luật toán học - Dành cho Học sinh Khối 4</p>
+    </header>
+
+    <div class="container">
+        <div class="mascot-area">🧑‍🚀🛸</div>
+        
+        <div class="op-selector">
+            <button class="op-btn active" onclick="setMode('add')">Phép Cộng (+)</button>
+            <button class="op-btn" onclick="setMode('sub')">Phép Trừ (-)</button>
+            <button class="op-btn" onclick="setMode('comp')">So Sánh (>)</button>
+        </div>
+
+        <div class="work-area">
+            <!-- Fraction 1 -->
+            <div class="fraction-card">
+                <h3>Phân số 1</h3>
+                <div class="pie-container" id="pie1">
+                    <div class="pie-slice pie-slice-1" id="slice1"></div>
+                    <div class="pie-lines" id="lines1"></div>
+                </div>
+                <div class="frac-input">
+                    <input type="number" id="num1" value="1" min="0" max="10" onchange="updateFractions()">
+                    <div class="frac-divider"></div>
+                    <input type="number" id="den1" value="2" min="1" max="10" onchange="updateFractions()">
+                </div>
+            </div>
+
+            <!-- Operator -->
+            <div class="operator-display" id="opSymbol">+</div>
+
+            <!-- Fraction 2 -->
+            <div class="fraction-card">
+                <h3>Phân số 2</h3>
+                <div class="pie-container" id="pie2">
+                    <div class="pie-slice pie-slice-2" id="slice2"></div>
+                    <div class="pie-lines" id="lines2"></div>
+                </div>
+                <div class="frac-input">
+                    <input type="number" id="num2" value="1" min="0" max="10" onchange="updateFractions()">
+                    <div class="frac-divider"></div>
+                    <input type="number" id="den2" value="3" min="1" max="10" onchange="updateFractions()">
+                </div>
+            </div>
+        </div>
+
+        <div class="action-panel">
+            <div class="status-text" id="statusText">Hai phân số đang khác mẫu số. Cần quy đồng trước khi tính!</div>
+            <button class="btn-action" id="btnQuyDong" onclick="thucHienQuyDong()">
+                🔪 Cắt nhỏ (Quy Đồng)
+            </button>
+            <button class="btn-action" id="btnTinhToan" onclick="thucHienTinhToan()" style="display:none; background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                ✨ Hợp nhất Kết quả
+            </button>
+        </div>
+
+        <!-- Result Area -->
+        <div class="result-area" id="resultArea">
+            <h2 style="color: #34d399; margin-bottom: 20px;">Kết Quả Khám Phá</h2>
+            
+            <div style="display: flex; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap;">
+                <div class="pie-container" id="pieRes" style="margin: 0; display: none;">
+                    <div class="pie-slice pie-slice-res" id="sliceRes"></div>
+                    <div class="pie-lines" id="linesRes"></div>
+                </div>
+                
+                <div class="math-expression" id="mathExp">
+                    <!-- Math expression rendered here -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // State
+        let mode = 'add'; // add, sub, comp
+        let isQuyDong = false;
+        
+        let originalF1 = {n: 1, d: 2};
+        let originalF2 = {n: 1, d: 3};
+        
+        // DOM Elements
+        const num1 = document.getElementById('num1');
+        const den1 = document.getElementById('den1');
+        const num2 = document.getElementById('num2');
+        const den2 = document.getElementById('den2');
+        
+        const slice1 = document.getElementById('slice1');
+        const lines1 = document.getElementById('lines1');
+        const slice2 = document.getElementById('slice2');
+        const lines2 = document.getElementById('lines2');
+        const sliceRes = document.getElementById('sliceRes');
+        const linesRes = document.getElementById('linesRes');
+        const pieRes = document.getElementById('pieRes');
+        
+        const opSymbol = document.getElementById('opSymbol');
+        const statusText = document.getElementById('statusText');
+        const btnQuyDong = document.getElementById('btnQuyDong');
+        const btnTinhToan = document.getElementById('btnTinhToan');
+        const resultArea = document.getElementById('resultArea');
+        const mathExp = document.getElementById('mathExp');
+
+        // Utils
+        function findLCM(a, b) {
+            if(a === 0 || b === 0) return 0;
+            return (a * b) / findGCD(a, b);
+        }
+        function findGCD(a, b) {
+            return b === 0 ? a : findGCD(b, a % b);
+        }
+
+        function drawPie(sliceEl, linesEl, num, den, colorHex) {
+            // Validate inputs to prevent errors
+            if(den <= 0) den = 1; 
+            
+            // Draw slice
+            let degree = (num / den) * 360;
+            sliceEl.style.background = `conic-gradient(${colorHex} 0deg, ${colorHex} ${degree}deg, transparent ${degree}deg, transparent 360deg)`;
+            
+            // Draw lines
+            linesEl.innerHTML = '';
+            for(let i=0; i<den; i++) {
+                let rot = (360 / den) * i;
+                let line = document.createElement('div');
+                line.className = 'pie-line';
+                line.style.transform = `rotate(${rot}deg)`;
+                linesEl.appendChild(line);
+            }
+        }
+
+        function buildFracHTML(n, d) {
+            return `<div class="inline-frac"><div class="num">${n}</div><div class="den">${d}</div></div>`;
+        }
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.querySelectorAll('.op-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if(mode === 'add') opSymbol.textContent = '+';
+            if(mode === 'sub') opSymbol.textContent = '-';
+            if(mode === 'comp') opSymbol.textContent = '?';
+            
+            resetToOriginal();
+        }
+
+        function updateFractions() {
+            let n1 = parseInt(num1.value) || 0;
+            let d1 = parseInt(den1.value) || 1;
+            let n2 = parseInt(num2.value) || 0;
+            let d2 = parseInt(den2.value) || 1;
+
+            if(d1 === 0) { d1 = 1; den1.value = 1; }
+            if(d2 === 0) { d2 = 1; den2.value = 1; }
+            
+            // Prevent numerator from exceeding denominator in visual pie
+            if(n1 > d1) { n1 = d1; num1.value = d1; }
+            if(n2 > d2) { n2 = d2; num2.value = d2; }
+
+            originalF1 = { n: n1, d: d1 };
+            originalF2 = { n: n2, d: d2 };
+            
+            resetToOriginal();
+        }
+
+        function resetToOriginal() {
+            isQuyDong = false;
+            drawPie(slice1, lines1, originalF1.n, originalF1.d, '#f43f5e'); // Rose
+            drawPie(slice2, lines2, originalF2.n, originalF2.d, '#3b82f6'); // Blue
+            
+            resultArea.classList.remove('visible');
+            pieRes.style.display = 'none';
+
+            if(originalF1.d !== originalF2.d) {
+                statusText.textContent = "Hai phân số đang khác mẫu số. Cần quy đồng trước khi tính!";
+                btnQuyDong.style.display = 'inline-flex';
+                btnTinhToan.style.display = 'none';
+            } else {
+                statusText.textContent = "Cùng mẫu số rồi! Đã sẵn sàng để tính toán.";
+                btnQuyDong.style.display = 'none';
+                btnTinhToan.style.display = 'inline-flex';
+            }
+        }
+
+        function thucHienQuyDong() {
+            let lcd = findLCM(originalF1.d, originalF2.d);
+            let m1 = lcd / originalF1.d;
+            let m2 = lcd / originalF2.d;
+            
+            let newN1 = originalF1.n * m1;
+            let newN2 = originalF2.n * m2;
+
+            // Visual Update: Split the pies into more pieces
+            drawPie(slice1, lines1, newN1, lcd, '#f43f5e');
+            drawPie(slice2, lines2, newN2, lcd, '#3b82f6');
+
+            // Update DOM Inputs visually
+            num1.value = newN1; den1.value = lcd;
+            num2.value = newN2; den2.value = lcd;
+
+            statusText.innerHTML = `Tuyệt vời! Bánh đã được cắt thành <strong>${lcd} phần</strong> bằng nhau.`;
+            btnQuyDong.style.display = 'none';
+            btnTinhToan.style.display = 'inline-flex';
+            isQuyDong = true;
+        }
+
+        function thucHienTinhToan() {
+            let n1 = parseInt(num1.value);
+            let d1 = parseInt(den1.value);
+            let n2 = parseInt(num2.value);
+            let d2 = parseInt(den2.value); // d1 == d2 at this point
+            
+            let f1_html = buildFracHTML(originalF1.n, originalF1.d);
+            let f2_html = buildFracHTML(originalF2.n, originalF2.d);
+            let qd1_html = buildFracHTML(n1, d1);
+            let qd2_html = buildFracHTML(n2, d2);
+            
+            let resultHTML = "";
+
+            if(mode === 'add') {
+                let resN = n1 + n2;
+                pieRes.style.display = 'block';
+                drawPie(sliceRes, linesRes, resN > d1 ? d1 : resN, d1, '#8b5cf6');
+                
+                resultHTML = `Bước 1: ${f1_html} + ${f2_html}<br><br>`;
+                if(isQuyDong) resultHTML += `Bước 2 (Quy đồng): ${qd1_html} + ${qd2_html}<br><br>`;
+                resultHTML += `Kết quả: <span style="color:#10b981;">${buildFracHTML(resN, d1)}</span>`;
+
+            } else if (mode === 'sub') {
+                if(n1 < n2) {
+                    alert("Ở lớp 4, phân số thứ nhất phải lớn hơn hoặc bằng phân số thứ hai để thực hiện phép trừ!");
+                    return;
+                }
+                let resN = n1 - n2;
+                pieRes.style.display = 'block';
+                drawPie(sliceRes, linesRes, resN, d1, '#8b5cf6');
+                
+                resultHTML = `Bước 1: ${f1_html} - ${f2_html}<br><br>`;
+                if(isQuyDong) resultHTML += `Bước 2 (Quy đồng): ${qd1_html} - ${qd2_html}<br><br>`;
+                resultHTML += `Kết quả: <span style="color:#10b981;">${buildFracHTML(resN, d1)}</span>`;
+
+            } else if (mode === 'comp') {
+                let sign = "=";
+                if(n1 > n2) sign = ">";
+                if(n1 < n2) sign = "<";
+                pieRes.style.display = 'none'; // No pie for comparison
+                
+                resultHTML = `So sánh ban đầu: ${f1_html} <strong>?</strong> ${f2_html}<br><br>`;
+                if(isQuyDong) resultHTML += `Sau khi quy đồng: ${qd1_html} <strong style="color:#fcd34d;">${sign}</strong> ${qd2_html}<br><br>`;
+                resultHTML += `Kết luận: ${f1_html} <strong style="color:#10b981; font-size: 35px;">${sign}</strong> ${f2_html}`;
+            }
+
+            mathExp.innerHTML = resultHTML;
+            resultArea.classList.add('visible');
+            statusText.textContent = "Hoàn thành nhiệm vụ khám phá!";
+            btnTinhToan.style.display = 'none';
+        }
+
+        // Init on load
+        window.onload = () => {
+            updateFractions();
+        };
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng: Cỗ Máy Biến Hình Phân Số</title>
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --secondary: #f59e0b;
+            --success: #10b981;
+            --bg-color: #f0f9ff;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-light: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 2px solid #e0f2fe;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 { font-size: 28px; margin-bottom: 5px; text-transform: uppercase; }
+        header p { font-size: 16px; opacity: 0.9; }
+
+        /* Scaffolding Panel */
+        .scaffold-panel {
+            background: #fffbeb;
+            border-left: 5px solid var(--secondary);
+            padding: 15px 20px;
+            margin: 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #b45309;
+        }
+
+        /* Simulation Area */
+        .simulation-area {
+            padding: 0 20px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Box Styles */
+        .box {
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .box h3 {
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        /* Visual Bars */
+        .bar-container {
+            width: 100%;
+            max-width: 600px;
+            height: 60px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            border: 3px solid #94a3b8;
+            display: grid;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        .piece {
+            height: 100%;
+            border-right: 2px dashed #94a3b8;
+            transition: all 0.3s ease;
+        }
+        .piece:last-child { border-right: none; }
+        
+        .bar-original .piece.filled { background: linear-gradient(to bottom, #38bdf8, #0284c7); }
+        .bar-result .piece.filled { background: linear-gradient(to bottom, #fcd34d, #d97706); }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+            justify-content: space-between;
+        }
+
+        .slider-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .slider-group label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        /* Transformer (The Cutter) */
+        .transformer {
+            background: #ecfdf5;
+            border: 2px dashed var(--success);
+        }
+        .transformer h3 { color: var(--success); }
+        .transformer input[type=range] { accent-color: var(--success); }
+        
+        /* Math Display */
+        .math-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            font-size: 36px;
+            font-weight: bold;
+            font-family: 'Times New Roman', serif;
+            margin: 20px 0;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.2;
+        }
+        .fraction .num { border-bottom: 4px solid var(--text-main); padding: 0 10px; }
+        .fraction .den { padding: 0 10px; }
+
+        .math-operator { color: var(--text-light); }
+        .equal-sign { color: var(--secondary); font-size: 40px; }
+
+        /* Action Buttons */
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background: #f1f5f9;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-check { background: var(--success); color: white; box-shadow: 0 4px 0 #047857; }
+        .btn-check:hover { background: #059669; transform: translateY(2px); box-shadow: 0 2px 0 #047857;}
+        
+        .btn-reset { background: var(--text-light); color: white; box-shadow: 0 4px 0 #475569; }
+        .btn-reset:hover { background: #475569; transform: translateY(2px); box-shadow: 0 2px 0 #475569;}
+
+        /* Conclusion Area */
+        .conclusion {
+            display: none;
+            margin: 20px;
+            padding: 25px;
+            background: #f0fdf4;
+            border: 2px solid var(--success);
+            border-radius: 12px;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }
+
+        .conclusion h2 { color: #047857; margin-bottom: 10px; }
+        .conclusion p { font-size: 18px; line-height: 1.6; }
+        .highlight { color: #b45309; font-weight: bold; font-size: 20px;}
+
+        @media (max-width: 600px) {
+            .math-display { flex-direction: column; gap: 10px; }
+            .equal-sign { transform: rotate(90deg); }
+            .controls { flex-direction: column; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Cỗ Máy Biến Hình Phân Số ⚙️</h1>
+            <p>Mô phỏng Khám phá Tính chất cơ bản của Phân số</p>
+        </header>
+
+        <div class="scaffold-panel" id="instructionText">
+            🔍 Bước 1: Hãy tạo một phân số ban đầu.<br>
+            🔍 Bước 2: Kéo thanh "Máy cắt" để chẻ nhỏ phân số đó ra. Chú ý quan sát vạch màu và các con số!
+        </div>
+
+        <div class="simulation-area">
+            <!-- Original Fraction -->
+            <div class="box">
+                <h3>Phân Số Ban Đầu (Bánh gốc)</h3>
+                <div class="bar-container bar-original" id="barOriginal"></div>
+                
+                <div class="controls">
+                    <div class="slider-group">
+                        <label>Tử số (Phần lấy): <span id="valN1" style="color:var(--primary-dark)">1</span></label>
+                        <input type="range" id="sliderN1" min="1" max="10" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <label>Mẫu số (Tổng phần): <span id="valD1" style="color:var(--primary-dark)">2</span></label>
+                        <input type="range" id="sliderD1" min="1" max="10" value="2">
+                    </div>
+                </div>
+            </div>
+
+            <!-- The Transformer -->
+            <div class="box transformer">
+                <h3>✂️ Máy Cắt (Hệ số nhân)</h3>
+                <div class="slider-group" style="width: 100%; max-width: 400px;">
+                    <label>Chia mỗi phần thành: <span id="valMulti" style="font-size: 22px; color: var(--success);">x1</span> phần nhỏ</label>
+                    <input type="range" id="sliderMulti" min="1" max="6" value="1">
+                </div>
+            </div>
+
+            <!-- Resulting Fraction -->
+            <div class="box">
+                <h3>Phân Số Mới (Sau khi cắt)</h3>
+                <div class="bar-container bar-result" id="barResult"></div>
+                
+                <div class="math-display">
+                    <div class="fraction" style="color: var(--primary-dark)">
+                        <div class="num" id="mathN1">1</div>
+                        <div class="den" id="mathD1">2</div>
+                    </div>
+                    
+                    <div class="math-operator" id="mathOp" style="display: none; font-size: 24px;">
+                        <div style="font-size:16px">nhân cả tử & mẫu với</div>
+                        <strong style="color: var(--success)" id="mathM">x2</strong>
+                    </div>
+
+                    <div class="equal-sign">=</div>
+
+                    <div class="fraction" style="color: var(--secondary)">
+                        <div class="num" id="mathN2">1</div>
+                        <div class="den" id="mathD2">2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn-check" onclick="checkHypothesis()">💡 Kiểm tra Giả thuyết</button>
+            <button class="btn-reset" onclick="resetSim()">🔄 Khám phá lại</button>
+        </div>
+
+        <div class="conclusion" id="conclusionPanel">
+            <h2>🎉 Khám Phá Thành Công!</h2>
+            <p>Em có thấy không? Dù "Máy cắt" chẻ bánh ra thành rất nhiều phần nhỏ (Tử số và Mẫu số đều tăng lên)...</p>
+            <p>Nhưng <span class="highlight">ĐỘ DÀI VÙNG ĐƯỢC TÔ MÀU KHÔNG HỀ THAY ĐỔI!</span></p>
+            <br>
+            <p style="font-style: italic; color: var(--text-light); border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+                👉 <b>Quy luật:</b> Nếu nhân cả tử số và mẫu số của một phân số với cùng một số tự nhiên lớn hơn 1, ta được một phân số mới <b>BẰNG</b> phân số đã cho.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const sliderN1 = document.getElementById('sliderN1');
+        const sliderD1 = document.getElementById('sliderD1');
+        const sliderMulti = document.getElementById('sliderMulti');
+        
+        const valN1 = document.getElementById('valN1');
+        const valD1 = document.getElementById('valD1');
+        const valMulti = document.getElementById('valMulti');
+
+        const barOriginal = document.getElementById('barOriginal');
+        const barResult = document.getElementById('barResult');
+
+        const mathN1 = document.getElementById('mathN1');
+        const mathD1 = document.getElementById('mathD1');
+        const mathN2 = document.getElementById('mathN2');
+        const mathD2 = document.getElementById('mathD2');
+        
+        const mathOp = document.getElementById('mathOp');
+        const mathM = document.getElementById('mathM');
+        const conclusionPanel = document.getElementById('conclusionPanel');
+        const instructionText = document.getElementById('instructionText');
+
+        // Render Bar Function
+        function renderBar(container, num, den) {
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${den}, 1fr)`;
+            for (let i = 0; i < den; i++) {
+                let piece = document.createElement('div');
+                piece.className = 'piece';
+                if (i < num) piece.classList.add('filled');
+                container.appendChild(piece);
+            }
+        }
+
+        // Main Update Logic
+        function updateSimulation() {
+            let n1 = parseInt(sliderN1.value);
+            let d1 = parseInt(sliderD1.value);
+            let m = parseInt(sliderMulti.value);
+
+            // Validation: Numerator <= Denominator
+            if (n1 > d1) {
+                n1 = d1;
+                sliderN1.value = d1;
+            }
+
+            let n2 = n1 * m;
+            let d2 = d1 * m;
+
+            // Update Labels
+            valN1.textContent = n1;
+            valD1.textContent = d1;
+            valMulti.textContent = `x${m}`;
+
+            // Update Math
+            mathN1.textContent = n1;
+            mathD1.textContent = d1;
+            mathN2.textContent = n2;
+            mathD2.textContent = d2;
+
+            // Update Visual Bars
+            renderBar(barOriginal, n1, d1);
+            renderBar(barResult, n2, d2);
+
+            // Dynamic UI adjustments
+            if (m > 1) {
+                mathOp.style.display = 'block';
+                mathM.textContent = `x${m}`;
+                instructionText.innerHTML = `Đang cắt mỗi phần thành ${m} phần nhỏ. Hãy so sánh vùng màu xanh và màu cam, chúng có bằng nhau không?`;
+            } else {
+                mathOp.style.display = 'none';
+                instructionText.innerHTML = `🔍 Bước 1: Hãy tạo một phân số ban đầu.<br>🔍 Bước 2: Kéo thanh "Máy cắt" để chẻ nhỏ phân số đó ra.`;
+            }
+
+            // Hide conclusion if user changes variables after checking
+            conclusionPanel.style.display = 'none';
+        }
+
+        // Check Hypothesis
+        function checkHypothesis() {
+            let m = parseInt(sliderMulti.value);
+            if (m === 1) {
+                alert("Hãy kéo thanh 'Máy cắt' lên mức lớn hơn 1 để tạo ra phân số mới trước khi kiểm tra nhé!");
+                sliderMulti.focus();
+            } else {
+                conclusionPanel.style.display = 'block';
+                // Scroll to conclusion smoothly
+                conclusionPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Reset
+        function resetSim() {
+            sliderN1.value = 1;
+            sliderD1.value = 2;
+            sliderMulti.value = 1;
+            updateSimulation();
+        }
+
+        // Event Listeners
+        sliderN1.addEventListener('input', updateSimulation);
+        sliderD1.addEventListener('input', updateSimulation);
+        sliderMulti.addEventListener('input', updateSimulation);
+
+        // Initialize
+        updateSimulation();
+
+    </script>
+</body>
+</html>
