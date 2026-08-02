@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ÔN TẬP TOÁN 4 - PHẦN 2: PHÉP CỘNG, TRỪ & BIỂU THỨC</title>
+    <style>
+        :root {
+            --primary: #10ac84;
+            --primary-dark: #0e8364;
+            --accent: #ff9f43;
+            --card-bg: #ffffff;
+            --text-dark: #2d3436;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #a8e6cf 0%, #10ac84 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .game-wrapper {
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 750px;
+            padding: 25px;
+            position: relative;
+        }
+
+        .top-banner {
+            background: linear-gradient(135deg, #10ac84, #0e8364);
+            color: white;
+            border-radius: 18px;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(16, 172, 132, 0.3);
+        }
+
+        .title-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .score-pill {
+            background: rgba(255,255,255,0.25);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .illustration-card {
+            background: #e6fffa;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px dashed #81e6d9;
+        }
+
+        .illustration-card svg { max-height: 100px; width: auto; }
+
+        .question-text {
+            font-size: 1.25rem;
+            color: var(--text-dark);
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) { .options-container { grid-template-columns: 1fr; } }
+
+        .opt-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px 18px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .opt-card:hover {
+            border-color: var(--primary);
+            background: #e6fffa;
+            transform: translateY(-2px);
+        }
+
+        .opt-card.correct { background: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+        .opt-card.incorrect { background: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+
+        .opt-prefix {
+            background: #e2e8f0;
+            color: #475569;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .opt-card.correct .opt-prefix { background: #22c55e; color: white; }
+        .opt-card.incorrect .opt-prefix { background: #ef4444; color: white; }
+
+        .feedback-box {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: none;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .feedback-box.correct { background: #dcfce7; color: #15803d; border-left: 5px solid #22c55e; display: block; }
+        .feedback-box.incorrect { background: #fee2e2; color: #b91c1c; border-left: 5px solid #ef4444; display: block; }
+
+        .btn-next {
+            background: linear-gradient(135deg, #10ac84, #0e8364);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(16, 172, 132, 0.4);
+            transition: all 0.2s;
+            display: none;
+            margin-left: auto;
+        }
+
+        .result-card { text-align: center; padding: 20px 10px; display: none; }
+        .trophy-svg { width: 120px; height: 120px; margin-bottom: 15px; }
+        .final-score { font-size: 2.8rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
+        .btn-replay { background: var(--primary); color: white; border: none; padding: 14px 36px; font-size: 1.1rem; font-weight: bold; border-radius: 30px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="game-wrapper">
+    <div class="top-banner">
+        <div class="title-badge">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+            <span>PHẦN 2: PHÉP CỘNG, TRỪ & BIỂU THỨC</span>
+        </div>
+        <div class="score-pill">⭐ Điểm: <span id="score">0</span>/50</div>
+    </div>
+
+    <div id="quiz-area">
+        <div class="illustration-card" id="illustration-box"></div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-container" id="opts-grid"></div>
+        <div class="feedback-box" id="feedback"></div>
+        <button class="btn-next" id="btn-next" onclick="nextQ()">Câu tiếp theo ➔</button>
+    </div>
+
+    <div id="result-area" class="result-card">
+        <svg class="trophy-svg" viewBox="0 0 24 24" fill="none" stroke="#10ac84" stroke-width="1.5"><circle cx="12" cy="12" r="10" fill="#e6fffa"/><path d="M9 12l2 2 4-4"/></svg>
+        <h2 style="color: #2d3436; font-size: 2rem;">HOÀN THÀNH PHẦN 2! 🎉</h2>
+        <div class="final-score" id="final-score">0 / 50</div>
+        <p id="comment" style="font-size: 1.1rem; color: #636e72; margin-bottom: 25px;"></p>
+        <button class="btn-replay" onclick="location.reload()">🔄 Chơi lại bài học</button>
+    </div>
+</div>
+
+<script>
+const svgs = [
+    `<svg viewBox="0 0 200 80"><rect width="200" height="80" rx="12" fill="#e6fffa"/><text x="100" y="48" font-size="20" font-weight="bold" fill="#0e8364" text-anchor="middle">73 000 - 3 000 - 50 000</text></svg>`,
+    `<svg viewBox="0 0 200 80"><rect width="200" height="80" rx="12" fill="#fef3c7"/><text x="100" y="48" font-size="22" font-weight="bold" fill="#d97706" text-anchor="middle">58 623 + 25 047</text></svg>`,
+    `<svg viewBox="0 0 200 80"><rect width="200" height="80" rx="12" fill="#e0e7ff"/><text x="100" y="48" font-size="22" font-weight="bold" fill="#4361ee" text-anchor="middle">74 528 - 16 240</text></svg>`,
+    `<svg viewBox="0 0 200 80"><rect width="200" height="80" rx="12" fill="#f3e8ff"/><text x="100" y="48" font-size="18" font-weight="bold" fill="#7e22ce" text-anchor="middle">16 000 + (8 140 + 2 760)</text></svg>`,
+    `<svg viewBox="0 0 200 80"><rect width="200" height="80" rx="12" fill="#fee2e2"/><text x="100" y="38" font-size="16" font-weight="bold" fill="#b91c1c" text-anchor="middle">Hộp bút: 16 500đ</text><text x="100" y="62" font-size="16" font-weight="bold" fill="#b91c1c" text-anchor="middle">Balo hơn: 62 500đ</text></svg>`
+];
+
+const data = [
+    { q: "1. Tính nhẩm: 73 000 - 3 000 - 50 000 =", opts: ["20 000", "70 000", "30 000", "10 000"], c: 0, exp: "💡 Tính từ trái qua phải: 73 000 - 3 000 = 70 000. Sau đó lấy 70 000 - 50 000 = 20 000." },
+    { q: "2. Kết quả phép tính đặt tính 58 623 + 25 047 là:", opts: ["83 670", "83 660", "82 670", "83 570"], c: 0, exp: "💡 Thực hiện cộng lần lượt từng hàng từ phải sang trái: 58 623 + 25 047 = 83 670." },
+    { q: "3. Kết quả phép tính đặt tính 74 528 - 16 240 là:", opts: ["58 288", "58 388", "58 188", "68 288"], c: 0, exp: "💡 Thực hiện trừ lần lượt từng hàng từ phải sang trái: 74 528 - 16 240 = 58 288." },
+    { q: "4. Tính giá trị biểu thức: 16 000 + 8 140 + 2 760 =", opts: ["26 900", "26 800", "27 000", "25 900"], c: 0, exp: "💡 Nhóm thuận tiện: (8 140 + 2 760 = 10 900). Sau đó lấy 16 000 + 10 900 = 26 900." },
+    { q: "5. Giá 1 hộp bút là 16 500 đồng. Balo đắt hơn hộp bút 62 500 đồng. Mẹ mua cả hai thứ hết bao nhiêu tiền?", opts: ["95 500 đồng", "79 000 đồng", "94 500 đồng", "95 000 đồng"], c: 0, exp: "💡 Bước 1: Giá chiếc Balo = 16 500 + 62 500 = 79 000 đồng.<br>Bước 2: Mẹ mua cả hai thứ hết = 16 500 + 79 000 = 95 500 đồng." }
+];
+
+let idx = 0, score = 0;
+
+function loadQ() {
+    const item = data[idx];
+    document.getElementById('illustration-box').innerHTML = svgs[idx];
+    document.getElementById('q-text').innerText = item.q;
+    const optsDiv = document.getElementById('opts-grid');
+    optsDiv.innerHTML = '';
+    
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('btn-next').style.display = 'none';
+
+    item.opts.forEach((o, i) => {
+        const card = document.createElement('div');
+        card.className = 'opt-card';
+        card.innerHTML = `<span class="opt-prefix">${String.fromCharCode(65+i)}</span><span>${o}</span>`;
+        card.onclick = () => check(i, card);
+        optsDiv.appendChild(card);
+    });
+}
+
+function check(i, cardElement) {
+    const item = data[idx];
+    const allCards = document.querySelectorAll('.opt-card');
+    allCards.forEach(c => c.style.pointerEvents = 'none');
+    
+    const fb = document.getElementById('feedback');
+
+    if(i === item.c) {
+        cardElement.classList.add('correct');
+        score += 10;
+        document.getElementById('score').innerText = score;
+        fb.className = 'feedback-box correct';
+        fb.innerHTML = '🎉 <b>Chính xác! Em làm tốt lắm.</b><br>' + item.exp;
+    } else {
+        cardElement.classList.add('incorrect');
+        allCards[item.c].classList.add('correct');
+        fb.className = 'feedback-box incorrect';
+        fb.innerHTML = '❌ <b>Chưa chính xác!</b><br>' + item.exp;
+    }
+    document.getElementById('btn-next').style.display = 'inline-block';
+}
+
+function nextQ() {
+    idx++;
+    if(idx < data.length) {
+        loadQ();
+    } else {
+        document.getElementById('quiz-area').style.display = 'none';
+        document.getElementById('result-area').style.display = 'block';
+        document.getElementById('final-score').innerText = score + " / 50";
+        document.getElementById('comment').innerText = score === 50 ? "🌟 Xuất sắc! Em tính toán vô cùng chính xác!" : "👍 Kết quả rất tốt, rèn luyện thêm tính toán nhé!";
+    }
+}
+
+loadQ();
+</script>
+</body>
+</html>

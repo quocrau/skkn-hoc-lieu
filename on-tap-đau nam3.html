@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ÔN TẬP TOÁN 4 - PHẦN 3: PHÉP NHÂN, CHIA & GIẢI TOÁN</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #fff8f0; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 15px; }
+        .game-wrapper { background: #ffffff; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); width: 100%; max-width: 700px; padding: 25px; }
+        .top-banner { background: #e67e22; color: #ffffff; padding: 16px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 1.1rem; margin-bottom: 20px; }
+        .illustration-card { background: #fff5eb; border: 2px dashed #fbd38d; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 20px; font-size: 1.3rem; font-weight: bold; color: #d35400; }
+        .question-text { font-size: 1.2rem; color: #2d3436; font-weight: 600; line-height: 1.5; margin-bottom: 20px; text-align: left; }
+        .options-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .opt-card { background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; font-size: 1rem; color: #333; cursor: pointer; transition: all 0.2s; text-align: left; font-weight: 500; }
+        .opt-card:hover { border-color: #e67e22; background: #fff5eb; }
+        .opt-card.correct { background: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; font-weight: bold; }
+        .opt-card.incorrect { background: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .feedback-box { padding: 14px 18px; border-radius: 10px; font-size: 1rem; margin-bottom: 20px; display: none; text-align: left; line-height: 1.5; }
+        .feedback-box.correct { background: #dcfce7; color: #15803d; border-left: 5px solid #22c55e; display: block; }
+        .feedback-box.incorrect { background: #fee2e2; color: #b91c1c; border-left: 5px solid #ef4444; display: block; }
+        .btn-next { background: #e67e22; color: white; border: none; padding: 12px 30px; font-size: 1rem; font-weight: bold; border-radius: 25px; cursor: pointer; display: none; margin-left: auto; }
+        .btn-next:hover { background: #d35400; }
+        .result-card { text-align: center; padding: 20px 0; display: none; }
+        .final-score { font-size: 2.5rem; font-weight: bold; color: #e67e22; margin: 15px 0; }
+        .btn-replay { background: #e67e22; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="game-wrapper">
+    <div class="top-banner">
+        <span>✖️➗ PHẦN 3: PHÉP NHÂN, CHIA & GIẢI TOÁN</span>
+        <span>Điểm: <span id="score">0</span>/50</span>
+    </div>
+
+    <div id="quiz-area">
+        <div class="illustration-card" id="illustration-box">Phép tính</div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-container" id="opts-grid"></div>
+        <div class="feedback-box" id="feedback"></div>
+        <button class="btn-next" id="btn-next" onclick="nextQ()">Câu tiếp theo ➔</button>
+    </div>
+
+    <div id="result-area" class="result-card">
+        <h2>🎉 HOÀN THÀNH PHẦN 3!</h2>
+        <div class="final-score" id="final-score">0 / 50</div>
+        <p id="comment" style="font-size: 1.1rem; color: #636e72; margin-bottom: 20px;"></p>
+        <button class="btn-replay" onclick="location.reload()">🔄 Chơi lại bài học</button>
+    </div>
+</div>
+
+<script>
+const illustrations = [
+    "80 000 : 2 = 40 000",
+    "29 073 x 3 = ?",
+    "17 218 x 4 = ?",
+    "13 206 x (36 : 9) = ?",
+    "Tháng 1: 12 960 sp | Tháng 2: Giảm 2 lần"
+];
+
+const data = [
+    { q: "1. Những phép tính nào dưới đây có cùng kết quả với 80 000 : 2 (bằng 40 000)?", opts: ["5 000 x 8", "6 000 x 4", "20 000 x 2", "Cả A và C đều đúng"], c: 3, exp: "💡 Ta có: 5 000 x 8 = 40 000 và 20 000 x 2 = 40 000. Do đó cả A và C đều cho kết quả 40 000." },
+    { q: "2. Tích của 29 073 và 3 là:", opts: ["87 219", "87 019", "31 678", "87 291"], c: 0, exp: "💡 Thực hiện phép nhân lần lượt từ phải sang trái: 29 073 x 3 = 87 219." },
+    { q: "3. Tích của 17 218 x 4 là:", opts: ["68 872", "68 862", "68 772", "68 882"], c: 0, exp: "💡 Thực hiện phép nhân lần lượt từ phải sang trái: 17 218 x 4 = 68 872." },
+    { q: "4. Tính giá trị biểu thức: 13 206 x (36 : 9) =", opts: ["52 824", "42 824", "52 814", "52 924"], c: 0, exp: "💡 Bước 1: Tính trong ngoặc (36 : 9 = 4).<br>Bước 2: Lấy 13 206 x 4 = 52 824." },
+    { q: "5. Tháng 1 nhà máy làm được 12 960 sản phẩm. Tháng 2 giảm 2 lần so với tháng 1. Hỏi tháng 2 làm được bao nhiêu sản phẩm?", opts: ["6 480 sản phẩm", "25 920 sản phẩm", "6 400 sản phẩm", "6 485 sản phẩm"], c: 0, exp: "💡 Giảm đi 2 lần nghĩa là chia 2.<br>Tháng 2 làm được: 12 960 : 2 = 6 480 sản phẩm." }
+];
+
+let idx = 0, score = 0;
+
+function loadQ() {
+    const item = data[idx];
+    document.getElementById('illustration-box').innerText = illustrations[idx];
+    document.getElementById('q-text').innerText = item.q;
+    const optsDiv = document.getElementById('opts-grid');
+    optsDiv.innerHTML = '';
+    
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('btn-next').style.display = 'none';
+
+    item.opts.forEach((o, i) => {
+        const card = document.createElement('div');
+        card.className = 'opt-card';
+        card.innerHTML = `<strong>${String.fromCharCode(65+i)}.</strong> ${o}`;
+        card.onclick = () => check(i, card);
+        optsDiv.appendChild(card);
+    });
+}
+
+function check(i, cardElement) {
+    const item = data[idx];
+    const allCards = document.querySelectorAll('.opt-card');
+    allCards.forEach(c => c.style.pointerEvents = 'none');
+    
+    const fb = document.getElementById('feedback');
+
+    if(i === item.c) {
+        cardElement.classList.add('correct');
+        score += 10;
+        document.getElementById('score').innerText = score;
+        fb.className = 'feedback-box correct';
+        fb.innerHTML = '🎉 <b>Chính xác! Em làm rất xuất sắc.</b><br>' + item.exp;
+    } else {
+        cardElement.classList.add('incorrect');
+        allCards[item.c].classList.add('correct');
+        fb.className = 'feedback-box incorrect';
+        fb.innerHTML = '❌ <b>Chưa đúng rồi!</b><br>' + item.exp;
+    }
+    document.getElementById('btn-next').style.display = 'block';
+}
+
+function nextQ() {
+    idx++;
+    if(idx < data.length) {
+        loadQ();
+    } else {
+        document.getElementById('quiz-area').style.display = 'none';
+        document.getElementById('result-area').style.display = 'block';
+        document.getElementById('final-score').innerText = score + " / 50";
+        document.getElementById('comment').innerText = score === 50 ? "🌟 Tuyệt vời! Em đạt điểm tối đa!" : "👍 Kết quả rất tốt! Hãy luyện tập lại nhé!";
+    }
+}
+
+loadQ();
+</script>
+</body>
+</html>

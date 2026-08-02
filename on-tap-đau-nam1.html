@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ÔN TẬP TOÁN 4 - PHẦN 1: SỐ ĐẾN 100 000</title>
+    <style>
+        :root {
+            --bg-color: #eef2f7;
+            --primary: #4361ee;
+            --primary-light: #eef2ff;
+            --accent: #ff9f43;
+            --success: #10ac84;
+            --danger: #ee5253;
+            --card-bg: #ffffff;
+            --text-dark: #2d3436;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .game-wrapper {
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 750px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Banner Header */
+        .top-banner {
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            color: white;
+            border-radius: 18px;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(67, 97, 238, 0.3);
+        }
+
+        .title-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .score-pill {
+            background: rgba(255,255,255,0.25);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Illustration Container */
+        .illustration-card {
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px dashed #a5b4fc;
+        }
+
+        .illustration-card svg {
+            max-height: 100px;
+            width: auto;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            color: var(--text-dark);
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        /* Options Grid */
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .options-container { grid-template-columns: 1fr; }
+        }
+
+        .opt-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px 18px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .opt-card:hover {
+            border-color: var(--primary);
+            background: #f0f3ff;
+            transform: translateY(-2px);
+        }
+
+        .opt-card.correct {
+            background: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
+        }
+
+        .opt-card.incorrect {
+            background: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c !important;
+        }
+
+        .opt-prefix {
+            background: #e2e8f0;
+            color: #475569;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .opt-card.correct .opt-prefix { background: #22c55e; color: white; }
+        .opt-card.incorrect .opt-prefix { background: #ef4444; color: white; }
+
+        /* Feedback Box */
+        .feedback-box {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: none;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .feedback-box.correct { background: #dcfce7; color: #15803d; border-left: 5px solid #22c55e; display: block; }
+        .feedback-box.incorrect { background: #fee2e2; color: #b91c1c; border-left: 5px solid #ef4444; display: block; }
+
+        /* Next Button */
+        .btn-next {
+            background: linear-gradient(135deg, #ff9f43, #ee5253);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(255, 159, 67, 0.4);
+            transition: all 0.2s;
+            display: none;
+            margin-left: auto;
+        }
+
+        .btn-next:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 20px rgba(255, 159, 67, 0.6);
+        }
+
+        /* Result Screen */
+        .result-card {
+            text-align: center;
+            padding: 20px 10px;
+            display: none;
+        }
+
+        .trophy-svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 15px;
+        }
+
+        .final-score {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .btn-replay {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 36px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-wrapper">
+    <!-- Banner -->
+    <div class="top-banner">
+        <div class="title-badge">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>PHẦN 1: CÁC SỐ ĐẾN 100 000</span>
+        </div>
+        <div class="score-pill">⭐ Điểm: <span id="score">0</span>/50</div>
+    </div>
+
+    <!-- Quiz Content Area -->
+    <div id="quiz-area">
+        <!-- SVG Graphic Banner per question -->
+        <div class="illustration-card" id="illustration-box">
+            <!-- Dynamic SVG -->
+        </div>
+
+        <div class="question-text" id="q-text">Đang tải câu hỏi...</div>
+
+        <div class="options-container" id="opts-grid"></div>
+
+        <div class="feedback-box" id="feedback"></div>
+
+        <button class="btn-next" id="btn-next" onclick="nextQ()">Câu tiếp theo ➔</button>
+    </div>
+
+    <!-- Result Area -->
+    <div id="result-area" class="result-card">
+        <svg class="trophy-svg" viewBox="0 0 24 24" fill="none" stroke="#ff9f43" stroke-width="1.5">
+            <path d="M6 9C6 13.97 10.03 18 15 18C19.97 18 24 13.97 24 9V3H6V9Z" fill="#fff3bf"/>
+            <path d="M6 9C6 13.97 10.03 18 15 18C19.97 18 24 13.97 24 9V3H6V9Z"/>
+            <path d="M6 5H2V8C2 10.21 3.79 12 6 12"/>
+            <path d="M18 5H22V8C22 10.21 20.21 12 18 12"/>
+            <path d="M12 18V21"/>
+            <path d="M8 21H16"/>
+        </svg>
+        <h2 style="color: #2d3436; font-size: 2rem;">XUẤT SẮC HOÀN THÀNH! 🎉</h2>
+        <div class="final-score" id="final-score">0 / 50</div>
+        <p id="comment" style="font-size: 1.1rem; color: #636e72; margin-bottom: 25px;">Em đã hoàn thành xuất sắc các câu hỏi phần 1!</p>
+        <button class="btn-replay" onclick="location.reload()">🔄 Chơi lại bài học</button>
+    </div>
+</div>
+
+<script>
+const svgs = [
+    `<svg viewBox="0 0 200 80"><rect width="200" height="80" rx="12" fill="#e0e7ff"/><text x="100" y="48" font-size="28" font-weight="bold" fill="#4361ee" text-anchor="middle">36 515</text></svg>`,
+    `<svg viewBox="0 0 200 80"><rect width="200" height="80" rx="12" fill="#fef3c7"/><text x="100" y="48" font-size="20" font-weight="bold" fill="#d97706" text-anchor="middle">61 034</text></svg>`,
+    `<svg viewBox="0 0 200 80"><rect width="200" height="80" rx="12" fill="#dcfce7"/><text x="100" y="48" font-size="26" font-weight="bold" fill="#15803d" text-anchor="middle">8 290 ➔ ?</text></svg>`,
+    `<svg viewBox="0 0 200 80"><rect width="200" height="80" rx="12" fill="#fee2e2"/><text x="100" y="48" font-size="26" font-weight="bold" fill="#b91c1c" text-anchor="middle">? ➔ 80 000</text></svg>`,
+    `<svg viewBox="0 0 200 80"><rect width="200" height="80" rx="12" fill="#f3e8ff"/><text x="100" y="48" font-size="26" font-weight="bold" fill="#6b21a8" text-anchor="middle">Hàng Trăm = 8?</text></svg>`
+];
+
+const data = [
+    { q: "1. Số '36 515' được đọc đúng là:", opts: ["Ba mươi sáu nghìn năm trăm mười lăm", "Ba mươi sáu nghìn năm trăm mười năm", "Ba sáu nghìn năm trăm mười lăm", "Ba mươi sáu nghìn năm mươi lăm"], c: 0, exp: "💡 Hàng chục nghìn: 3, Hàng nghìn: 6, Hàng trăm: 5, Hàng chục: 1, Hàng đơn vị: 5 -> Đọc là Ba mươi sáu nghìn năm trăm mười lăm." },
+    { q: "2. Số 'Sáu mươi mốt nghìn không trăm ba mươi tư' được viết là:", opts: ["61 034", "61 340", "61 043", "60 134"], c: 0, exp: "💡 Phân tích: Sáu mươi mốt nghìn (61) - không trăm (0) - ba mươi tư (34) = 61 034." },
+    { q: "3. Số liền sau của số 8 290 là:", opts: ["8 291", "8 289", "8 292", "8 300"], c: 0, exp: "💡 Tìm số liền sau: Ta lấy số đã cho cộng thêm 1 đơn vị (8 290 + 1 = 8 291)." },
+    { q: "4. Số liền trước của số 80 000 là:", opts: ["79 999", "80 001", "79 900", "79 000"], c: 0, exp: "💡 Tìm số liền trước: Ta lấy số đã cho trừ đi 1 đơn vị (80 000 - 1 = 79 999)." },
+    { q: "5. Trong các số dưới đây, số nào có chữ số HÀNG TRĂM là 8?", opts: ["57 680", "48 954", "84 273", "39 825"], c: 3, exp: "💡 Xét số 39 825: Hàng chục nghìn=3, Hàng nghìn=9, Hàng trăm=8, Hàng chục=2, Hàng đơn vị=5." }
+];
+
+let idx = 0, score = 0;
+
+function loadQ() {
+    const item = data[idx];
+    document.getElementById('illustration-box').innerHTML = svgs[idx];
+    document.getElementById('q-text').innerText = item.q;
+    const optsDiv = document.getElementById('opts-grid');
+    optsDiv.innerHTML = '';
+    
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('btn-next').style.display = 'none';
+
+    item.opts.forEach((o, i) => {
+        const card = document.createElement('div');
+        card.className = 'opt-card';
+        card.innerHTML = `<span class="opt-prefix">${String.fromCharCode(65+i)}</span><span>${o}</span>`;
+        card.onclick = () => check(i, card);
+        optsDiv.appendChild(card);
+    });
+}
+
+function check(i, cardElement) {
+    const item = data[idx];
+    const allCards = document.querySelectorAll('.opt-card');
+    allCards.forEach(c => c.style.pointerEvents = 'none');
+    
+    const fb = document.getElementById('feedback');
+
+    if(i === item.c) {
+        cardElement.classList.add('correct');
+        score += 10;
+        document.getElementById('score').innerText = score;
+        fb.className = 'feedback-box correct';
+        fb.innerHTML = '🎉 <b>Chính xác! Hoàn toàn đúng.</b><br>' + item.exp;
+    } else {
+        cardElement.classList.add('incorrect');
+        allCards[item.c].classList.add('correct');
+        fb.className = 'feedback-box incorrect';
+        fb.innerHTML = '❌ <b>Chưa chính xác rồi!</b><br>' + item.exp;
+    }
+    document.getElementById('btn-next').style.display = 'inline-block';
+}
+
+function nextQ() {
+    idx++;
+    if(idx < data.length) {
+        loadQ();
+    } else {
+        document.getElementById('quiz-area').style.display = 'none';
+        document.getElementById('result-area').style.display = 'block';
+        document.getElementById('final-score').innerText = score + " / 50";
+        if(score === 50) {
+            document.getElementById('comment').innerText = "🌟 Tuyệt vời! Em đạt điểm tối đa. Kiến thức đọc viết số rất xuất sắc!";
+        } else {
+            document.getElementById('comment').innerText = "💪 Em đã cố gắng rất tốt! Ôn tập lại thêm một lần nữa nhé!";
+        }
+    }
+}
+
+loadQ();
+</script>
+</body>
+</html>
