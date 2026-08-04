@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ĐẠI CHIẾN TOÁN HỌC 3 - ÔN TẬP TỔNG HỢP</title>
+  <style>
+    :root {
+      --primary: #4A90E2;
+      --secondary: #FF9F43;
+      --success: #2ECC71;
+      --danger: #EE5253;
+      --purple: #8E44AD;
+      --bg: #F0F3F8;
+      --card-bg: #FFFFFF;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .game-container {
+      background: var(--bg);
+      width: 100%;
+      max-width: 900px;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: #2C3E50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 1px;
+      color: #F1C40F;
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      background: #34495E;
+      padding: 10px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: #BDC3C7;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      background: none;
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+      transition: 0.3s;
+      border-bottom: 4px solid transparent;
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: var(--primary);
+      border-bottom: 4px solid var(--primary);
+    }
+
+    .game-content {
+      padding: 25px;
+      min-height: 400px;
+    }
+
+    .part-panel {
+      display: none;
+    }
+
+    .part-panel.active {
+      display: block;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      color: #2C3E50;
+      border-left: 5px solid var(--secondary);
+      padding-left: 10px;
+      margin-top: 0;
+    }
+
+    .question-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      border: 1px solid #E2E8F0;
+    }
+
+    .question-text {
+      font-size: 17px;
+      font-weight: 600;
+      color: #2D3748;
+      margin-bottom: 15px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .btn-option {
+      background: #EDF2F7;
+      border: 2px solid #CBD5E0;
+      padding: 12px 15px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #2D3748;
+      text-align: left;
+    }
+
+    .btn-option:hover {
+      background: #E2E8F0;
+      border-color: #A0AEC0;
+    }
+
+    .btn-option.correct {
+      background: #DEF7EC !important;
+      border-color: #31C48D !important;
+      color: #03543F !important;
+    }
+
+    .btn-option.wrong {
+      background: #FDE8E8 !important;
+      border-color: #F98080 !important;
+      color: #9B1C1C !important;
+    }
+
+    .input-box {
+      width: 100%;
+      max-width: 200px;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #CBD5E0;
+      border-radius: 8px;
+      margin-right: 10px;
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn-submit:hover {
+      background: #357ABD;
+    }
+
+    .feedback {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .reward-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .reward-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 450px;
+      width: 90%;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .trophy-icon {
+      font-size: 70px;
+      margin-bottom: 10px;
+    }
+
+    .btn-restart {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .canvas-container {
+      margin: 15px 0;
+      text-align: center;
+    }
+
+    canvas {
+      border: 2px solid #2C3E50;
+      border-radius: 8px;
+      background: #FFF;
+    }
+  </style>
+</head>
+<body>
+
+<div class="game-container">
+  <div class="header">
+    <h1>⚔️ ĐẠI CHIẾN TOÁN HỌC LỚP 3 ⚔️</h1>
+    <p style="margin: 5px 0 0 0; color: #BDC3C7;">Thử thách nâng cao - Ôn tập tổng hợp cuối năm</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">⭐ Điểm số: <span id="score">0</span></div>
+    <div class="stat-item">🏆 Danh hiệu: <span id="rank">Tân thủ</span></div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab(1)">Phần 1: Thám Hiểm Số Lớn</button>
+    <button class="tab-btn" onclick="switchTab(2)">Phần 2: Thách Thức Tính Toán</button>
+    <button class="tab-btn" onclick="switchTab(3)">Phần 3: Hình Học & Đố Mẹo</button>
+  </div>
+
+  <div class="game-content">
+    <!-- PHẦN 1 -->
+    <div id="part1" class="part-panel active">
+      <h2 class="section-title">PHẦN 1: THÁM HIỂM SỐ VÀ ĐẠI LƯỢNG (Dãy số, Cấu tạo số, Đo lường)</h2>
+      
+      <!-- Câu 1 -->
+      <div class="question-card" id="q1">
+        <div class="question-text">1. Hãy điền 2 số tiếp theo vào quy luật dãy số sau: <br><b>15 200 ;  15 250 ;  15 300 ;  [ ? ] ;  [ ? ]</b></div>
+        <input type="text" id="q1_1" class="input-box" placeholder="Số thứ 1">
+        <input type="text" id="q1_2" class="input-box" placeholder="Số thứ 2">
+        <button class="btn-submit" onclick="checkQ1()">Gửi đáp án</button>
+        <div class="feedback" id="fb1"></div>
+      </div>
+
+      <!-- Câu 2 -->
+      <div class="question-card" id="q2">
+        <div class="question-text">2. Biểu thức nào dưới đây có giá trị <b>LỚN NHẤT</b>?</div>
+        <div class="options-grid">
+          <button class="btn-option" onclick="checkQ2(this, 'A')">A. 40 000 + 5 000 + 600 + 80</button>
+          <button class="btn-option" onclick="checkQ2(this, 'B')">B. 50 000 + 800 + 9</button>
+          <button class="btn-option" onclick="checkQ2(this, 'C')">C. 45 000 + 900 + 90 + 9</button>
+          <button class="btn-option" onclick="checkQ2(this, 'D')">D. 30 000 + 19 000 + 200</button>
+        </div>
+        <div class="feedback" id="fb2"></div>
+      </div>
+
+      <!-- Câu 3 -->
+      <div class="question-card" id="q3">
+        <div class="question-text">3. Đổi đơn vị đo: <b>4 m 8 dm 5 cm = ... cm</b>?</div>
+        <input type="number" id="q3_val" class="input-box" placeholder="Nhập số cm">
+        <button class="btn-submit" onclick="checkQ3()">Kiểm tra</button>
+        <div class="feedback" id="fb3"></div>
+      </div>
+    </div>
+
+    <!-- PHẦN 2 -->
+    <div id="part2" class="part-panel">
+      <h2 class="section-title">PHẦN 2: THÁCH THỨC TÍNH TOÁN (Phép tính & Giải toán)</h2>
+
+      <!-- Câu 4 -->
+      <div class="question-card" id="q4">
+        <div class="question-text">4. Tìm giá trị của biểu thức: <b>85 000 - 15 000 × 4 = ?</b></div>
+        <div class="options-grid">
+          <button class="btn-option" onclick="checkQ4(this, 'A')">A. 280 000</button>
+          <button class="btn-option" onclick="checkQ4(this, 'B')">B. 25 000</button>
+          <button class="btn-option" onclick="checkQ4(this, 'C')">C. 35 000</button>
+          <button class="btn-option" onclick="checkQ4(this, 'D')">D. 15 000</button>
+        </div>
+        <div class="feedback" id="fb4"></div>
+      </div>
+
+      <!-- Câu 5 -->
+      <div class="question-card" id="q5">
+        <div class="question-text">5. Tìm chữ số còn thiếu trong phép tính đặt tính sau:<br>
+        <code style="font-size:18px; color: #D63031;">
+          &nbsp;&nbsp;6 ? 4 2 8<br>
+        + 1 5 3 ? 4<br>
+        -----------<br>
+          &nbsp;&nbsp;8 2 7 8 2
+        </code>
+        </div>
+        <p>Nhập 2 chữ số thiếu (theo thứ tự từ trên xuống dưới):</p>
+        <input type="number" id="q5_1" class="input-box" placeholder="Chữ số hàng nghìn">
+        <input type="number" id="q5_2" class="input-box" placeholder="Chữ số hàng chục">
+        <button class="btn-submit" onclick="checkQ5()">Xác nhận</button>
+        <div class="feedback" id="fb5"></div>
+      </div>
+
+      <!-- Câu 6 -->
+      <div class="question-card" id="q6">
+        <div class="question-text">6. Mua 4 cuốn sách cùng loại hết 96 000 đồng. Hỏi mua 6 cuốn sách như thế hết bao nhiêu tiền?</div>
+        <input type="number" id="q6_val" class="input-box" placeholder="Nhập số tiền (đồng)">
+        <button class="btn-submit" onclick="checkQ6()">Trả lời</button>
+        <div class="feedback" id="fb6"></div>
+      </div>
+    </div>
+
+    <!-- PHẦN 3 -->
+    <div id="part3" class="part-panel">
+      <h2 class="section-title">PHẦN 3: HÌNH HỌC TƯƠNG TÁC & BÀI TOÁN ĐỐ MẸO</h2>
+
+      <!-- Câu 7 -->
+      <div class="question-card" id="q7">
+        <div class="question-text">7. Quan sát hình chữ nhật ghép bên dưới. Tính diện tích toàn bộ hình:</div>
+        <div class="canvas-container">
+          <canvas id="geoCanvas" width="320" height="180"></canvas>
+        </div>
+        <p>Biết hình chữ nhật A có kích thước 6cm x 4cm, hình chữ nhật B có kích thước 8cm x 5cm.</p>
+        <input type="number" id="q7_val" class="input-box" placeholder="Diện tích (cm²)">
+        <button class="btn-submit" onclick="checkQ7()">Gửi câu trả lời</button>
+        <div class="feedback" id="fb7"></div>
+      </div>
+
+      <!-- Câu 8 -->
+      <div class="question-card" id="q8">
+        <div class="question-text">8. <b>Thách thức Đố Mẹo:</b> Điền dấu thích hợp (+, -, ×, :) vào ô trống để được kết quả đúng:<br>
+        <b>72  [ ? ]  ( 6  [ ? ]  2 ) = 9</b></div>
+        <select id="q8_op1" class="input-box" style="width: 100px;">
+          <option value="">Dấu 1</option>
+          <option value="+">+</option>
+          <option value="-">-</option>
+          <option value="*">×</option>
+          <option value="/">:</option>
+        </select>
+        <select id="q8_op2" class="input-box" style="width: 100px;">
+          <option value="">Dấu 2</option>
+          <option value="+">+</option>
+          <option value="-">-</option>
+          <option value="*">×</option>
+          <option value="/">:</option>
+        </select>
+        <button class="btn-submit" onclick="checkQ8()">Thử ngay</button>
+        <div class="feedback" id="fb8"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PHẦN THƯỞNG -->
+<div class="reward-modal" id="rewardModal">
+  <div class="reward-content">
+    <div class="trophy-icon">🏆</div>
+    <h2>CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH!</h2>
+    <p id="finalScoreText" style="font-size: 18px; color: #2C3E50;"></p>
+    <p id="badgeText" style="font-size: 16px; font-weight: bold; color: var(--purple);"></p>
+    <button class="btn-restart" onclick="location.reload()">Chơi Lại Từ Đầu 🔄</button>
+  </div>
+</div>
+
+<script>
+  let score = 0;
+  let answered = {};
+
+  // Audio Synth System (Web Audio API)
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playSound(type) {
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    if (type === 'correct') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+      osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.4);
+    } else {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
+  }
+
+  function addScore(pts) {
+    score += pts;
+    document.getElementById('score').innerText = score;
+    updateRank();
+    checkFinish();
+  }
+
+  function updateRank() {
+    let rank = "Tân thủ";
+    if (score >= 30) rank = "Tập sự Thông thái 🌟";
+    if (score >= 60) rank = "Cao thủ Toán học ⚔️";
+    if (score >= 80) rank = "Đại Hiệp Số Học 👑";
+    document.getElementById('rank').innerText = rank;
+  }
+
+  function switchTab(tabNum) {
+    document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', idx === tabNum - 1);
+    });
+    document.querySelectorAll('.part-panel').forEach((panel, idx) => {
+      panel.classList.toggle('active', idx === tabNum - 1);
+    });
+  }
+
+  function checkQ1() {
+    if (answered[1]) return;
+    const v1 = document.getElementById('q1_1').value.trim();
+    const v2 = document.getElementById('q1_2').value.trim();
+    const fb = document.getElementById('fb1');
+    
+    if (v1 === '15350' && v2 === '15400') {
+      fb.innerHTML = '<span style="color: green;">🎉 Chính xác! Mỗi số tăng 50 đơn vị. (+10 điểm)</span>';
+      playSound('correct');
+      answered[1] = true;
+      addScore(10);
+    } else {
+      fb.innerHTML = '<span style="color: red;">❌ Chưa đúng rồi! Hãy chú ý khoảng cách giữa các số nhé.</span>';
+      playSound('wrong');
+    }
+  }
+
+  function checkQ2(btn, choice) {
+    if (answered[2]) return;
+    const fb = document.getElementById('fb2');
+    const parent = btn.parentElement;
+    
+    // A: 45680, B: 50809, C: 45999, D: 49200 -> B lớn nhất
+    if (choice === 'B') {
+      btn.classList.add('correct');
+      fb.innerHTML = '<span style="color: green;">🎉 Đã chọn đúng! 50 809 là số lớn nhất. (+10 điểm)</span>';
+      playSound('correct');
+      answered[2] = true;
+      addScore(10);
+    } else {
+      btn.classList.add('wrong');
+      fb.innerHTML = '<span style="color: red;">❌ Rất tiếc, câu này chưa đúng. Tính lại các tổng nhé!</span>';
+      playSound('wrong');
+    }
+  }
+
+  function checkQ3() {
+    if (answered[3]) return;
+    const val = document.getElementById('q3_val').value.trim();
+    const fb = document.getElementById('fb3');
+
+    // 4m = 400cm, 8dm = 80cm => 485cm
+    if (val === '485') {
+      fb.innerHTML = '<span style="color: green;">🎉 Xuất sắc! 4m 8dm 5cm = 485 cm. (+10 điểm)</span>';
+      playSound('correct');
+      answered[3] = true;
+      addScore(10);
+    } else {
+      fb.innerHTML = '<span style="color: red;">❌ Chưa chính xác. Lời khuyên: 1m = 100cm, 1dm = 10cm.</span>';
+      playSound('wrong');
+    }
+  }
+
+  function checkQ4(btn, choice) {
+    if (answered[4]) return;
+    const fb = document.getElementById('fb4');
+    
+    // 85000 - 15000*4 = 85000 - 60000 = 25000
+    if (choice === 'B') {
+      btn.classList.add('correct');
+      fb.innerHTML = '<span style="color: green;">🎉 Bạn nhớ nhân chia trước, cộng trừ sau rất tốt! (+10 điểm)</span>';
+      playSound('correct');
+      answered[4] = true;
+      addScore(10);
+    } else {
+      fb.innerHTML = '<span style="color: red;">❌ Hãy nhớ thứ tự thực hiện phép tính nhé!</span>';
+      playSound('wrong');
+    }
+  }
+
+  function checkQ5() {
+    if (answered[5]) return;
+    const v1 = document.getElementById('q5_1').value.trim(); // 7
+    const v2 = document.getElementById('q5_2').value.trim(); // 5
+    const fb = document.getElementById('fb5');
+
+    if (v1 === '7' && v2 === '5') {
+      fb.innerHTML = '<span style="color: green;">🎉 Hoàn toàn chính xác! Tính nhẩm đặt tính rất giỏi. (+15 điểm)</span>';
+      playSound('correct');
+      answered[5] = true;
+      addScore(15);
+    } else {
+      fb.innerHTML = '<span style="color: red;">❌ Số chưa đúng, nhớ kiểm tra phần có nhớ nhé!</span>';
+      playSound('wrong');
+    }
+  }
+
+  function checkQ6() {
+    if (answered[6]) return;
+    const val = document.getElementById('q6_val').value.trim();
+    const fb = document.getElementById('fb6');
+
+    // 1 cuốn = 96000 / 4 = 24000. 6 cuốn = 24000 * 6 = 144000
+    if (val === '144000') {
+      fb.innerHTML = '<span style="color: green;">🎉 Tuyệt vời! 1 cuốn giá 24 000đ => 6 cuốn là 144 000đ. (+15 điểm)</span>';
+      playSound('correct');
+      answered[6] = true;
+      addScore(15);
+    } else {
+      fb.innerHTML = '<span style="color: red;">❌ Hãy tìm giá tiền 1 cuốn sách trước nhé!</span>';
+      playSound('wrong');
+    }
+  }
+
+  function checkQ7() {
+    if (answered[7]) return;
+    const val = document.getElementById('q7_val').value.trim();
+    const fb = document.getElementById('fb7');
+
+    // S_A = 6*4 = 24, S_B = 8*5 = 40 => Total = 64
+    if (val === '64') {
+      fb.innerHTML = '<span style="color: green;">🎉 Chính xác! Tổng diện tích là 24 + 40 = 64 cm². (+15 điểm)</span>';
+      playSound('correct');
+      answered[7] = true;
+      addScore(15);
+    } else {
+      fb.innerHTML = '<span style="color: red;">❌ Tính diện tích từng hình rồi cộng lại nhé!</span>';
+      playSound('wrong');
+    }
+  }
+
+  function checkQ8() {
+    if (answered[8]) return;
+    const op1 = document.getElementById('q8_op1').value;
+    const op2 = document.getElementById('q8_op2').value;
+    const fb = document.getElementById('fb8');
+
+    // 72 : (6 * 2) = 72 : 12 = 6 (chưa đúng)
+    // 72 : (6 + 2) = 72 : 8 = 9 (ĐÚNG!)
+    if (op1 === '/' && op2 === '+') {
+      fb.innerHTML = '<span style="color: green;">🎉 Đỉnh cao toán học! 72 : (6 + 2) = 9. (+15 điểm)</span>';
+      playSound('correct');
+      answered[8] = true;
+      addScore(15);
+    } else {
+      fb.innerHTML = '<span style="color: red;">❌ Dấu chọn chưa tạo ra kết quả bằng 9. Thử lại nào!</span>';
+      playSound('wrong');
+    }
+  }
+
+  function checkFinish() {
+    if (Object.keys(answered).length === 8) {
+      setTimeout(() => {
+        document.getElementById('rewardModal').style.display = 'flex';
+        document.getElementById('finalScoreText').innerText = `Bạn đạt tổng cộng: ${score} / 100 Điểm`;
+        document.getElementById('badgeText').innerText = `Hạng nhận được: ${document.getElementById('rank').innerText}`;
+      }, 800);
+    }
+  }
+
+  // Draw geometry canvas
+  function drawCanvas() {
+    const canvas = document.getElementById('geoCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // Draw Rect A
+    ctx.fillStyle = '#6C5CE7';
+    ctx.fillRect(30, 40, 100, 80);
+    ctx.fillStyle = '#FFF';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText('Hình A', 55, 75);
+    ctx.fillText('6cm x 4cm', 45, 95);
+
+    // Draw Rect B
+    ctx.fillStyle = '#00CEC9';
+    ctx.fillRect(130, 20, 150, 100);
+    ctx.fillStyle = '#FFF';
+    ctx.fillText('Hình B', 180, 65);
+    ctx.fillText('8cm x 5cm', 170, 85);
+  }
+
+  window.onload = drawCanvas;
+</script>
+</body>
+</html>
