@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 23: Phép Trừ Các Số Có Nhiều Chữ Số</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#bae6fd 2px, transparent 2px);
+            background-size: 30px 30px;
+            padding-bottom: 80px;
+        }
+
+        .heading-font {
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .card-shadow {
+            box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-correct {
+            background-color: #dcfce7 !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
+            font-weight: 800 !important;
+        }
+
+        .input-incorrect {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c !important;
+        }
+
+        @keyframes bounce-sm {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        .animate-bounce-sm {
+            animation: bounce-sm 2s ease-in-out infinite;
+        }
+        
+        /* Confetti Animation */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+        }
+        
+        @keyframes fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        /* Custom hide number arrows */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Sticky Score Widget -->
+    <div class="fixed top-4 right-4 z-50">
+        <div id="score-widget" class="bg-yellow-300 border-4 border-yellow-500 rounded-3xl py-2 px-6 flex items-center gap-3 shadow-lg transform transition-transform duration-300">
+            <span class="text-3xl">🏆</span>
+            <div class="text-yellow-900 font-black text-2xl heading-font">
+                <span id="score-val">0</span>/36
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 pt-12">
+        
+        <!-- Header -->
+        <header class="text-center mb-12 relative">
+            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 text-7xl animate-bounce-sm">🤖</div>
+            <h1 class="text-4xl md:text-5xl font-black text-sky-600 heading-font drop-shadow-md pt-10">
+                BÀI 23: PHÉP TRỪ CÁC SỐ CÓ NHIỀU CHỮ SỐ
+            </h1>
+            <p class="text-xl text-sky-800 mt-4 font-bold bg-sky-100 inline-block px-6 py-2 rounded-full border-2 border-sky-300 card-shadow">
+                Cùng Rô-bốt học cách trừ các số siêu to khổng lồ nhé! 🚀
+            </p>
+        </header>
+
+        <!-- I. Khám Phá -->
+        <section class="mb-16">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="bg-indigo-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-black shadow-md border-2 border-white">1</div>
+                <h2 class="text-3xl font-black text-indigo-700 heading-font">Khám Phá</h2>
+            </div>
+
+            <div class="bg-white rounded-3xl p-8 border-4 border-indigo-200 card-shadow relative">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <!-- Scenario -->
+                    <div class="bg-indigo-50 rounded-2xl p-6 border-2 border-indigo-100 relative">
+                        <div class="absolute -top-5 -left-5 text-4xl">👧🏻</div>
+                        <div class="absolute -top-5 -right-5 text-4xl">👦🏻</div>
+                        <p class="text-lg font-semibold text-indigo-900 mb-4 leading-relaxed">
+                            Video dạy hát nhạc có <span class="text-rose-500 font-black text-xl">235 072</span> lượt xem. Còn video dạy tiếng Anh có <span class="text-blue-600 font-black text-xl">438 589</span> lượt xem.
+                        </p>
+                        <div class="bg-white p-4 rounded-xl border-2 border-dashed border-indigo-300 text-center font-bold text-indigo-700">
+                            "Video dạy tiếng Anh nhiều hơn video dạy hát nhạc bao nhiêu lượt xem nhỉ? 🤔"
+                        </div>
+                    </div>
+
+                    <!-- Calculation steps -->
+                    <div class="flex flex-col gap-6">
+                        <div class="bg-rose-50 rounded-2xl p-6 border-2 border-rose-200 flex flex-col md:flex-row items-center gap-6">
+                            <div class="font-mono text-3xl font-bold tracking-widest text-right leading-loose text-slate-700 bg-white p-4 rounded-xl shadow-sm border border-rose-100">
+                                <div class="text-blue-600">438 589</div>
+                                <div class="border-b-4 border-slate-400 relative">
+                                    <span class="absolute -left-6 text-rose-500">-</span>
+                                    235 072
+                                </div>
+                                <div class="text-green-600">203 517</div>
+                            </div>
+                            <div class="flex-1 text-sm font-semibold text-rose-800 space-y-2 bg-white/60 p-4 rounded-xl">
+                                <p>• 9 trừ 2 bằng 7, viết 7.</p>
+                                <p>• 8 trừ 7 bằng 1, viết 1.</p>
+                                <p>• 5 trừ 0 bằng 5, viết 5.</p>
+                                <p>• 8 trừ 5 bằng 3, viết 3.</p>
+                                <p>• 3 trừ 3 bằng 0, viết 0.</p>
+                                <p>• 4 trừ 2 bằng 2, viết 2.</p>
+                            </div>
+                        </div>
+
+                        <!-- Example 2 -->
+                        <div class="bg-amber-50 rounded-2xl p-6 border-2 border-amber-200">
+                            <h3 class="font-bold text-amber-800 mb-3">Ví dụ 2 (Có nhớ):</h3>
+                            <div class="flex flex-col sm:flex-row items-center gap-6">
+                                <div class="font-mono text-2xl font-bold tracking-widest text-right leading-loose bg-white p-4 rounded-xl border border-amber-100">
+                                    <div class="">648 390</div>
+                                    <div class="border-b-4 border-slate-400 relative">
+                                        <span class="absolute -left-5">-</span>
+                                        382 547
+                                    </div>
+                                    <div class="text-green-600">265 843</div>
+                                </div>
+                                <div class="text-sm font-semibold text-amber-900 space-y-1">
+                                    <p>• 0 không trừ được 7, lấy 10 trừ 7 bằng 3, viết 3 nhớ 1.</p>
+                                    <p>• 4 thêm 1 bằng 5, 9 trừ 5 bằng 4, viết 4.</p>
+                                    <p>• 3 không trừ được 5, lấy 13 trừ 5 bằng 8, viết 8 nhớ 1.</p>
+                                    <p>• 2 thêm 1 bằng 3, 8 trừ 3 bằng 5, viết 5.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- II. Luyện Tập -->
+        <section class="mb-16">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="bg-emerald-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-black shadow-md border-2 border-white">2</div>
+                <h2 class="text-3xl font-black text-emerald-700 heading-font">Luyện Tập</h2>
+            </div>
+
+            <!-- Bài 1: Đặt tính rồi tính -->
+            <div class="bg-emerald-50 rounded-3xl p-6 sm:p-8 border-4 border-emerald-200 card-shadow mb-8 relative">
+                <div class="absolute -top-4 -right-4 bg-emerald-400 text-white font-bold py-1 px-4 rounded-full border-2 border-white rotate-12">Bài 1</div>
+                <h3 class="text-2xl font-bold text-emerald-800 mb-6">✍️ Tính các phép tính sau:</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards -->
+                    <div class="bg-white p-5 rounded-2xl border-2 border-emerald-100 flex flex-col items-center">
+                        <div class="text-lg font-bold mb-3">a) 36 724 - 3 291</div>
+                        <div class="flex items-center gap-2 text-xl font-bold">
+                            = <input type="number" data-answer="33433" class="w-32 text-center py-2 px-3 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none transition-all focus:border-emerald-400">
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border-2 border-emerald-100 flex flex-col items-center">
+                        <div class="text-lg font-bold mb-3">b) 637 891 - 412 520</div>
+                        <div class="flex items-center gap-2 text-xl font-bold">
+                            = <input type="number" data-answer="225371" class="w-32 text-center py-2 px-3 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none transition-all focus:border-emerald-400">
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border-2 border-emerald-100 flex flex-col items-center">
+                        <div class="text-lg font-bold mb-3">c) 895 332 - 282 429</div>
+                        <div class="flex items-center gap-2 text-xl font-bold">
+                            = <input type="number" data-answer="612903" class="w-32 text-center py-2 px-3 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none transition-all focus:border-emerald-400">
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border-2 border-emerald-100 flex flex-col items-center">
+                        <div class="text-lg font-bold mb-3">d) 54 832 - 4 150</div>
+                        <div class="flex items-center gap-2 text-xl font-bold">
+                            = <input type="number" data-answer="50682" class="w-32 text-center py-2 px-3 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none transition-all focus:border-emerald-400">
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border-2 border-emerald-100 flex flex-col items-center">
+                        <div class="text-lg font-bold mb-3">e) 748 902 - 521 630</div>
+                        <div class="flex items-center gap-2 text-xl font-bold">
+                            = <input type="number" data-answer="227272" class="w-32 text-center py-2 px-3 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none transition-all focus:border-emerald-400">
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border-2 border-emerald-100 flex flex-col items-center">
+                        <div class="text-lg font-bold mb-3">f) 912 455 - 390 128</div>
+                        <div class="flex items-center gap-2 text-xl font-bold">
+                            = <input type="number" data-answer="522327" class="w-32 text-center py-2 px-3 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none transition-all focus:border-emerald-400">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bài 2: Điền số vào bảng -->
+            <div class="bg-orange-50 rounded-3xl p-6 sm:p-8 border-4 border-orange-200 card-shadow mb-8 relative">
+                <div class="absolute -top-4 -right-4 bg-orange-400 text-white font-bold py-1 px-4 rounded-full border-2 border-white rotate-12">Bài 2</div>
+                <h3 class="text-2xl font-bold text-orange-800 mb-6">📊 Điền số thích hợp vào ô trống:</h3>
+                
+                <div class="overflow-x-auto rounded-xl border-2 border-orange-200">
+                    <table class="w-full min-w-[600px] text-center bg-white border-collapse">
+                        <thead>
+                            <tr class="bg-orange-200 text-orange-900 font-black text-lg">
+                                <th class="p-3 border-2 border-orange-300 w-16">STT</th>
+                                <th class="p-3 border-2 border-orange-300 w-1/3">Số bị trừ</th>
+                                <th class="p-3 border-2 border-orange-300 w-1/3">Số trừ</th>
+                                <th class="p-3 border-2 border-orange-300 w-1/3">Hiệu</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-lg font-semibold text-slate-700">
+                            <tr>
+                                <td class="p-3 border-2 border-orange-100 bg-orange-50">1</td>
+                                <td class="p-3 border-2 border-orange-100">538 239</td>
+                                <td class="p-3 border-2 border-orange-100">347 287</td>
+                                <td class="p-3 border-2 border-orange-100 bg-yellow-50"><input type="number" data-answer="190952" class="w-3/4 mx-auto text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-orange-400"></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-2 border-orange-100 bg-orange-50">2</td>
+                                <td class="p-3 border-2 border-orange-100">27 018</td>
+                                <td class="p-3 border-2 border-orange-100">20 026</td>
+                                <td class="p-3 border-2 border-orange-100 bg-yellow-50"><input type="number" data-answer="6992" class="w-3/4 mx-auto text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-orange-400"></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-2 border-orange-100 bg-orange-50">3</td>
+                                <td class="p-3 border-2 border-orange-100">511 221</td>
+                                <td class="p-3 border-2 border-orange-100">327 261</td>
+                                <td class="p-3 border-2 border-orange-100 bg-yellow-50"><input type="number" data-answer="183960" class="w-3/4 mx-auto text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-orange-400"></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-2 border-orange-100 bg-orange-50">4</td>
+                                <td class="p-3 border-2 border-orange-100 bg-blue-50"><input type="number" data-answer="659000" class="w-3/4 mx-auto text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-orange-400"></td>
+                                <td class="p-3 border-2 border-orange-100">432 000</td>
+                                <td class="p-3 border-2 border-orange-100">227 000</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-2 border-orange-100 bg-orange-50">5</td>
+                                <td class="p-3 border-2 border-orange-100 bg-blue-50"><input type="number" data-answer="683000" class="w-3/4 mx-auto text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-orange-400"></td>
+                                <td class="p-3 border-2 border-orange-100">231 000</td>
+                                <td class="p-3 border-2 border-orange-100">452 000</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-2 border-orange-100 bg-orange-50">6</td>
+                                <td class="p-3 border-2 border-orange-100">645 120</td>
+                                <td class="p-3 border-2 border-orange-100">123 050</td>
+                                <td class="p-3 border-2 border-orange-100 bg-yellow-50"><input type="number" data-answer="522070" class="w-3/4 mx-auto text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-orange-400"></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-2 border-orange-100 bg-orange-50">7</td>
+                                <td class="p-3 border-2 border-orange-100">89 450</td>
+                                <td class="p-3 border-2 border-orange-100 bg-rose-50"><input type="number" data-answer="44250" class="w-3/4 mx-auto text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-orange-400"></td>
+                                <td class="p-3 border-2 border-orange-100">45 200</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-2 border-orange-100 bg-orange-50">8</td>
+                                <td class="p-3 border-2 border-orange-100 bg-blue-50"><input type="number" data-answer="490000" class="w-3/4 mx-auto text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-orange-400"></td>
+                                <td class="p-3 border-2 border-orange-100">150 000</td>
+                                <td class="p-3 border-2 border-orange-100">340 000</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-2 border-orange-100 bg-orange-50">9</td>
+                                <td class="p-3 border-2 border-orange-100">784 562</td>
+                                <td class="p-3 border-2 border-orange-100">451 230</td>
+                                <td class="p-3 border-2 border-orange-100 bg-yellow-50"><input type="number" data-answer="333332" class="w-3/4 mx-auto text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-orange-400"></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 border-2 border-orange-100 bg-orange-50">10</td>
+                                <td class="p-3 border-2 border-orange-100 bg-blue-50"><input type="number" data-answer="432950" class="w-3/4 mx-auto text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-orange-400"></td>
+                                <td class="p-3 border-2 border-orange-100">312 450</td>
+                                <td class="p-3 border-2 border-orange-100">120 500</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Bài 3: Giải toán -->
+            <div class="bg-blue-50 rounded-3xl p-6 sm:p-8 border-4 border-blue-200 card-shadow relative">
+                <div class="absolute -top-4 -right-4 bg-blue-500 text-white font-bold py-1 px-4 rounded-full border-2 border-white -rotate-6">Bài 3</div>
+                <h3 class="text-2xl font-bold text-blue-800 mb-6">📝 Giải toán có lời văn:</h3>
+                
+                <div class="space-y-4">
+                    <!-- Word Problem 1 -->
+                    <div class="bg-white p-4 rounded-2xl border-2 border-blue-100 flex flex-col sm:flex-row gap-4 justify-between items-center hover:shadow-md transition-shadow">
+                        <div class="flex-1">
+                            <span class="font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md mr-2">1</span>
+                            Muỗi đập cánh 180 000 lần/5 phút. Ong đập cánh 60 000 lần/5 phút. Hỏi muỗi đập nhiều hơn ong bao nhiêu lần? 🦟🐝
+                        </div>
+                        <div class="flex items-center gap-2 whitespace-nowrap">
+                            <span class="font-bold text-gray-500">Đ/s:</span>
+                            <input type="number" data-answer="120000" class="w-28 text-center py-2 px-2 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none focus:border-blue-400"> 
+                            <span class="font-bold text-gray-500 text-sm">lần</span>
+                        </div>
+                    </div>
+                    <!-- Word Problem 2 -->
+                    <div class="bg-white p-4 rounded-2xl border-2 border-blue-100 flex flex-col sm:flex-row gap-4 justify-between items-center hover:shadow-md transition-shadow">
+                        <div class="flex-1">
+                            <span class="font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md mr-2">2</span>
+                            Máy bay xanh có 240 373 lít nhiên liệu. Máy bay hồng có 25 350 lít. Khoang máy bay xanh nhiều hơn hồng bao nhiêu lít? ✈️
+                        </div>
+                        <div class="flex items-center gap-2 whitespace-nowrap">
+                            <span class="font-bold text-gray-500">Đ/s:</span>
+                            <input type="number" data-answer="215023" class="w-28 text-center py-2 px-2 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none focus:border-blue-400">
+                            <span class="font-bold text-gray-500 text-sm">lít</span>
+                        </div>
+                    </div>
+                    <!-- Word Problem 3 -->
+                    <div class="bg-white p-4 rounded-2xl border-2 border-blue-100 flex flex-col sm:flex-row gap-4 justify-between items-center hover:shadow-md transition-shadow">
+                        <div class="flex-1">
+                            <span class="font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md mr-2">3</span>
+                            Tiền vé của 4 bạn là 320 000đ. Tiền vé Rô-bốt là 50 000đ. Rô-bốt đưa 500 000đ. Người bán trả lại bao nhiêu tiền? 🎟️
+                        </div>
+                        <div class="flex items-center gap-2 whitespace-nowrap">
+                            <span class="font-bold text-gray-500">Đ/s:</span>
+                            <input type="number" data-answer="130000" class="w-28 text-center py-2 px-2 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none focus:border-blue-400">
+                            <span class="font-bold text-gray-500 text-sm">đ</span>
+                        </div>
+                    </div>
+                    <!-- Word Problem 4 -->
+                    <div class="bg-white p-4 rounded-2xl border-2 border-blue-100 flex flex-col sm:flex-row gap-4 justify-between items-center hover:shadow-md transition-shadow">
+                        <div class="flex-1">
+                            <span class="font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md mr-2">4</span>
+                            Nhà máy A sản xuất 450 000 cái kẹo, nhà máy B sản xuất 385 000 cái kẹo. Nhà máy A nhiều hơn B bao nhiêu cái? 🍬
+                        </div>
+                        <div class="flex items-center gap-2 whitespace-nowrap">
+                            <span class="font-bold text-gray-500">Đ/s:</span>
+                            <input type="number" data-answer="65000" class="w-28 text-center py-2 px-2 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none focus:border-blue-400">
+                            <span class="font-bold text-gray-500 text-sm">cái</span>
+                        </div>
+                    </div>
+                    <!-- Word Problem 5 -->
+                    <div class="bg-white p-4 rounded-2xl border-2 border-blue-100 flex flex-col sm:flex-row gap-4 justify-between items-center hover:shadow-md transition-shadow">
+                        <div class="flex-1">
+                            <span class="font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md mr-2">5</span>
+                            Thư viện có 125 400 quyển sách, đã cho mượn 89 250 quyển sách. Thư viện còn lại bao nhiêu quyển? 📚
+                        </div>
+                        <div class="flex items-center gap-2 whitespace-nowrap">
+                            <span class="font-bold text-gray-500">Đ/s:</span>
+                            <input type="number" data-answer="36150" class="w-28 text-center py-2 px-2 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none focus:border-blue-400">
+                            <span class="font-bold text-gray-500 text-sm">quyển</span>
+                        </div>
+                    </div>
+                    <!-- Word Problem 6 -->
+                    <div class="bg-white p-4 rounded-2xl border-2 border-blue-100 flex flex-col sm:flex-row gap-4 justify-between items-center hover:shadow-md transition-shadow">
+                        <div class="flex-1">
+                            <span class="font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md mr-2">6</span>
+                            Mẹ mua đồ hết 415 000đ, mẹ đưa cô thu ngân 500 000đ. Tiền thừa trả lại là bao nhiêu? 🛒
+                        </div>
+                        <div class="flex items-center gap-2 whitespace-nowrap">
+                            <span class="font-bold text-gray-500">Đ/s:</span>
+                            <input type="number" data-answer="85000" class="w-28 text-center py-2 px-2 bg-gray-50 border-2 border-gray-300 rounded-xl outline-none focus:border-blue-400">
+                            <span class="font-bold text-gray-500 text-sm">đ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- III. Thử Thách -->
+        <section>
+            <div class="flex items-center gap-4 mb-6">
+                <div class="bg-purple-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-black shadow-md border-2 border-white">3</div>
+                <h2 class="text-3xl font-black text-purple-700 heading-font">Thử Thách Chuyên Gia</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Missing Digits Challenge -->
+                <div class="bg-pink-50 rounded-3xl p-6 sm:p-8 border-4 border-pink-200 card-shadow">
+                    <h3 class="text-xl font-bold text-pink-800 mb-6 border-b-2 border-pink-200 pb-2">🔍 1. Tìm chữ số thích hợp:</h3>
+                    
+                    <div class="flex flex-col items-center space-y-8 bg-white p-6 rounded-2xl border border-pink-100">
+                        
+                        <!-- Eq 1 -->
+                        <div class="grid grid-cols-7 gap-1 md:gap-2 text-2xl font-mono text-center items-center w-full max-w-[300px]">
+                            <div class="font-bold"></div><div class="font-bold">5</div><div class="font-bold">0</div><div class="font-bold">7</div><div class="font-bold">5</div><div class="font-bold">1</div>
+                            <div><input type="text" maxlength="1" data-answer="8" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                            
+                            <div class="text-pink-500 font-bold">-</div>
+                            <div><input type="text" maxlength="1" data-answer="3" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                            <div class="font-bold">2</div><div class="font-bold">7</div>
+                            <div><input type="text" maxlength="1" data-answer="4" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                            <div class="font-bold">3</div><div class="font-bold">0</div>
+                            
+                            <div class="col-span-7 border-b-4 border-slate-700 my-1"></div>
+                            
+                            <div class="font-bold"></div><div class="font-bold">1</div><div class="font-bold">8</div>
+                            <div><input type="text" maxlength="1" data-answer="0" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                            <div class="font-bold">0</div><div class="font-bold">8</div><div class="font-bold">8</div>
+                        </div>
+
+                        <!-- Eq 2 -->
+                        <div class="grid grid-cols-7 gap-1 md:gap-2 text-2xl font-mono text-center items-center w-full max-w-[300px]">
+                            <div class="font-bold"></div><div class="font-bold">6</div>
+                            <div><input type="text" maxlength="1" data-answer="4" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                            <div class="font-bold">2</div><div class="font-bold">9</div><div class="font-bold">3</div><div class="font-bold">4</div>
+                            
+                            <div class="text-pink-500 font-bold">-</div>
+                            <div class="font-bold">1</div><div class="font-bold">2</div><div class="font-bold">3</div>
+                            <div><input type="text" maxlength="1" data-answer="7" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                            <div class="font-bold">2</div><div class="font-bold">6</div>
+                            
+                            <div class="col-span-7 border-b-4 border-slate-700 my-1"></div>
+                            
+                            <div class="font-bold"></div><div class="font-bold">5</div><div class="font-bold">1</div>
+                            <div><input type="text" maxlength="1" data-answer="9" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                            <div class="font-bold">2</div><div class="font-bold">0</div>
+                            <div><input type="text" maxlength="1" data-answer="8" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                        </div>
+
+                        <!-- Eq 3 -->
+                        <div class="grid grid-cols-7 gap-1 md:gap-2 text-2xl font-mono text-center items-center w-full max-w-[300px]">
+                            <div class="font-bold"></div><div class="font-bold">8</div>
+                            <div><input type="text" maxlength="1" data-answer="1" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                            <div class="font-bold">5</div><div class="font-bold">4</div><div class="font-bold">2</div><div class="font-bold">1</div>
+                            
+                            <div class="text-pink-500 font-bold">-</div>
+                            <div class="font-bold">3</div><div class="font-bold">4</div>
+                            <div><input type="text" maxlength="1" data-answer="2" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                            <div class="font-bold">1</div><div class="font-bold">5</div><div class="font-bold">6</div>
+                            
+                            <div class="col-span-7 border-b-4 border-slate-700 my-1"></div>
+                            
+                            <div class="font-bold"></div><div class="font-bold">4</div><div class="font-bold">7</div><div class="font-bold">3</div>
+                            <div><input type="text" maxlength="1" data-answer="2" class="w-8 h-8 md:w-10 md:h-10 text-center border-2 border-pink-300 rounded bg-pink-50 outline-none focus:border-pink-500 mx-auto"></div>
+                            <div class="font-bold">6</div><div class="font-bold">5</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Delete Digits Challenge -->
+                <div class="bg-violet-50 rounded-3xl p-6 sm:p-8 border-4 border-violet-200 card-shadow flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-violet-800 mb-4 border-b-2 border-violet-200 pb-2">✂️ 2. Xóa đi 1 chữ số để được số có 6 chữ số:</h3>
+                        
+                        <div class="bg-white p-5 rounded-2xl border border-violet-100 mb-6">
+                            <p class="font-bold text-slate-700 mb-3">Từ số <span class="text-2xl text-violet-600 font-black tracking-wider bg-violet-100 px-2 rounded">2 130 574</span>:</p>
+                            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200 mb-2">
+                                <span>Số lớn nhất:</span>
+                                <input type="number" data-answer="230574" class="w-32 text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-violet-400 font-bold">
+                            </div>
+                            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                <span>Số bé nhất:</span>
+                                <input type="number" data-answer="130574" class="w-32 text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-violet-400 font-bold">
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-2xl border border-violet-100">
+                            <p class="font-bold text-slate-700 mb-3">Từ số <span class="text-2xl text-violet-600 font-black tracking-wider bg-violet-100 px-2 rounded">8 549 201</span>:</p>
+                            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200 mb-2">
+                                <span>Số lớn nhất:</span>
+                                <input type="number" data-answer="859201" class="w-32 text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-violet-400 font-bold">
+                            </div>
+                            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                <span>Số bé nhất:</span>
+                                <input type="number" data-answer="549201" class="w-32 text-center py-1 px-2 border-2 border-gray-300 rounded-lg outline-none focus:border-violet-400 font-bold">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <button id="check-all-btn" class="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-black text-xl py-3 px-8 rounded-full shadow-[0px_6px_0px_0px_#4338ca] hover:shadow-[0px_3px_0px_0px_#4338ca] hover:translate-y-[3px] transition-all">
+                            ✨ Kiểm tra toàn bộ bài
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Celebration Overlay -->
+    <div id="celebration-overlay" class="fixed inset-0 bg-black/60 z-[100] hidden items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl text-center max-w-md mx-4 border-8 border-yellow-400 transform scale-110">
+            <h2 class="text-4xl font-black text-rose-500 mb-2 drop-shadow-md heading-font">Xuất Sắc! 🎉</h2>
+            <p class="text-xl text-gray-700 font-bold mb-6">Em đã hoàn thành xuất sắc tất cả bài tập!</p>
+            <div class="text-8xl mb-8 animate-bounce">🏆</div>
+            <button onclick="closeModal()" class="bg-green-500 hover:bg-green-600 text-white font-bold text-xl py-3 px-8 rounded-full shadow-[0px_5px_0px_0px_#166534] hover:shadow-[0px_2px_0px_0px_#166534] hover:translate-y-[3px] transition-all">
+                Tuyệt Vời!
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input[data-answer]');
+            const scoreVal = document.getElementById('score-val');
+            const scoreWidget = document.getElementById('score-widget');
+            const checkAllBtn = document.getElementById('check-all-btn');
+            const totalInputs = inputs.length; // Should be 36
+            
+            // Initialization for single character inputs
+            inputs.forEach(input => {
+                if(input.maxLength === 1) {
+                    input.addEventListener('keypress', (e) => {
+                        // Allow only numbers
+                        if (!/[0-9]/.test(e.key)) {
+                            e.preventDefault();
+                        }
+                    });
+                }
+
+                // Attach real-time validation on blur (losing focus) or input
+                input.addEventListener('input', function() {
+                    validateInput(this);
+                });
+            });
+
+            checkAllBtn.addEventListener('click', () => {
+                inputs.forEach(input => validateInput(input, true));
+                // Add button animation
+                checkAllBtn.classList.add('scale-95');
+                setTimeout(() => checkAllBtn.classList.remove('scale-95'), 150);
+            });
+
+            function validateInput(input, forceCheckEmpty = false) {
+                const answer = input.getAttribute('data-answer');
+                const val = input.value.trim();
+
+                // Reset classes
+                input.classList.remove('input-correct', 'input-incorrect');
+
+                if (val === '') {
+                    if(forceCheckEmpty) {
+                         // visually indicate it's missing if they clicked check all
+                         input.classList.add('border-red-300', 'bg-red-50');
+                    } else {
+                         input.classList.remove('border-red-300', 'bg-red-50');
+                    }
+                    updateScore();
+                    return;
+                }
+                
+                input.classList.remove('border-red-300', 'bg-red-50'); // remove forced empty styles
+
+                if (val === answer) {
+                    input.classList.add('input-correct');
+                } else {
+                    input.classList.add('input-incorrect');
+                }
+                
+                updateScore();
+            }
+
+            function updateScore() {
+                let currentScore = 0;
+                inputs.forEach(input => {
+                    if (input.value.trim() === input.getAttribute('data-answer')) {
+                        currentScore++;
+                    }
+                });
+                
+                const oldScore = parseInt(scoreVal.innerText);
+                scoreVal.innerText = currentScore;
+                
+                // Pop animation if score increased
+                if(currentScore > oldScore) {
+                    scoreWidget.classList.add('scale-110');
+                    setTimeout(() => {
+                        scoreWidget.classList.remove('scale-110');
+                    }, 200);
+                }
+
+                // Win condition
+                if (currentScore === totalInputs) {
+                    setTimeout(triggerCelebration, 500);
+                }
+            }
+
+            function triggerCelebration() {
+                document.getElementById('celebration-overlay').classList.remove('hidden');
+                document.getElementById('celebration-overlay').classList.add('flex');
+                createConfetti();
+            }
+
+            window.closeModal = function() {
+                document.getElementById('celebration-overlay').classList.add('hidden');
+                document.getElementById('celebration-overlay').classList.remove('flex');
+                // Clean up confetti
+                const confettis = document.querySelectorAll('.confetti');
+                confettis.forEach(c => c.remove());
+            }
+
+            function createConfetti() {
+                const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+                for (let i = 0; i < 100; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear infinite`;
+                    confetti.style.animationDelay = `${Math.random() * 2}s`;
+                    
+                    if (Math.random() > 0.5) {
+                        confetti.style.borderRadius = '50%';
+                    }
+                    
+                    document.body.appendChild(confetti);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

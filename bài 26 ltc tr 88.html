@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vui Học Toán</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #f0fdf4; /* Light green pastel */
+            background-image: radial-gradient(#dcfce7 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+        
+        .receipt-edges {
+            position: relative;
+            background: #fff;
+        }
+        .receipt-edges::before, .receipt-edges::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background-size: 20px 20px;
+        }
+        .receipt-edges::before {
+            top: -10px;
+            background-image: radial-gradient(circle at 10px 0, transparent 10px, inherit 11px);
+        }
+        .receipt-edges::after {
+            bottom: -10px;
+            background-image: radial-gradient(circle at 10px 20px, transparent 10px, inherit 11px);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Custom Input Transition */
+        input {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="py-10 px-4 md:px-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-green-600 animate-float drop-shadow-md mb-4">
+                🌟 Vui Học Toán Cùng Các Bạn Nhỏ 🌟
+            </h1>
+            <p class="text-xl text-gray-700 font-semibold">Cùng nhau luyện tập những bài toán thú vị nhé!</p>
+        </header>
+
+        <section class="mb-16">
+            <div class="flex items-center mb-6">
+                <span class="text-3xl mr-3">🛒</span>
+                <h2 class="text-3xl font-bold text-pink-600">Phần 1: Tính tiền hóa đơn</h2>
+            </div>
+            <p class="text-gray-600 font-medium mb-6 text-lg">Em hãy giúp thu ngân tính tổng số tiền trên các hóa đơn sau nhé!</p>
+            <div id="invoices-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pt-4 pb-4">
+                <!-- Invoices will be rendered here by JS -->
+            </div>
+        </section>
+
+        <section>
+            <div class="flex items-center mb-6 mt-8">
+                <span class="text-3xl mr-3">💡</span>
+                <h2 class="text-3xl font-bold text-blue-600">Phần 2: Giải toán có lời văn</h2>
+            </div>
+            <p class="text-gray-600 font-medium mb-6 text-lg">Đọc kĩ đề bài và tìm ra đáp án đúng cho từng câu hỏi dưới đây (Dạng bài: Tìm hai số khi biết Tổng và Hiệu).</p>
+            <div id="word-problems-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Word problems will be rendered here by JS -->
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Data for Invoices
+        const invoices = [
+            { title: "Hóa đơn 1", items: [{name: "Củ cải 🥕", price: 12000}, {name: "Sữa tươi 🥛", price: 39000}, {name: "Ngũ cốc 🥣", price: 124000}], total: 175000, color: "bg-pink-100" },
+            { title: "Hóa đơn 2", items: [{name: "Cà phê ☕", price: 72500}, {name: "Kẹo 🍬", price: 43000}, {name: "Bộ ấm chén 🫖", price: 452500}], total: 568000, color: "bg-blue-100" },
+            { title: "Hóa đơn 3", items: [{name: "Sách 📚", price: 45000}, {name: "Bút 🖊️", price: 15000}, {name: "Balo 🎒", price: 250000}], total: 310000, color: "bg-green-100" },
+            { title: "Hóa đơn 4", items: [{name: "Áo thun 👕", price: 120000}, {name: "Quần 👖", price: 150000}, {name: "Mũ 🧢", price: 35000}], total: 305000, color: "bg-yellow-100" }
+        ];
+
+        // Data for Word Problems
+        const wordProblems = [
+            { title: "Bài 1 🕊️", text: "Mai và Mi cùng nhau gấp được 154 con hạc giấy. Mai gấp nhiều hơn Mi 12 con hạc. Hỏi mỗi bạn gấp được bao nhiêu con hạc giấy?", inputs: [{label: "Mai", answer: 83}, {label: "Mi", answer: 71}], color: "bg-orange-100" },
+            { title: "Bài 2 🌳", text: "Trường Lê Lợi và Trường Kim Đồng trồng được tất cả 450 cây. Trường Lê Lợi trồng ít hơn Trường Kim Đồng là 28 cây. Hỏi mỗi trường trồng được bao nhiêu cây?", inputs: [{label: "Lê Lợi", answer: 211}, {label: "Kim Đồng", answer: 239}], color: "bg-teal-100" },
+            { title: "Bài 3 💰", text: "Mai và Mi tiết kiệm được 80.000 đồng. Số tiền mà Mai tiết kiệm nhiều hơn số tiền mà em Mi tiết kiệm là 10.000 đồng. Hỏi mỗi người tiết kiệm được bao nhiêu tiền?", inputs: [{label: "Mai", answer: 45000}, {label: "Mi", answer: 35000}], color: "bg-purple-100" },
+            { title: "Bài 4 ♻️", text: "Lớp 4A và 4B thu gom được 120kg giấy vụn. Lớp 4A thu gom nhiều hơn lớp 4B 16kg. Hỏi mỗi lớp thu gom được bao nhiêu kg?", inputs: [{label: "Lớp 4A", answer: 68}, {label: "Lớp 4B", answer: 52}], color: "bg-cyan-100" },
+            { title: "Bài 5 🌾", text: "Hai bao gạo nặng tổng cộng 150kg. Bao thứ nhất nặng hơn bao thứ hai 20kg. Hỏi mỗi bao nặng bao nhiêu kg?", inputs: [{label: "Bao 1", answer: 85}, {label: "Bao 2", answer: 65}], color: "bg-rose-100" },
+            { title: "Bài 6 👨‍👦", text: "Tổng số tuổi của bố và con là 46 tuổi. Bố hơn con 30 tuổi. Hỏi mỗi người bao nhiêu tuổi?", inputs: [{label: "Bố", answer: 38}, {label: "Con", answer: 8}], color: "bg-indigo-100" }
+        ];
+
+        function renderInvoices() {
+            const container = document.getElementById('invoices-container');
+            let html = '';
+            invoices.forEach((inv, idx) => {
+                html += `
+                <div class="receipt-edges ${inv.color} rounded-lg shadow-md p-5 flex flex-col justify-between transform transition duration-300 hover:-translate-y-2">
+                    <h3 class="text-xl font-bold mb-4 text-center text-gray-800 border-b-2 border-dashed border-gray-400 pb-2">${inv.title}</h3>
+                    <ul class="mb-4 flex-grow text-gray-700 text-lg">
+                        ${inv.items.map(item => `
+                            <li class="flex justify-between mb-2">
+                                <span class="font-semibold">${item.name}</span>
+                                <span>${item.price.toLocaleString('vi-VN')} đ</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <div class="border-t-2 border-dashed border-gray-400 pt-4 mb-4">
+                        <div class="flex items-center justify-between font-bold text-lg text-gray-800">
+                            <span>Tổng:</span>
+                            <div class="flex items-center">
+                                <input type="text" id="invoice-input-${idx}" class="w-24 text-center p-1 rounded-md border-2 border-gray-300 outline-none focus:border-pink-500 mr-2 bg-white" placeholder="?">
+                                <span>đ</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-auto">
+                        <button onclick="checkInvoice(${idx})" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-2 rounded-full transition shadow-sm text-sm">Kiểm tra</button>
+                        <button onclick="resetInvoice(${idx})" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-2 rounded-full transition shadow-sm text-sm">Làm lại</button>
+                    </div>
+                    <div id="invoice-feedback-${idx}" class="text-center min-h-[1.5rem] mt-3 transition-all duration-300 text-sm"></div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderWordProblems() {
+            const container = document.getElementById('word-problems-container');
+            let html = '';
+            wordProblems.forEach((wp, idx) => {
+                html += `
+                <div class="${wp.color} rounded-2xl shadow-lg p-6 flex flex-col justify-between transform transition duration-300 hover:shadow-xl">
+                    <h3 class="text-2xl font-extrabold mb-3 text-gray-800">${wp.title}</h3>
+                    <p class="text-gray-800 font-medium mb-5 text-lg leading-relaxed flex-grow">${wp.text}</p>
+                    <div class="space-y-3 mb-5">
+                        ${wp.inputs.map((inp, i) => `
+                            <div class="flex items-center justify-between bg-white bg-opacity-60 p-3 rounded-xl border border-white">
+                                <span class="font-bold text-gray-700 w-24 text-lg">${inp.label}:</span>
+                                <input type="text" id="wp-input-${idx}-${i}" class="flex-1 text-center p-2 rounded-lg border-2 border-gray-300 outline-none focus:border-blue-500 mx-2 text-lg bg-white" placeholder="Đáp án...">
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex gap-3 mt-auto">
+                        <button onclick="checkWP(${idx})" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-full transition transform hover:scale-105 shadow-md">Kiểm tra</button>
+                        <button onclick="resetWP(${idx})" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-full transition transform hover:scale-105 shadow-md">Làm lại</button>
+                    </div>
+                    <div id="wp-feedback-${idx}" class="text-center min-h-[1.5rem] mt-3 transition-all duration-300 text-base"></div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function parseInput(val) {
+            // Remove everything except numbers to handle users typing dots/spaces
+            const cleaned = val.replace(/[^0-9]/g, '');
+            return parseInt(cleaned, 10);
+        }
+
+        function checkInvoice(index) {
+            const input = document.getElementById(`invoice-input-${index}`);
+            const feedback = document.getElementById(`invoice-feedback-${index}`);
+            const val = parseInput(input.value);
+            
+            if (!isNaN(val) && val === invoices[index].total) {
+                input.classList.remove('bg-red-100', 'border-red-400');
+                input.classList.add('bg-green-200', 'border-green-500');
+                feedback.innerHTML = "🎉 Chính xác! Bạn giỏi quá!";
+                feedback.className = "text-green-700 font-bold mt-3 text-sm";
+            } else {
+                input.classList.remove('bg-green-200', 'border-green-500');
+                input.classList.add('bg-red-100', 'border-red-400');
+                feedback.innerHTML = "😢 Sai rồi, bạn tính lại nhé!";
+                feedback.className = "text-red-600 font-bold mt-3 text-sm";
+            }
+        }
+
+        function resetInvoice(index) {
+            const input = document.getElementById(`invoice-input-${index}`);
+            const feedback = document.getElementById(`invoice-feedback-${index}`);
+            input.value = '';
+            input.classList.remove('bg-red-100', 'border-red-400', 'bg-green-200', 'border-green-500');
+            input.classList.add('bg-white', 'border-gray-300');
+            feedback.innerHTML = '';
+        }
+
+        function checkWP(index) {
+            const wp = wordProblems[index];
+            const feedback = document.getElementById(`wp-feedback-${index}`);
+            let allCorrect = true;
+            let hasEmpty = false;
+
+            wp.inputs.forEach((inp, i) => {
+                const inputElement = document.getElementById(`wp-input-${index}-${i}`);
+                if(inputElement.value.trim() === '') {
+                    hasEmpty = true;
+                }
+                const val = parseInput(inputElement.value);
+                
+                if (!isNaN(val) && val === inp.answer) {
+                    inputElement.classList.remove('bg-red-100', 'border-red-400');
+                    inputElement.classList.add('bg-green-200', 'border-green-500');
+                } else {
+                    inputElement.classList.remove('bg-green-200', 'border-green-500');
+                    inputElement.classList.add('bg-red-100', 'border-red-400');
+                    allCorrect = false;
+                }
+            });
+
+            if (hasEmpty) {
+                 feedback.innerHTML = "⚠️ Hãy điền đầy đủ đáp án nhé!";
+                 feedback.className = "text-yellow-600 font-bold mt-3 text-base";
+            } else if (allCorrect) {
+                feedback.innerHTML = "🌟 Chúc mừng! Đáp án hoàn toàn chính xác!";
+                feedback.className = "text-green-700 font-bold mt-3 text-base";
+            } else {
+                feedback.innerHTML = "🤔 Hãy tính toán lại cẩn thận nhé!";
+                feedback.className = "text-red-600 font-bold mt-3 text-base";
+            }
+        }
+
+        function resetWP(index) {
+            const wp = wordProblems[index];
+            const feedback = document.getElementById(`wp-feedback-${index}`);
+            
+            wp.inputs.forEach((inp, i) => {
+                const inputElement = document.getElementById(`wp-input-${index}-${i}`);
+                inputElement.value = '';
+                inputElement.classList.remove('bg-red-100', 'border-red-400', 'bg-green-200', 'border-green-500');
+                inputElement.classList.add('bg-white', 'border-gray-300');
+            });
+            
+            feedback.innerHTML = '';
+        }
+
+        // Initialize App
+        window.onload = () => {
+            renderInvoices();
+            renderWordProblems();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập số có nhiều chữ số cùng thầy Quốc</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+        :root {
+            --primary: #4A90E2;
+            --secondary: #FFB347;
+            --accent: #FF6B6B;
+            --bg-color: #F0F8FF;
+            --text: #333;
+            --white: #FFF;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), #63a4ff);
+            color: var(--white);
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .section {
+            padding: 30px;
+            border-bottom: 2px dashed #eee;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            background: var(--secondary);
+            color: var(--white);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        /* Styling cho Bảng */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #e1e8ed;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: var(--white);
+            font-weight: bold;
+        }
+
+        .bg-light-blue { background-color: #e6f2ff; }
+        .bg-light-yellow { background-color: #fff8e6; }
+
+        /* Styling cho Tia số */
+        .number-line-container {
+            position: relative;
+            margin: 40px 0;
+            padding: 20px 0;
+        }
+        
+        .line {
+            height: 4px;
+            background: var(--text);
+            width: 100%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .points {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+        }
+
+        .point {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin-bottom: 10px;
+            border: 2px solid var(--white);
+        }
+
+        .val-box {
+            background: #f8f9fa;
+            border: 2px solid #ccc;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .val-box.empty {
+            color: transparent;
+            border-style: dashed;
+            border-color: var(--primary);
+        }
+
+        /* Styling cho thẻ bài */
+        .cards-grid {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .num-card {
+            background: linear-gradient(135deg, #FF9A9E, #FECFEF);
+            width: 60px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #d81b60;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: rotate(calc(var(--rot) * 1deg));
+            transition: transform 0.2s;
+        }
+
+        .num-card:hover {
+            transform: scale(1.1);
+            cursor: pointer;
+        }
+
+        /* Hộp câu hỏi */
+        .question-box {
+            background: #fff3cd;
+            border-left: 5px solid var(--secondary);
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+        }
+
+        .input-blank {
+            display: inline-block;
+            min-width: 80px;
+            border-bottom: 2px dashed var(--primary);
+            margin: 0 10px;
+            color: transparent;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #333;
+            color: white;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🚀 Ôn tập số có nhiều chữ số cùng thầy Quốc</h1>
+        <p>Vượt qua các thử thách để trở thành Master Toán Học!</p>
+    </div>
+
+    <!-- PHẦN 1: TIA SỐ VŨ TRỤ -->
+    <div class="section">
+        <span class="badge">Thử thách 1</span>
+        <h2>🌌 Hoàn thiện tia số không gian</h2>
+        <p>Phi thuyền của chúng ta đang di chuyển qua các trạm không gian. Dựa vào quy luật, em hãy điền số thích hợp vào các trạm bị thiếu nhé!</p>
+        
+        <div class="number-line-container">
+            <div class="line"></div>
+            <div class="points">
+                <div class="point"><div class="dot"></div><div class="val-box">999 996</div></div>
+                <div class="point"><div class="dot"></div><div class="val-box">999 997</div></div>
+                <div class="point"><div class="dot"></div><div class="val-box empty">?</div></div>
+                <div class="point"><div class="dot"></div><div class="val-box">999 999</div></div>
+                <div class="point"><div class="dot"></div><div class="val-box empty" style="border-color: var(--accent);">?</div></div>
+            </div>
+        </div>
+        <div class="question-box">
+            <strong>Câu hỏi:</strong> Số liền sau của số 999 999 là số nào? Đọc số đó lên!
+            <br>
+            <em>Trả lời:</em> ..........................................................................
+        </div>
+    </div>
+
+    <!-- PHẦN 2: BẢNG GIÁ TRỊ -->
+    <div class="section">
+        <span class="badge">Thử thách 2</span>
+        <h2>🏰 Giải mã kho báu các hàng và lớp</h2>
+        <p>Kho báu của hải tặc râu đen được giấu ở một hòn đảo có tọa độ vô cùng phức tạp. Hãy điền các số còn thiếu vào bảng phân tích cấu tạo số sau để tìm ra tọa độ nhé.</p>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="3">Lớp nghìn</th>
+                        <th colspan="3">Lớp đơn vị</th>
+                        <th rowspan="2">Viết số</th>
+                        <th rowspan="2">Đọc số</th>
+                    </tr>
+                    <tr>
+                        <th class="bg-light-blue">Hàng<br>trăm nghìn</th>
+                        <th class="bg-light-blue">Hàng<br>chục nghìn</th>
+                        <th class="bg-light-blue">Hàng<br>nghìn</th>
+                        <th class="bg-light-yellow">Hàng<br>trăm</th>
+                        <th class="bg-light-yellow">Hàng<br>chục</th>
+                        <th class="bg-light-yellow">Hàng<br>đơn vị</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>4</td>
+                        <td>2</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>5</td>
+                        <td>8</td>
+                        <td><span class="input-blank">?</span></td>
+                        <td>Bốn trăm hai mươi nghìn không trăm năm mươi tám</td>
+                    </tr>
+                    <tr>
+                        <td>?</td>
+                        <td>?</td>
+                        <td>?</td>
+                        <td>?</td>
+                        <td>?</td>
+                        <td>?</td>
+                        <td><strong>508 112</strong></td>
+                        <td><span class="input-blank">?</span></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>0</td>
+                        <td>3</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>4</td>
+                        <td><span class="input-blank">?</span></td>
+                        <td><span class="input-blank">?</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PHẦN 3: PHÂN TÍCH SỐ -->
+    <div class="section">
+        <span class="badge">Thử thách 3</span>
+        <h2>🧩 Cỗ máy phân tích số</h2>
+        <p>Giúp tiến sĩ Robot điền số thích hợp vào chỗ chấm để hệ thống hoạt động:</p>
+        <div class="question-box" style="background-color: #e8f4f8; border-left-color: var(--primary);">
+            <p>a) <strong>745 892</strong> = 700 000 + 40 000 + <span class="input-blank"></span> + 800 + <span class="input-blank"></span> + 2</p>
+            <p>b) <strong>300 005</strong> = <span class="input-blank"></span> + 5</p>
+            <p>c) <strong>950 000</strong> = 900 000 + <span class="input-blank"></span></p>
+        </div>
+    </div>
+
+    <!-- PHẦN 4: THỰC TẾ -->
+    <div class="section">
+        <span class="badge">Thử thách 4</span>
+        <h2>🌍 Kiến thức quanh ta</h2>
+        <p>Đọc đoạn thông tin khoa học dưới đây và trả lời câu hỏi:</p>
+        <div class="question-box" style="background-color: #e6ffe6; border-left-color: #2ecc71;">
+            <em>"Rùa biển là một trong những loài vật cổ đại nhất Trái Đất. Vào năm 2010, người ta ước tính có khoảng <strong>150 000</strong> cá thể rùa xanh sinh sản trên các bãi biển. Tuy nhiên, do ô nhiễm đại dương, đến nay các nhà khoa học ước tính số lượng rùa xanh cái trưởng thành chỉ còn khoảng <strong>85 500</strong> con."</em>
+        </div>
+        <ul>
+            <li>Năm 2010, ước tính có bao nhiêu cá thể rùa xanh sinh sản? Đọc số đó: <span class="input-blank"></span></li>
+            <li>Hiện nay ước tính còn bao nhiêu cá thể rùa xanh cái trưởng thành? Đọc số đó: <span class="input-blank"></span></li>
+        </ul>
+    </div>
+
+    <!-- PHẦN 5: TRÒ CHƠI THẺ BÀI -->
+    <div class="section">
+        <span class="badge">Thử thách 5</span>
+        <h2>🃏 Ảo thuật gia thẻ bài</h2>
+        <p>Thầy Quốc có 6 tấm thẻ mang các chữ số sau:</p>
+        
+        <div class="cards-grid">
+            <div class="num-card" style="--rot: -5;">8</div>
+            <div class="num-card" style="--rot: 3;">0</div>
+            <div class="num-card" style="--rot: -2;">5</div>
+            <div class="num-card" style="--rot: 6;">1</div>
+            <div class="num-card" style="--rot: -4;">4</div>
+            <div class="num-card" style="--rot: 2;">9</div>
+        </div>
+
+        <div class="question-box" style="background-color: #fff0f5; border-left-color: #d81b60;">
+            <p>Sử dụng <strong>tất cả 6 tấm thẻ</strong> trên, em hãy:</p>
+            <p>a) Lập 1 số <strong>chẵn</strong> lớn nhất: <span class="input-blank"></span></p>
+            <p>b) Lập 1 số <strong>lẻ</strong> bé nhất (chú ý chữ số 0 không thể đứng đầu): <span class="input-blank"></span></p>
+        </div>
+    </div>
+
+    <div class="footer">
+        Thiết kế bởi Hệ thống AI của Thầy Quốc | Chúc các em ôn tập thật vui! 🌟
+    </div>
+</div>
+
+</body>
+</html>
