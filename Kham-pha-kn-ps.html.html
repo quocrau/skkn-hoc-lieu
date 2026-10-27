@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khám phá phân số</title>
+    <!-- Tailwind CSS cho layout và styling nhanh -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font chữ cho trẻ em -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            min-height: 100vh;
+        }
+
+        /* Styling cho các miếng bánh (slices) trong SVG */
+        .fraction-slice {
+            fill: #ffffff;
+            stroke: #cbd5e1;
+            stroke-width: 2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fraction-slice:hover {
+            fill: #f1f5f9;
+        }
+
+        .fraction-slice.active {
+            fill: #3b82f6; /* Màu xanh dương tươi sáng khi được tô */
+            stroke: #2563eb;
+        }
+        
+        .fraction-slice.disabled {
+            pointer-events: none;
+        }
+
+        /* Hiệu ứng nảy cho nút */
+        .btn-bounce {
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-bounce:hover {
+            transform: scale(1.05);
+        }
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+
+        /* Hiệu ứng chúc mừng (pháo hoa nhỏ) */
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .success-anim {
+            animation: pop 0.5s ease-out forwards;
+        }
+
+        /* Trang trí bóng mờ cho vùng vẽ */
+        .svg-container {
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4">
+
+    <!-- Khung nội dung chính -->
+    <div class="max-w-4xl w-full bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border-4 border-white">
+        
+        <!-- Tiêu đề -->
+        <header class="bg-gradient-to-r from-blue-400 to-purple-500 py-6 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white drop-shadow-md tracking-wide">
+                ✨ Khám Phá Phân Số ✨
+            </h1>
+        </header>
+
+        <div class="p-6 md:p-8 flex flex-col md:flex-row gap-8">
+            
+            <!-- Phần Lý Thuyết (Cột trái) -->
+            <div class="flex-1 bg-yellow-50 rounded-2xl p-6 border-2 border-yellow-200 shadow-inner h-fit">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-3xl">📚</span>
+                    <h2 class="text-2xl font-bold text-orange-600">Lý thuyết cần nhớ</h2>
+                </div>
+                
+                <div class="space-y-4 text-gray-700 text-lg leading-relaxed">
+                    <p class="font-semibold text-blue-700 bg-blue-100 p-3 rounded-xl">
+                        Chia hình tròn thành 6 phần bằng nhau.
+                    </p>
+                    
+                    <p>
+                        Các số như <span class="font-bold text-xl text-blue-600">1/6</span> và <span class="font-bold text-xl text-blue-600">2/6</span> là những <strong>phân số</strong>.
+                    </p>
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                        <p class="mb-2">Mỗi phân số có <span class="text-red-500 font-bold">tử số</span> và <span class="text-green-600 font-bold">mẫu số</span>:</p>
+                        <ul class="list-disc pl-6 space-y-2 marker:text-orange-400">
+                            <li>
+                                <strong class="text-red-500">Tử số</strong> là số tự nhiên viết <em>trên</em> gạch ngang, chỉ số phần đã tô màu.
+                            </li>
+                            <li>
+                                <strong class="text-green-600">Mẫu số</strong> là số tự nhiên khác 0 viết <em>dưới</em> gạch ngang, chỉ số phần bằng nhau của cả hình tròn.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phần Thực Hành (Cột phải) -->
+            <div class="flex-1 flex flex-col items-center justify-start bg-blue-50/50 rounded-2xl p-6 border-2 border-blue-100">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-3xl">🎨</span>
+                    <h2 class="text-2xl font-bold text-blue-600">Thử tài tô màu</h2>
+                </div>
+                
+                <!-- Hướng dẫn lượt chơi -->
+                <div class="text-center mb-4">
+                    <p class="text-xl font-bold text-gray-800">
+                        Lượt <span id="round-display">1</span>/4
+                    </p>
+                    <p class="text-2xl font-extrabold text-purple-600 mt-2 bg-purple-100 px-4 py-2 rounded-full inline-block shadow-sm">
+                        Hãy tô màu <span id="target-fraction" class="text-3xl">1/6</span> hình tròn
+                    </p>
+                </div>
+
+                <!-- Khu vực vẽ SVG -->
+                <div class="svg-container relative w-64 h-64 md:w-80 md:h-80 mb-6 bg-white rounded-full border-4 border-gray-200">
+                    <svg id="pie-chart" viewBox="0 0 300 300" class="w-full h-full transform -rotate-90"></svg>
+                </div>
+
+                <!-- Khu vực phản hồi (thông báo) -->
+                <div id="feedback-area" class="h-16 flex items-center justify-center mb-4 w-full text-center">
+                    <!-- Text phản hồi sẽ được chèn bằng JS -->
+                </div>
+
+                <!-- Nút điều khiển -->
+                <div class="flex gap-4">
+                    <button id="btn-check" class="btn-bounce bg-green-500 hover:bg-green-600 text-white font-bold text-xl py-3 px-8 rounded-full shadow-lg border-b-4 border-green-700 focus:outline-none">
+                        Kiểm tra
+                    </button>
+                    <button id="btn-next" class="btn-bounce bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl py-3 px-8 rounded-full shadow-lg border-b-4 border-blue-700 focus:outline-none hidden">
+                        Lượt tiếp theo ➔
+                    </button>
+                    <button id="btn-restart" class="btn-bounce bg-orange-500 hover:bg-orange-600 text-white font-bold text-xl py-3 px-8 rounded-full shadow-lg border-b-4 border-orange-700 focus:outline-none hidden">
+                        Chơi lại từ đầu
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-gray-600 text-sm font-medium tracking-wider">
+        Minh Quốc
+    </footer>
+
+    <!-- Script xử lý logic trò chơi -->
+    <script>
+        // Cấu hình trò chơi
+        const rounds = [1, 2, 4, 5]; // Các tử số cần tô (trên mẫu số 6)
+        let currentRound = 0;
+        let selectedCount = 0;
+        const totalSlices = 6;
+        let isRoundCompleted = false;
+
+        // Các elements DOM
+        const svgElement = document.getElementById('pie-chart');
+        const targetFractionDisplay = document.getElementById('target-fraction');
+        const roundDisplay = document.getElementById('round-display');
+        const btnCheck = document.getElementById('btn-check');
+        const btnNext = document.getElementById('btn-next');
+        const btnRestart = document.getElementById('btn-restart');
+        const feedbackArea = document.getElementById('feedback-area');
+
+        // Hàm tính toán và vẽ các hình quạt (slices) cho SVG
+        function createSvgSlices() {
+            const cx = 150; // Tâm x của viewBox 300x300
+            const cy = 150; // Tâm y của viewBox 300x300
+            const r = 145;  // Bán kính (nhỏ hơn một chút so với viewBox để tránh cắt viền)
+            
+            for (let i = 0; i < totalSlices; i++) {
+                // Tính góc bắt đầu và kết thúc cho mỗi phần (đơn vị: radian)
+                // Một vòng tròn 360 độ (2 PI rad), chia 6 = 60 độ (PI/3 rad) mỗi phần
+                const startAngle = (i * 60) * (Math.PI / 180);
+                const endAngle = ((i + 1) * 60) * (Math.PI / 180);
+
+                // Tính tọa độ điểm trên đường tròn
+                const x1 = cx + r * Math.cos(startAngle);
+                const y1 = cy + r * Math.sin(startAngle);
+                const x2 = cx + r * Math.cos(endAngle);
+                const y2 = cy + r * Math.sin(endAngle);
+
+                // Cú pháp lệnh vẽ path (Move to, Line to, Arc to, Close path)
+                // M: di chuyển đến tâm
+                // L: kẻ đường đến điểm bắt đầu trên viền
+                // A: vẽ cung tròn đến điểm kết thúc (rx ry x-axis-rotation large-arc-flag sweep-flag x y)
+                // Z: Đóng hình (kẻ đường về tâm)
+                const d = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", d);
+                path.classList.add("fraction-slice");
+                path.dataset.index = i;
+
+                // Thêm sự kiện click cho mỗi miếng
+                path.addEventListener('click', toggleSlice);
+                svgElement.appendChild(path);
+            }
+        }
+
+        // Hàm xử lý khi click vào 1 miếng bánh
+        function toggleSlice(event) {
+            if (isRoundCompleted) return; // Không cho click nếu đã hoàn thành lượt
+
+            const slice = event.target;
+            if (slice.classList.contains('active')) {
+                slice.classList.remove('active');
+                selectedCount--;
+            } else {
+                slice.classList.add('active');
+                selectedCount++;
+            }
+            
+            // Xóa thông báo cũ khi người dùng thay đổi lựa chọn
+            feedbackArea.innerHTML = ''; 
+        }
+
+        // Khởi tạo lượt chơi mới
+        function initRound() {
+            // Cập nhật text hiển thị
+            const targetNumerator = rounds[currentRound];
+            targetFractionDisplay.innerText = `${targetNumerator}/6`;
+            roundDisplay.innerText = currentRound + 1;
+            
+            // Reset trạng thái
+            selectedCount = 0;
+            isRoundCompleted = false;
+            feedbackArea.innerHTML = '';
+            
+            // Ẩn/hiện nút
+            btnCheck.classList.remove('hidden');
+            btnNext.classList.add('hidden');
+            btnRestart.classList.add('hidden');
+
+            // Reset tất cả các miếng bánh
+            const slices = document.querySelectorAll('.fraction-slice');
+            slices.forEach(slice => {
+                slice.classList.remove('active', 'disabled');
+            });
+        }
+
+        // Hàm kiểm tra kết quả
+        function checkAnswer() {
+            const targetNumerator = rounds[currentRound];
+            
+            if (selectedCount === targetNumerator) {
+                // Đúng
+                isRoundCompleted = true;
+                
+                // Vô hiệu hóa click vào bánh
+                const slices = document.querySelectorAll('.fraction-slice');
+                slices.forEach(slice => slice.classList.add('disabled'));
+
+                // Hiển thị thông báo chúc mừng kèm hiệu ứng
+                feedbackArea.innerHTML = `
+                    <div class="success-anim bg-green-100 text-green-700 px-6 py-3 rounded-2xl font-bold text-xl border-2 border-green-300 shadow-sm">
+                        🎉 Chính xác! Bạn giỏi quá! 🌟
+                    </div>
+                `;
+                
+                btnCheck.classList.add('hidden');
+                
+                // Kiểm tra xem đã hết màn chưa
+                if (currentRound < rounds.length - 1) {
+                    btnNext.classList.remove('hidden');
+                } else {
+                    // Hoàn thành tất cả các lượt
+                    setTimeout(() => {
+                        feedbackArea.innerHTML = `
+                            <div class="success-anim bg-purple-100 text-purple-700 px-6 py-3 rounded-2xl font-bold text-xl border-2 border-purple-300 shadow-sm">
+                                🏆 Hoàn thành xuất sắc toàn bộ bài học! 🏆
+                            </div>
+                        `;
+                        btnRestart.classList.remove('hidden');
+                    }, 500);
+                }
+            } else {
+                // Sai
+                let msg = selectedCount < targetNumerator ? "Chưa đủ phần rồi, tô thêm nhé!" : "Tô nhiều phần quá rồi, bỏ bớt đi nào!";
+                if (selectedCount === 0) msg = "Bạn chưa tô màu phần nào cả!";
+                
+                feedbackArea.innerHTML = `
+                    <div class="bg-red-100 text-red-600 px-6 py-2 rounded-2xl font-bold text-lg border-2 border-red-200 animate-pulse">
+                        😅 ${msg} Hãy đếm và thử lại nhé!
+                    </div>
+                `;
+            }
+        }
+
+        // Chuyển lượt
+        function nextRound() {
+            currentRound++;
+            initRound();
+        }
+
+        // Chơi lại
+        function restartGame() {
+            currentRound = 0;
+            initRound();
+        }
+
+        // Gán sự kiện cho các nút
+        btnCheck.addEventListener('click', checkAnswer);
+        btnNext.addEventListener('click', nextRound);
+        btnRestart.addEventListener('click', restartGame);
+
+        // Khởi chạy khi load trang
+        window.onload = () => {
+            createSvgSlices();
+            initRound();
+        };
+    </script>
+</body>
+</html>
