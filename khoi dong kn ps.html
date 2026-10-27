@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khởi Động Toán 4 - Nhận Biết Số Phần Bánh Pizza</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Nunito & Comfortaa -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        display: ['Comfortaa', 'cursive']
+                    },
+                    colors: {
+                        amberwood: '#8C5226',
+                        crust: '#D97706',
+                        cheesegold: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Hiệu ứng miếng bánh khi trượt ra / đặt vào */
+        .slice-group {
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .slice-group:hover {
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.28));
+        }
+
+        /* Nút lựa chọn A, B, C kích thước lớn, hiệu ứng 3D nổi bật cho tiểu học */
+        .btn-choice {
+            transition: all 0.15s ease-in-out;
+            box-shadow: 0 7px 0px rgba(0, 0, 0, 0.14);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-choice:active:not(:disabled) {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0px rgba(0, 0, 0, 0.14);
+        }
+
+        /* Animation lắc khi trả lời sai */
+        @keyframes gentle-shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-9px); }
+            40%, 80% { transform: translateX(9px); }
+        }
+        .animate-shake {
+            animation: gentle-shake 0.4s ease-in-out;
+        }
+
+        /* Animation phóng to nhẹ khi đúng */
+        @keyframes bounce-scale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+            100% { transform: scale(1); }
+        }
+        .animate-bounce-scale {
+            animation: bounce-scale 0.35s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 min-h-screen font-sans text-slate-800 select-none flex flex-col justify-between overflow-x-hidden">
+
+    <!-- THANH TIÊU ĐỀ & CHẾ ĐỘ -->
+    <header class="bg-white/95 backdrop-blur-md shadow-md sticky top-0 z-30 border-b-2 border-amber-200">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            
+            <div class="flex items-center gap-3">
+                <span class="text-4xl filter drop-shadow">🍕</span>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-amber-500 text-white text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">Khởi động</span>
+                        <h1 class="font-display font-bold text-xl md:text-2xl text-amber-800 tracking-tight leading-tight">Khám Phá Chiếc Bánh Pizza</h1>
+                    </div>
+                    <p class="text-xs text-amber-700 font-bold hidden sm:block">Toán 4 • Hình thành biểu tượng: Nhận biết và đếm số phần bằng nhau</p>
+                </div>
+            </div>
+
+            <!-- Nút chuyển giữa Thử thách và Khám phá -->
+            <div class="flex bg-amber-100 p-1.5 rounded-2xl border border-amber-300">
+                <button id="tab-quiz" onclick="switchMode('quiz')" class="px-4 py-2 rounded-xl text-sm font-extrabold transition-all bg-amber-500 text-white shadow-sm flex items-center gap-2">
+                    <span>🎯 Thử Thách</span>
+                </button>
+                <button id="tab-free" onclick="switchMode('free')" class="px-4 py-2 rounded-xl text-sm font-extrabold transition-all text-amber-900 hover:bg-amber-200/80 flex items-center gap-2">
+                    <span>🖐 Tự Do Trải Nghiệm</span>
+                </button>
+            </div>
+
+            <!-- Bảng điểm & câu hỏi -->
+            <div id="quiz-badge" class="flex items-center gap-4 bg-amber-100/90 px-4 py-2 rounded-2xl border border-amber-300">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-2xl">⭐</span>
+                    <span id="star-score" class="font-black text-amber-900 text-xl">0</span>
+                </div>
+                <div class="w-px h-6 bg-amber-300"></div>
+                <div class="text-xs font-black text-amber-800 uppercase">
+                    Câu: <span id="question-num" class="text-base text-amber-900">1</span>/6
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Thanh tiến độ -->
+        <div id="quiz-progress-track" class="w-full bg-amber-200 h-2">
+            <div id="quiz-progress-bar" class="bg-gradient-to-r from-amber-400 to-emerald-500 h-2 transition-all duration-400 w-1/6"></div>
+        </div>
+    </header>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="max-w-6xl mx-auto w-full px-4 py-4 md:py-6 flex-1 flex flex-col justify-center">
+
+        <!-- ================= GIAO DIỆN 1: THỬ THÁCH (QUIZ) ================= -->
+        <div id="view-quiz" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            
+            <!-- Cột trái: Chiếc bánh Pizza chia 8 phần SVG -->
+            <div class="lg:col-span-6 flex flex-col items-center">
+                <div class="relative w-full max-w-[420px] md:max-w-[460px] aspect-square bg-gradient-to-b from-amber-100/90 to-orange-100/90 rounded-3xl p-3 shadow-2xl border-4 border-amber-300 flex items-center justify-center">
+                    
+                    <svg id="pizza-stage" viewBox="0 0 500 500" class="w-full h-full filter drop-shadow-md select-none overflow-visible">
+                        <defs>
+                            <!-- Mặt thớt gỗ tròn -->
+                            <radialGradient id="boardGrad" cx="45%" cy="40%" r="65%">
+                                <stop offset="0%" stop-color="#C68953" />
+                                <stop offset="85%" stop-color="#8E5224" />
+                                <stop offset="100%" stop-color="#5B3111" />
+                            </radialGradient>
+                            <!-- Vỏ bánh giòn vàng -->
+                            <linearGradient id="crustGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#FBBF24" />
+                                <stop offset="45%" stop-color="#EA580C" />
+                                <stop offset="100%" stop-color="#9A3412" />
+                            </linearGradient>
+                            <!-- Phô mai nướng chảy -->
+                            <radialGradient id="cheeseGrad" cx="42%" cy="42%" r="68%">
+                                <stop offset="0%" stop-color="#FEF9C3" />
+                                <stop offset="35%" stop-color="#FDE047" />
+                                <stop offset="80%" stop-color="#F59E0B" />
+                                <stop offset="100%" stop-color="#D97706" />
+                            </radialGradient>
+                            <!-- Xúc xích Pepperoni tròn -->
+                            <radialGradient id="pepGrad" cx="35%" cy="35%" r="60%">
+                                <stop offset="0%" stop-color="#EF4444" />
+                                <stop offset="70%" stop-color="#B91C1C" />
+                                <stop offset="100%" stop-color="#7F1D1D" />
+                            </radialGradient>
+                        </defs>
+
+                        <!-- ĐĨA THỚT GỖ & GIẤY NẾN -->
+                        <g id="table-plate">
+                            <circle cx="250" cy="250" r="236" fill="url(#boardGrad)" stroke="#43220A" stroke-width="7" />
+                            <circle cx="250" cy="250" r="218" fill="none" stroke="#6C3914" stroke-width="2.5" stroke-dasharray="9,6" opacity="0.6"/>
+                            <!-- Giấy nến cắt góc -->
+                            <polygon points="120,78 385,88 425,385 85,415" fill="#FFFDF5" opacity="0.88" rx="8" filter="drop-shadow(0 2px 5px rgba(0,0,0,0.18))"/>
+                        </g>
+
+                        <!-- 8 MIẾNG BÁNH SVG (ĐƯỢC RENDER QUA JS) -->
+                        <g id="slices-group"></g>
+
+                        <!-- TÂM ĐĨA BÁNH -->
+                        <circle cx="250" cy="250" r="6" fill="#8E5224" opacity="0.4"/>
+                    </svg>
+
+                    <!-- Huy hiệu trạng thái dưới bánh -->
+                    <div class="absolute bottom-3 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full border border-amber-300 shadow-md text-xs md:text-sm font-extrabold text-amber-950 flex items-center gap-3">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-3.5 h-3.5 rounded-full bg-red-500 inline-block border border-red-700"></span> 
+                            Đã lấy: <span id="status-taken" class="text-red-600 font-black text-base">1</span> phần
+                        </span>
+                        <span class="text-slate-300">|</span>
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 inline-block border border-emerald-700"></span> 
+                            Còn lại: <span id="status-remain" class="text-emerald-700 font-black text-base">7</span> phần
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Cột phải: Câu hỏi & 3 Lựa chọn đáp án (Hoàn toàn dạng chữ/số tự nhiên, KHÔNG có phân số) -->
+            <div class="lg:col-span-6 flex flex-col justify-center">
+                <div class="bg-white rounded-3xl p-5 md:p-7 shadow-xl border-2 border-amber-200">
+                    
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-orange-100 text-orange-800 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider border border-orange-200">
+                            Quan sát & Đếm
+                        </span>
+                        <span class="text-xs font-bold text-slate-500">Bánh chia thành 8 phần bằng nhau</span>
+                    </div>
+
+                    <!-- Nội dung câu hỏi -->
+                    <h2 id="quiz-question-title" class="text-lg md:text-xl font-bold text-slate-800 mb-2 leading-snug">
+                        Chiếc bánh pizza ban đầu được chia thành 8 phần bằng nhau.
+                    </h2>
+                    
+                    <div id="quiz-question-task" class="text-amber-950 font-black text-xl md:text-2xl bg-amber-50 p-4 rounded-2xl border-l-4 border-amber-500 mb-6 flex items-center gap-2">
+                        <span>👉</span>
+                        <span id="task-text">Đã lấy ra mấy phần của chiếc bánh?</span>
+                    </div>
+
+                    <!-- 3 Phương án lựa chọn A, B, C (Tự nhiên, không ký hiệu phân số) -->
+                    <div id="choices-box" class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-5">
+                        <!-- Nạp bằng Javascript -->
+                    </div>
+
+                    <!-- Hộp phản hồi sư phạm -->
+                    <div id="feedback-panel" class="hidden rounded-2xl p-4 border transition-all duration-300 mb-2">
+                        <div class="flex items-start gap-3">
+                            <span id="feedback-icon" class="text-3xl">🎉</span>
+                            <div class="flex-1">
+                                <h4 id="feedback-heading" class="font-black text-base">Chính xác! Bé giỏi lắm!</h4>
+                                <p id="feedback-detail" class="text-sm mt-1 text-slate-700 leading-relaxed font-semibold">
+                                    Đúng rồi, có 1 miếng bánh đã được tách rời ra ngoài chiếc đĩa.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nút sang câu tiếp theo -->
+                    <div class="flex justify-end pt-2">
+                        <button id="btn-next-question" onclick="goToNextQuestion()" class="hidden px-7 py-3.5 rounded-2xl font-black text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-200 transform active:scale-95 transition-all text-base flex items-center gap-2">
+                            <span>Câu Tiếp Theo</span>
+                            <span>➜</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= GIAO DIỆN 2: TỰ DO TRẢI NGHIỆM / DÀNH CHO GIÁO VIÊN ================= -->
+        <div id="view-free" class="hidden flex-col items-center">
+            <div class="w-full max-w-4xl bg-white rounded-3xl p-5 md:p-8 shadow-xl border-2 border-amber-200">
+                <div class="text-center mb-5">
+                    <span class="bg-indigo-100 text-indigo-800 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider border border-indigo-200">
+                        Chế độ Giáo viên thị phạm & Học sinh thao tác bảng
+                    </span>
+                    <h2 class="text-xl md:text-2xl font-black text-slate-800 mt-2">Chạm hoặc bấm vào từng miếng bánh để tách ra / đặt vào</h2>
+                    <p class="text-sm font-bold text-slate-500 mt-1">Giúp học sinh đếm trực quan số phần lấy ra và số phần còn lại</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <!-- Bánh tương tác -->
+                    <div class="md:col-span-7 flex justify-center">
+                        <div class="relative w-full max-w-[390px] aspect-square bg-amber-50 rounded-2xl p-2 border-2 border-amber-200 flex items-center justify-center shadow-inner">
+                            <svg id="free-pizza-stage" viewBox="0 0 500 500" class="w-full h-full select-none overflow-visible">
+                                <circle cx="250" cy="250" r="236" fill="url(#boardGrad)" stroke="#43220A" stroke-width="7" />
+                                <polygon points="120,78 385,88 425,385 85,415" fill="#FFFDF5" opacity="0.88" rx="8"/>
+                                <g id="free-slices-group"></g>
+                                <circle cx="250" cy="250" r="6" fill="#8E5224" opacity="0.4"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Bảng đếm tự nhiên -->
+                    <div class="md:col-span-5 flex flex-col gap-4">
+                        
+                        <!-- Thẻ phần đã tách ra -->
+                        <div class="bg-red-50 p-4 rounded-2xl border-2 border-red-200 flex items-center justify-between shadow-sm">
+                            <div>
+                                <span class="text-xs font-black uppercase tracking-wider text-red-600 block">Số phần đã lấy ra:</span>
+                                <span class="text-sm font-bold text-slate-600">Đã nhấc ra ngoài:</span>
+                            </div>
+                            <div class="bg-white px-4 py-2 rounded-xl shadow border border-red-300 text-red-600 text-2xl font-black">
+                                <span id="free-count-taken">0</span> phần
+                            </div>
+                        </div>
+
+                        <!-- Thẻ phần còn lại -->
+                        <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-200 flex items-center justify-between shadow-sm">
+                            <div>
+                                <span class="text-xs font-black uppercase tracking-wider text-emerald-700 block">Số phần còn lại trên đĩa:</span>
+                                <span class="text-sm font-bold text-slate-600">Còn nguyên trên đĩa:</span>
+                            </div>
+                            <div class="bg-white px-4 py-2 rounded-xl shadow border border-emerald-300 text-emerald-700 text-2xl font-black">
+                                <span id="free-count-remain">8</span> phần
+                            </div>
+                        </div>
+
+                        <!-- Lời kết luận sư phạm tự nhiên -->
+                        <div class="bg-amber-50 p-4 rounded-2xl border border-amber-300 text-sm text-amber-950 font-bold leading-relaxed" id="free-summary-note">
+                            🍕 Chiếc bánh pizza được chia đều thành 8 phần bằng nhau. Hãy nhấc thử 1 phần, 2 phần hoặc 3 phần bánh ra nhé!
+                        </div>
+
+                        <!-- Nút đặt nhanh phục vụ giảng dạy -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="setFreeSlicesPreset(1)" class="py-2.5 px-2 rounded-xl font-black text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition">
+                                Tách 1 phần
+                            </button>
+                            <button onclick="setFreeSlicesPreset(2)" class="py-2.5 px-2 rounded-xl font-black text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition">
+                                Tách 2 phần
+                            </button>
+                            <button onclick="setFreeSlicesPreset(3)" class="py-2.5 px-2 rounded-xl font-black text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition">
+                                Tách 3 phần
+                            </button>
+                        </div>
+
+                        <button onclick="setFreeSlicesPreset(0)" class="w-full py-2.5 rounded-xl font-extrabold text-sm bg-slate-200 hover:bg-slate-300 text-slate-800 transition">
+                            ↺ Đặt lại chiếc bánh nguyên vẹn (8 phần)
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- CHÂN TRANG SƯ PHẠM -->
+    <footer class="bg-white/80 border-t border-amber-200 py-3 px-4 text-center text-xs text-slate-600 font-bold">
+        Toán 4 (GDPT 2018) • Giai đoạn chuẩn bị: Hình thành biểu tượng "chia đều thành nhiều phần bằng nhau" và đếm số phần.
+    </footer>
+
+    <!-- MODAL CHÚC MỪNG KHI HOÀN THÀNH 6 CÂU -->
+    <div id="congrats-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center shadow-2xl border-4 border-amber-400 animate-bounce-scale">
+            <div class="text-6xl mb-2">🎉</div>
+            <h3 class="text-2xl font-display font-black text-amber-800">BÉ ĐÃ HOÀN THÀNH XUẤT SẮC!</h3>
+            <p class="text-slate-600 font-bold mt-1">Em đã đếm và nhận biết rất chính xác các phần của chiếc bánh pizza!</p>
+            
+            <div class="my-5 p-4 bg-amber-50 rounded-2xl border border-amber-200">
+                <div class="text-4xl font-black text-amber-600">
+                    <span id="final-star-display">6</span>/6 ⭐
+                </div>
+                <p class="text-sm font-extrabold text-slate-600 mt-1">Mắt quan sát rất tinh tường!</p>
+            </div>
+
+            <div class="flex flex-col gap-2.5">
+                <button onclick="restartAllQuestions()" class="w-full py-3.5 rounded-2xl font-black text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-orange-200 transition">
+                    🔄 Làm Lại Lượt Mới
+                </button>
+                <button onclick="switchToFreeFromModal()" class="w-full py-3 rounded-2xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
+                    🖐 Khám Phá Thao Tác Tự Do
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOÀN BỘ LOGIC JAVASCRIPT -->
+    <script>
+        /* -------------------------------------------------------------
+           1. ÂM THANH BẰNG WEB AUDIO API (Tự tạo, không phụ thuộc URL)
+           ------------------------------------------------------------- */
+        class ClassroomAudio {
+            constructor() {
+                this.ctx = null;
+            }
+            ensureCtx() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+            playCorrect() {
+                this.ensureCtx();
+                const now = this.ctx.currentTime;
+                // Chuỗi nốt vui nhộn Đồ - Mi - Sol - Đố
+                const freqs = [523.25, 659.25, 783.99, 1046.50];
+                freqs.forEach((f, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(f, now + i * 0.08);
+
+                    gain.gain.setValueAtTime(0, now + i * 0.08);
+                    gain.gain.linearRampToValueAtTime(0.25, now + i * 0.08 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.08);
+                    osc.stop(now + i * 0.08 + 0.38);
+                });
+            }
+            playWrong() {
+                this.ensureCtx();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(320, now);
+                osc.frequency.exponentialRampToValueAtTime(180, now + 0.25);
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.28);
+            }
+            playPop() {
+                this.ensureCtx();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(750, now + 0.1);
+
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.12);
+            }
+        }
+        const sfx = new ClassroomAudio();
+
+        /* -------------------------------------------------------------
+           2. BỘ CÂU HỎI NHẬN BIẾT SỐ PHẦN (TUYỆT ĐỐI KHÔNG CÓ PHÂN SỐ 1/8)
+           ------------------------------------------------------------- */
+        const QUESTIONS = [
+            {
+                id: 1,
+                taken: 1, // Tách 1 phần ra xa
+                target: 'taken',
+                title: "Chiếc bánh pizza ban đầu được chia thành 8 phần bằng nhau.",
+                task: "Quan sát chiếc bánh, người ta đã lấy ra mấy phần bánh?",
+                choices: ["1 phần", "2 phần", "4 phần"],
+                correctIndex: 0,
+                detail: "Chính xác! Đã có đúng 1 phần bánh được lấy rời ra khỏi chiếc bánh."
+            },
+            {
+                id: 2,
+                taken: 2, // Tách 2 phần ra xa
+                target: 'taken',
+                title: "Chiếc bánh pizza được chia đều thành 8 phần bằng nhau.",
+                task: "Đã có mấy phần bánh được lấy ra?",
+                choices: ["3 phần", "2 phần", "5 phần"],
+                correctIndex: 1,
+                detail: "Rất giỏi! Có 2 phần bánh đã được tách ra để chia cho hai bạn nhỏ."
+            },
+            {
+                id: 3,
+                taken: 3, // Tách 3 phần ra xa
+                target: 'taken',
+                title: "Chiếc bánh pizza thơm ngon gồm 8 phần đều nhau.",
+                task: "Bé hãy đếm xem đã lấy ra mấy phần bánh?",
+                choices: ["4 phần", "1 phần", "3 phần"],
+                correctIndex: 2,
+                detail: "Hoan hô! Bé đếm rất chuẩn, có đúng 3 phần bánh đã được lấy ra."
+            },
+            {
+                id: 4,
+                taken: 1, // Tách 1 phần -> Hỏi phần CÒN LẠI trên đĩa
+                target: 'remain',
+                title: "Chiếc bánh gồm 8 phần bằng nhau, sau khi đã lấy ra 1 phần bánh.",
+                task: "Còn lại mấy phần bánh ở trên đĩa?",
+                choices: ["7 phần", "6 phần", "8 phần"],
+                correctIndex: 0,
+                detail: "Tuyệt vời! Bánh có 8 phần, lấy bớt đi 1 phần thì còn lại đúng 7 phần bánh trên đĩa."
+            },
+            {
+                id: 5,
+                taken: 2, // Tách 2 phần -> Hỏi phần CÒN LẠI trên đĩa
+                target: 'remain',
+                title: "Từ chiếc bánh chia đều 8 phần, người ta đã lấy ra 2 phần bánh.",
+                task: "Trên đĩa còn lại mấy phần bánh?",
+                choices: ["5 phần", "6 phần", "4 phần"],
+                correctIndex: 1,
+                detail: "Đúng rồi! Lấy đi 2 phần trong 8 phần, trên đĩa còn lại đúng 6 phần bánh."
+            },
+            {
+                id: 6,
+                taken: 3, // Tách 3 phần -> Hỏi phần CÒN LẠI trên đĩa
+                target: 'remain',
+                title: "Cả nhà cùng liên hoan và đã thưởng thức 3 phần bánh trong 8 phần.",
+                task: "Còn lại mấy phần bánh chưa ăn?",
+                choices: ["3 phần", "6 phần", "5 phần"],
+                correctIndex: 2,
+                detail: "Chính xác! 8 phần trừ đi 3 phần đã ăn thì còn lại đúng 5 phần bánh."
+            }
+        ];
+
+        /* -------------------------------------------------------------
+           3. ĐỒ HỌA SVG: VẼ CHI TIẾT 8 PHẦN BÁNH PIZZA
+           ------------------------------------------------------------- */
+        const CENTER = 250;
+        const RADIUS = 180;
+        const TOTAL_SLICES = 8;
+        const ANGLE_STEP = 360 / TOTAL_SLICES; // 45 độ mỗi miếng
+
+        function polarCoord(cx, cy, r, angleDeg) {
+            const rad = (angleDeg - 90) * Math.PI / 180.0;
+            return {
+                x: cx + r * Math.cos(rad),
+                y: cy + r * Math.sin(rad)
+            };
+        }
+
+        function createSlicePath(cx, cy, r, startAngle, endAngle) {
+            const start = polarCoord(cx, cy, r, endAngle);
+            const end = polarCoord(cx, cy, r, startAngle);
+            const largeArc = (endAngle - startAngle <= 180) ? "0" : "1";
+            return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y} Z`;
+        }
+
+        function generateToppings(midAngle) {
+            let svg = '';
+            // 2 miếng Pepperoni đỏ tươi
+            const p1 = polarCoord(CENTER, CENTER, RADIUS * 0.72, midAngle - 7);
+            const p2 = polarCoord(CENTER, CENTER, RADIUS * 0.44, midAngle + 6);
+            svg += `
+                <circle cx="${p1.x}" cy="${p1.y}" r="15" fill="url(#pepGrad)" stroke="#7F1D1D" stroke-width="1.6" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.25))"/>
+                <circle cx="${p1.x - 3}" cy="${p1.y - 3}" r="2.2" fill="#FFA5A5" opacity="0.6"/>
+                <circle cx="${p2.x}" cy="${p2.y}" r="13" fill="url(#pepGrad)" stroke="#7F1D1D" stroke-width="1.6" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.25))"/>
+                <circle cx="${p2.x - 2}" cy="${p2.y - 2}" r="1.8" fill="#FFA5A5" opacity="0.6"/>
+            `;
+
+            // Lá húng quế xanh
+            const basil = polarCoord(CENTER, CENTER, RADIUS * 0.62, midAngle + 9);
+            svg += `
+                <g transform="translate(${basil.x}, ${basil.y}) rotate(${midAngle + 30})">
+                    <path d="M 0,-9 C 6,-6 6,6 0,9 C -6,6 -6,-6 0,-9 Z" fill="#2E7D32" stroke="#1B5E20" stroke-width="1.2"/>
+                    <line x1="0" y1="-8" x2="0" y2="8" stroke="#A5D6A7" stroke-width="0.8"/>
+                </g>
+            `;
+
+            // Vòng hành tây tím
+            const onion = polarCoord(CENTER, CENTER, RADIUS * 0.36, midAngle - 8);
+            svg += `
+                <path d="M ${onion.x - 8},${onion.y - 4} Q ${onion.x},${onion.y - 11} ${onion.x + 8},${onion.y - 3}" 
+                      fill="none" stroke="#BA68C8" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+            `;
+
+            return svg;
+        }
+
+        function renderPizzaSlices(targetGroupId, isFreeMode = false) {
+            const group = document.getElementById(targetGroupId);
+            group.innerHTML = '';
+
+            for (let i = 0; i < TOTAL_SLICES; i++) {
+                const startAngle = i * ANGLE_STEP;
+                const endAngle = startAngle + ANGLE_STEP;
+                const midAngle = startAngle + ANGLE_STEP / 2;
+
+                const sliceG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                sliceG.setAttribute("id", `${targetGroupId}-slice-${i}`);
+                sliceG.setAttribute("class", "slice-group");
+                sliceG.setAttribute("data-index", i);
+                sliceG.setAttribute("data-mid-angle", midAngle);
+
+                const crust = createSlicePath(CENTER, CENTER, RADIUS, startAngle, endAngle);
+                const cheese = createSlicePath(CENTER, CENTER, RADIUS * 0.86, startAngle, endAngle);
+
+                sliceG.innerHTML = `
+                    <!-- Viền vỏ bánh nướng vàng giòn -->
+                    <path d="${crust}" fill="url(#crustGrad)" stroke="#78350F" stroke-width="2.5" />
+                    <!-- Lớp phô mai béo ngậy -->
+                    <path d="${cheese}" fill="url(#cheeseGrad)" stroke="#D97706" stroke-width="1.2" />
+                    <!-- Chấm cháy xém vỏ bánh tự nhiên -->
+                    <circle cx="${polarCoord(CENTER, CENTER, RADIUS * 0.94, midAngle - 10).x}" 
+                            cy="${polarCoord(CENTER, CENTER, RADIUS * 0.94, midAngle - 10).y}" r="2.2" fill="#451A03" opacity="0.4"/>
+                    <circle cx="${polarCoord(CENTER, CENTER, RADIUS * 0.94, midAngle + 12).x}" 
+                            cy="${polarCoord(CENTER, CENTER, RADIUS * 0.94, midAngle + 12).y}" r="1.8" fill="#451A03" opacity="0.35"/>
+                    <!-- Topping phong phú -->
+                    ${generateToppings(midAngle)}
+                `;
+
+                if (isFreeMode) {
+                    sliceG.onclick = () => onToggleFreeSlice(i);
+                }
+
+                group.appendChild(sliceG);
+            }
+        }
+
+        // Đẩy miếng bánh tách xa tâm hoặc kéo về
+        function setSliceTorn(groupId, sliceIndex, isTorn) {
+            const el = document.getElementById(`${groupId}-slice-${sliceIndex}`);
+            if (!el) return;
+
+            if (isTorn) {
+                const midAngle = parseFloat(el.getAttribute("data-mid-angle"));
+                const rad = (midAngle - 90) * Math.PI / 180.0;
+                const dist = 46; // Khoảng cách tách miếng bánh
+                const dx = dist * Math.cos(rad);
+                const dy = dist * Math.sin(rad);
+                el.style.transform = `translate(${dx}px, ${dy}px) scale(1.03)`;
+                el.style.filter = "drop-shadow(0 6px 12px rgba(0,0,0,0.32))";
+            } else {
+                el.style.transform = "translate(0px, 0px) scale(1)";
+                el.style.filter = "none";
+            }
+        }
+
+        /* -------------------------------------------------------------
+           4. ĐIỀU KHIỂN CHẾ ĐỘ THỬ THÁCH (QUIZ)
+           ------------------------------------------------------------- */
+        let currentIdx = 0;
+        let scoreStars = 0;
+        let answeredCurrent = false;
+
+        function displayQuestion(index) {
+            answeredCurrent = false;
+            const q = QUESTIONS[index];
+
+            // Cập nhật số câu & thanh tiến độ
+            document.getElementById('question-num').innerText = index + 1;
+            document.getElementById('quiz-progress-bar').style.width = `${((index + 1) / QUESTIONS.length) * 100}%`;
+
+            // Cập nhật chữ câu hỏi
+            document.getElementById('quiz-question-title').innerText = q.title;
+            document.getElementById('task-text').innerText = q.task;
+
+            // Cập nhật thẻ trạng thái
+            document.getElementById('status-taken').innerText = q.taken;
+            document.getElementById('status-remain').innerText = TOTAL_SLICES - q.taken;
+
+            // Tách các miếng bánh theo yêu cầu câu hỏi (ví dụ: tách 1 miếng, 2 miếng, 3 miếng)
+            for (let i = 0; i < TOTAL_SLICES; i++) {
+                const isTaken = (i < q.taken);
+                setSliceTorn('slices-group', i, isTaken);
+            }
+
+            // Tạo 3 nút đáp án A, B, C (dạng chữ/số tự nhiên: "1 phần", "2 phần"...)
+            const box = document.getElementById('choices-box');
+            box.innerHTML = '';
+            const labels = ['A', 'B', 'C'];
+
+            q.choices.forEach((text, i) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-choice bg-amber-50 hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-500 rounded-2xl p-4 flex items-center justify-start gap-3 transition text-slate-800";
+                btn.onclick = () => onSelectChoice(i);
+
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-full bg-amber-200 text-amber-900 font-black text-sm flex items-center justify-center shrink-0">
+                        ${labels[i]}
+                    </span>
+                    <span class="text-xl md:text-2xl font-black text-amber-950">${text}</span>
+                `;
+                box.appendChild(btn);
+            });
+
+            // Ẩn bảng phản hồi & nút tiếp theo
+            document.getElementById('feedback-panel').className = "hidden rounded-2xl p-4 border transition-all duration-300 mb-2";
+            document.getElementById('btn-next-question').classList.add('hidden');
+        }
+
+        function onSelectChoice(chosenIdx) {
+            if (answeredCurrent) return;
+            answeredCurrent = true;
+
+            const q = QUESTIONS[currentIdx];
+            const isCorrect = (chosenIdx === q.correctIndex);
+            const buttons = document.getElementById('choices-box').children;
+
+            const panel = document.getElementById('feedback-panel');
+            const icon = document.getElementById('feedback-icon');
+            const heading = document.getElementById('feedback-heading');
+            const detail = document.getElementById('feedback-detail');
+            const nextBtn = document.getElementById('btn-next-question');
+
+            // Khóa các nút lựa chọn và tô màu
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true;
+                if (i === q.correctIndex) {
+                    buttons[i].classList.remove('bg-amber-50', 'border-amber-300');
+                    buttons[i].classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                } else if (i === chosenIdx && !isCorrect) {
+                    buttons[i].classList.remove('bg-amber-50', 'border-amber-300');
+                    buttons[i].classList.add('bg-rose-100', 'border-rose-400', 'text-rose-900', 'animate-shake');
+                }
+            }
+
+            panel.classList.remove('hidden');
+
+            if (isCorrect) {
+                scoreStars++;
+                document.getElementById('star-score').innerText = scoreStars;
+                sfx.playCorrect();
+
+                confetti({
+                    particleCount: 50,
+                    spread: 60,
+                    origin: { y: 0.7 }
+                });
+
+                panel.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-950', 'animate-bounce-scale');
+                icon.innerText = "🌟";
+                heading.innerText = "Chính xác! Bé rất thông minh!";
+                detail.innerText = q.detail;
+            } else {
+                sfx.playWrong();
+
+                panel.classList.add('bg-amber-100/80', 'border-amber-300', 'text-amber-950');
+                icon.innerText = "👀";
+                heading.innerText = "Bé hãy nhìn kỹ lại hình vẽ nhé!";
+                detail.innerText = `Hướng dẫn: Em hãy đếm kỹ lại xem có bao nhiêu miếng bánh đã được nhấc tách hẳn ra ngoài. Đáp án đúng là "${q.choices[q.correctIndex]}".`;
+            }
+
+            nextBtn.classList.remove('hidden');
+        }
+
+        function goToNextQuestion() {
+            sfx.playPop();
+            if (currentIdx < QUESTIONS.length - 1) {
+                currentIdx++;
+                displayQuestion(currentIdx);
+            } else {
+                // Đã xong 6 câu -> Mở modal chúc mừng
+                document.getElementById('final-star-display').innerText = scoreStars;
+                document.getElementById('congrats-modal').classList.remove('hidden');
+            }
+        }
+
+        function restartAllQuestions() {
+            document.getElementById('congrats-modal').classList.add('hidden');
+            currentIdx = 0;
+            scoreStars = 0;
+            document.getElementById('star-score').innerText = "0";
+            displayQuestion(0);
+        }
+
+        function switchToFreeFromModal() {
+            document.getElementById('congrats-modal').classList.add('hidden');
+            switchMode('free');
+        }
+
+        /* -------------------------------------------------------------
+           5. ĐIỀU KHIỂN CHẾ ĐỘ TỰ DO (DÀNH CHO GIÁO VIÊN & HỌC SINH TƯƠNG TÁC)
+           ------------------------------------------------------------- */
+        let freeSliceStates = [false, false, false, false, false, false, false, false]; // true = nhấc ra
+
+        function onToggleFreeSlice(index) {
+            sfx.playPop();
+            freeSliceStates[index] = !freeSliceStates[index];
+            setSliceTorn('free-slices-group', index, freeSliceStates[index]);
+            updateFreeDisplay();
+        }
+
+        function updateFreeDisplay() {
+            const takenCount = freeSliceStates.filter(s => s).length;
+            const remainCount = TOTAL_SLICES - takenCount;
+
+            document.getElementById('free-count-taken').innerText = takenCount;
+            document.getElementById('free-count-remain').innerText = remainCount;
+
+            const note = document.getElementById('free-summary-note');
+            if (takenCount === 0) {
+                note.innerHTML = `🍕 Chiếc bánh pizza nguyên vẹn được chia đều thành <b>8 phần bằng nhau</b>. Hãy bấm vào các miếng bánh để tách ra!`;
+            } else {
+                note.innerHTML = `👉 Đã lấy ra: <span class="text-red-600 font-black text-base">${takenCount} phần</span>. Còn lại trên đĩa: <span class="text-emerald-700 font-black text-base">${remainCount} phần</span> (Tổng cộng vẫn là 8 phần bằng nhau).`;
+            }
+        }
+
+        function setFreeSlicesPreset(count) {
+            sfx.playPop();
+            for (let i = 0; i < TOTAL_SLICES; i++) {
+                freeSliceStates[i] = (i < count);
+                setSliceTorn('free-slices-group', i, freeSliceStates[i]);
+            }
+            updateFreeDisplay();
+        }
+
+        /* -------------------------------------------------------------
+           6. CHUYỂN TAB CHẾ ĐỘ
+           ------------------------------------------------------------- */
+        function switchMode(mode) {
+            const tabQuiz = document.getElementById('tab-quiz');
+            const tabFree = document.getElementById('tab-free');
+            const viewQuiz = document.getElementById('view-quiz');
+            const viewFree = document.getElementById('view-free');
+            const quizBadge = document.getElementById('quiz-badge');
+            const quizProgress = document.getElementById('quiz-progress-track');
+
+            if (mode === 'quiz') {
+                tabQuiz.className = "px-4 py-2 rounded-xl text-sm font-extrabold transition-all bg-amber-500 text-white shadow-sm flex items-center gap-2";
+                tabFree.className = "px-4 py-2 rounded-xl text-sm font-extrabold transition-all text-amber-900 hover:bg-amber-200/80 flex items-center gap-2";
+                viewQuiz.classList.remove('hidden');
+                viewFree.classList.add('hidden');
+                quizBadge.classList.remove('hidden');
+                quizProgress.classList.remove('hidden');
+            } else {
+                tabFree.className = "px-4 py-2 rounded-xl text-sm font-extrabold transition-all bg-indigo-600 text-white shadow-sm flex items-center gap-2";
+                tabQuiz.className = "px-4 py-2 rounded-xl text-sm font-extrabold transition-all text-amber-900 hover:bg-amber-200/80 flex items-center gap-2";
+                viewQuiz.classList.add('hidden');
+                viewFree.classList.remove('hidden');
+                quizBadge.classList.add('hidden');
+                quizProgress.classList.add('hidden');
+
+                // Khởi tạo đồ họa bánh tự do nếu chưa có
+                if (!document.getElementById('free-slices-group').hasChildNodes()) {
+                    renderPizzaSlices('free-slices-group', true);
+                    updateFreeDisplay();
+                }
+            }
+        }
+
+        /* -------------------------------------------------------------
+           7. KHỞI CHẠY LẦN ĐẦU
+           ------------------------------------------------------------- */
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPizzaSlices('slices-group', false);
+            displayQuestion(0);
+        });
+    </script>
+</body>
+</html>
