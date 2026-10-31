@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khám Phá Phân Số - Toán 4</title>
+    <style>
+        :root {
+            --primary-color: #4A90E2; /* Xanh dương giáo dục */
+            --secondary-color: #F39C12; /* Cam dưa hấu/pizza */
+            --bg-color: #F4F7F6;
+            --panel-bg: #FFFFFF;
+            --text-color: #333333;
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0 0 10px 0; font-size: 28px; }
+        .instructions { font-size: 16px; opacity: 0.9; margin: 0; }
+
+        .main-workspace {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .control-panel, .visual-panel {
+            background: var(--panel-bg);
+            padding: 24px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            flex: 1;
+            min-width: 300px;
+        }
+
+        /* --- Controls --- */
+        .slider-group {
+            margin-bottom: 25px;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        #numeratorSlider::-webkit-slider-thumb {
+            background: var(--secondary-color);
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* --- Visual Display --- */
+        .visual-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fraction-display {
+            display: flex;
+            align-items: center;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .fraction-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .numerator-text { color: var(--secondary-color); }
+        .fraction-line {
+            width: 100%;
+            height: 4px;
+            background-color: var(--text-color);
+            margin: 5px 0;
+        }
+        .denominator-text { color: var(--primary-color); }
+
+        .reading-text {
+            font-size: 20px;
+            color: #555;
+            margin-left: 20px;
+            font-style: italic;
+        }
+
+        svg {
+            width: 250px;
+            height: 250px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            transition: all 0.3s ease;
+        }
+
+        /* --- Interaction Area --- */
+        .interaction-area {
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .question-box {
+            font-size: 18px;
+            color: #444;
+            margin-bottom: 20px;
+            min-height: 50px;
+            font-weight: 500;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .btn-test { background-color: #27AE60; }
+        .btn-test:hover { background-color: #219653; transform: translateY(-2px); }
+        
+        .btn-reset { background-color: #E74C3C; }
+        .btn-reset:hover { background-color: #C0392B; transform: translateY(-2px); }
+
+        .btn-submit { background-color: #9B59B6; display: none; }
+        .btn-submit:hover { background-color: #8E44AD; transform: translateY(-2px); }
+
+        /* --- Conclusion Area --- */
+        .conclusion {
+            display: none;
+            background: #D4EFDF;
+            border-left: 5px solid #27AE60;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .score-board {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        /* Animation class */
+        .shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .celebrate { animation: pop 0.5s ease; }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); filter: brightness(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .main-workspace { flex-direction: column; }
+            .reading-text { display: block; margin-left: 0; margin-top: 15px; text-align: center;}
+            .fraction-display { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="score-board" id="scoreBoard">Điểm: 0</div>
+
+<div class="container">
+    <header>
+        <h1>Khám Phá Phân Số</h1>
+        <p class="instructions" id="mainInstruction">Hãy kéo các thanh trượt bên dưới để tự tay chia bánh và quan sát sự thay đổi nhé!</p>
+    </header>
+
+    <div class="main-workspace">
+        <!-- Control Panel -->
+        <div class="control-panel" id="controls">
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span style="color: var(--primary-color)">Mẫu số (Chia thành mấy phần?)</span>
+                    <span id="denValue" style="color: var(--primary-color)">4</span>
+                </div>
+                <input type="range" id="denominatorSlider" min="1" max="12" value="4">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span style="color: var(--secondary-color)">Tử số (Lấy mấy phần?)</span>
+                    <span id="numValue" style="color: var(--secondary-color)">1</span>
+                </div>
+                <!-- Max will be controlled by JS to not exceed Denominator -->
+                <input type="range" id="numeratorSlider" min="0" max="4" value="1">
+            </div>
+        </div>
+
+        <!-- Visual Display Panel -->
+        <div class="visual-panel">
+            <div class="fraction-display">
+                <div class="fraction-col">
+                    <span class="numerator-text" id="dispNum">1</span>
+                    <div class="fraction-line"></div>
+                    <span class="denominator-text" id="dispDen">4</span>
+                </div>
+                <div class="reading-text" id="readingText">Đọc là: Một phần tư</div>
+            </div>
+
+            <!-- SVG Container for Pie Chart -->
+            <svg id="pieChart" viewBox="0 0 200 200">
+                <!-- Slices will be injected here by JS -->
+            </svg>
+        </div>
+    </div>
+
+    <!-- Interaction & Learning Flow -->
+    <div class="interaction-area">
+        <div class="question-box" id="questionText">
+            🤔 Câu hỏi: Khi bạn kéo thanh Mẫu số tăng lên, miếng bánh trở nên to hơn hay nhỏ đi?
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn-test" id="btnTest" onclick="startGameMode()">Kiểm tra thử thách (Chơi Game)</button>
+            <button class="btn-submit" id="btnSubmit" onclick="checkAnswer()">Nộp bài</button>
+            <button class="btn-reset" id="btnReset" onclick="resetExploreMode()">Khám phá lại</button>
+        </div>
+
+        <div class="conclusion" id="conclusionBox">
+            🎉 <strong>Kết luận bạn vừa tìm ra:</strong><br>
+            - <strong>Mẫu số</strong> (số ở dưới) cho biết cái bánh được chia làm bao nhiêu phần <strong>bằng nhau</strong>.<br>
+            - <strong>Tử số</strong> (số ở trên) cho biết chúng ta đã lấy đi (tô màu) bao nhiêu phần trong số đó.
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Data Dictionaries ---
+    const numberWords = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín", "mười", "mười một", "mười hai"];
+    const fractionWords = {
+        2: "hai", 3: "ba", 4: "tư", 5: "năm", 6: "sáu", 
+        7: "bảy", 8: "tám", 9: "chín", 10: "mười", 11: "mười một", 12: "mười hai"
+    };
+
+    // --- State Variables ---
+    let currentNum = 1;
+    let currentDen = 4;
+    let isGameMode = false;
+    let targetNum = 0;
+    let targetDen = 0;
+    let score = 0;
+
+    // --- DOM Elements ---
+    const numSlider = document.getElementById('numeratorSlider');
+    const denSlider = document.getElementById('denominatorSlider');
+    const numValText = document.getElementById('numValue');
+    const denValText = document.getElementById('denValue');
+    const dispNum = document.getElementById('dispNum');
+    const dispDen = document.getElementById('dispDen');
+    const readingText = document.getElementById('readingText');
+    const pieChart = document.getElementById('pieChart');
+    
+    const questionText = document.getElementById('questionText');
+    const conclusionBox = document.getElementById('conclusionBox');
+    const mainInstruction = document.getElementById('mainInstruction');
+    const scoreBoard = document.getElementById('scoreBoard');
+    
+    const btnTest = document.getElementById('btnTest');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const btnReset = document.getElementById('btnReset');
+
+    // --- Core Logic: Drawing SVG Pie Slices ---
+    function createPieSlicePath(cx, cy, r, startAngle, endAngle) {
+        // Handle full circle case
+        if (endAngle - startAngle >= 360 || endAngle - startAngle <= -360) {
+            return `M ${cx} ${cy-r} A ${r} ${r} 0 1 1 ${cx} ${cy+r} A ${r} ${r} 0 1 1 ${cx} ${cy-r} Z`;
+        }
+
+        const startRad = (startAngle - 90) * Math.PI / 180.0;
+        const endRad = (endAngle - 90) * Math.PI / 180.0;
+
+        const x1 = cx + r * Math.cos(startRad);
+        const y1 = cy + r * Math.sin(startRad);
+        const x2 = cx + r * Math.cos(endRad);
+        const y2 = cy + r * Math.sin(endRad);
+
+        const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
+
+        return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+    }
+
+    function updateVisualization() {
+        // Clear current SVG
+        pieChart.innerHTML = '';
+        
+        const cx = 100, cy = 100, r = 90;
+        const sliceAngle = 360 / currentDen;
+
+        for (let i = 0; i < currentDen; i++) {
+            const startAngle = i * sliceAngle;
+            const endAngle = (i + 1) * sliceAngle;
+            
+            const pathData = createPieSlicePath(cx, cy, r, startAngle, endAngle);
+            const pathNode = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            
+            pathNode.setAttribute("d", pathData);
+            pathNode.setAttribute("stroke", "#ffffff");
+            pathNode.setAttribute("stroke-width", "2");
+            
+            // Color logic: fill 'currentNum' slices with primary color, rest with empty color
+            if (i < currentNum) {
+                pathNode.setAttribute("fill", "var(--secondary-color)");
+            } else {
+                pathNode.setAttribute("fill", "#EAECEE"); // Light gray for empty parts
+            }
+            
+            pieChart.appendChild(pathNode);
+        }
+
+        // Update Text Display
+        dispNum.textContent = currentNum;
+        dispDen.textContent = currentDen;
+
+        // Construct reading string
+        let readString = "Đọc là: ";
+        if (currentNum === 0) {
+            readString += "Không phần " + fractionWords[currentDen];
+        } else {
+            // Capitalize first letter
+            let numWord = numberWords[currentNum];
+            numWord = numWord.charAt(0).toUpperCase() + numWord.slice(1);
+            readString += numWord + " phần " + fractionWords[currentDen];
+        }
+        readingText.textContent = readString;
+    }
+
+    // --- Event Listeners for Sliders ---
+    denSlider.addEventListener('input', function() {
+        currentDen = parseInt(this.value);
+        denValText.textContent = currentDen;
+        
+        // Constraint: Numerator cannot exceed Denominator
+        numSlider.max = currentDen;
+        if (currentNum > currentDen) {
+            currentNum = currentDen;
+            numSlider.value = currentNum;
+            numValText.textContent = currentNum;
+        }
+        
+        updateVisualization();
+        updateEducationalPrompt();
+    });
+
+    numSlider.addEventListener('input', function() {
+        currentNum = parseInt(this.value);
+        numValText.textContent = currentNum;
+        updateVisualization();
+        updateEducationalPrompt();
+    });
+
+    // --- Educational Flow Logic ---
+    function updateEducationalPrompt() {
+        if(isGameMode) return;
+
+        if (currentNum === currentDen) {
+            questionText.innerHTML = "💡 Bạn thấy không? Khi Tử số = Mẫu số, chúng ta có một cái bánh hoàn chỉnh (bằng 1).";
+            conclusionBox.style.display = 'block';
+        } else if (currentNum === 0) {
+            questionText.innerHTML = "💡 Khi Tử số = 0, phần tô màu sẽ biến mất. (Phân số có giá trị bằng 0).";
+        } else {
+            questionText.innerHTML = "🤔 Hãy tiếp tục thay đổi để xem các mảnh ghép thay đổi kích thước thế nào nhé.";
+        }
+    }
+
+    // --- Game Mode Logic ---
+    function startGameMode() {
+        isGameMode = true;
+        scoreBoard.style.display = 'block';
+        btnTest.style.display = 'none';
+        btnSubmit.style.display = 'inline-block';
+        conclusionBox.style.display = 'none';
+        
+        // Generate random target
+        targetDen = Math.floor(Math.random() * 8) + 3; // Random 3 to 10
+        targetNum = Math.floor(Math.random() * targetDen) + 1; // 1 to targetDen
+
+        let tNumWord = numberWords[targetNum];
+        tNumWord = tNumWord.charAt(0).toUpperCase() + tNumWord.slice(1);
+        let targetText = tNumWord + " phần " + fractionWords[targetDen];
+
+        mainInstruction.innerHTML = "<strong>THỬ THÁCH:</strong> Sử dụng thanh trượt để biểu diễn phân số bên dưới!";
+        questionText.innerHTML = `🎯 Nhiệm vụ: Hãy tạo hình biểu diễn phân số <span style="color:var(--primary-color); font-weight:bold; font-size:24px;">"${targetText}"</span>`;
+        
+        // Reset current visually to obscure answer
+        numSlider.value = 1; denSlider.value = 2;
+        numSlider.dispatchEvent(new Event('input'));
+        denSlider.dispatchEvent(new Event('input'));
+    }
+
+    function checkAnswer() {
+        if (currentNum === targetNum && currentDen === targetDen) {
+            // Correct
+            score += 10;
+            scoreBoard.textContent = `Điểm: ${score}`;
+            pieChart.classList.add('celebrate');
+            questionText.innerHTML = "🎉 Tuyệt vời! Bạn đã ghép chính xác!";
+            
+            setTimeout(() => {
+                pieChart.classList.remove('celebrate');
+                startGameMode(); // Next question
+            }, 1500);
+
+        } else {
+            // Incorrect
+            pieChart.classList.add('shake');
+            questionText.innerHTML = "❌ Chưa chính xác. Hãy kiểm tra lại Tử số và Mẫu số nhé!";
+            setTimeout(() => {
+                pieChart.classList.remove('shake');
+                questionText.innerHTML = `🎯 Nhiệm vụ: Hãy tạo hình biểu diễn phân số <span style="color:var(--primary-color); font-weight:bold; font-size:24px;">"${numberWords[targetNum]} phần ${fractionWords[targetDen]}"</span>`;
+            }, 1000);
+        }
+    }
+
+    function resetExploreMode() {
+        isGameMode = false;
+        score = 0;
+        scoreBoard.style.display = 'none';
+        btnTest.style.display = 'inline-block';
+        btnSubmit.style.display = 'none';
+        conclusionBox.style.display = 'none';
+        mainInstruction.innerHTML = "Hãy kéo các thanh trượt bên dưới để tự tay chia bánh và quan sát sự thay đổi nhé!";
+        questionText.innerHTML = "🤔 Câu hỏi: Khi bạn kéo thanh Mẫu số tăng lên, miếng bánh trở nên to hơn hay nhỏ đi?";
+        
+        numSlider.value = 1; denSlider.value = 4;
+        numSlider.dispatchEvent(new Event('input'));
+        denSlider.dispatchEvent(new Event('input'));
+    }
+
+    // Init display
+    updateVisualization();
+
+</script>
+</body>
+</html>
