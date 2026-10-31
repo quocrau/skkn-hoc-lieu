@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vương Quốc Phân Số - Thử Thách Lớp 4</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter & Fredoka -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti cho hiệu ứng pháo hoa -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #6EE7B7 0%, #3B82F6 100%);
+            min-height: 100vh;
+        }
+        .castle-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 4px solid #F59E0B;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .bounce-hover:hover {
+            transform: translateY(-3px);
+            transition: all 0.2s ease;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F59E0B;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Header Vương Quốc -->
+    <header class="bg-amber-500 text-white py-4 px-6 shadow-lg border-b-4 border-amber-600 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl animate-bounce">👑</span>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide drop-shadow-md">VƯƠNG QUỐC PHÂN SỐ</h1>
+                    <p class="text-xs text-amber-100 font-semibold">Chinh Phục 5 Cửa Ái Phép Cộng Phân Số (Toán Lớp 4)</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 bg-amber-600 px-4 py-2 rounded-full border-2 border-amber-300 shadow-inner">
+                <div class="flex items-center gap-1.5 font-bold text-yellow-200 text-lg">
+                    <i class="fa-solid fa-star text-yellow-300 animate-spin" style="animation-duration: 4s;"></i>
+                    <span id="score-display">0</span> Điểm
+                </div>
+                <div class="h-5 w-0.5 bg-amber-400"></div>
+                <div class="flex items-center gap-1.5 font-bold text-white text-sm">
+                    <i class="fa-solid fa-fire text-orange-300"></i>
+                    <span id="streak-display">0</span> Chuỗi đúng
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+
+        <!-- MÀN HÌNH CHÀO (HOME) -->
+        <div id="screen-home" class="castle-card rounded-3xl p-6 sm:p-10 text-center max-w-2xl mx-auto my-auto animate-fadeIn">
+            <div class="text-6xl sm:text-7xl mb-4 animate-bounce">🏰✨</div>
+            <h2 class="text-3xl sm:text-4xl font-bold text-amber-600 mb-3">Chào Mừng Đến Vùng Đất Phân Số!</h2>
+            <p class="text-gray-600 mb-6 text-sm sm:text-base leading-relaxed">
+                Hôm nay các bạn nhỏ sẽ cùng Cú Thông Thái và các bạn nhỏ vượt qua <b>5 Cửa thử thách</b> về phép cộng phân số cùng mẫu số. Mỗi cửa gồm 2 câu hỏi thú vị để giành lấy kho báu vương quốc nhé!
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+                <div class="bg-amber-100 p-3 rounded-xl border border-amber-300 text-xs font-bold text-amber-800">Cửa 1<br>Cộng cùng mẫu</div>
+                <div class="bg-emerald-100 p-3 rounded-xl border border-emerald-300 text-xs font-bold text-emerald-800">Cửa 2<br>Tìm số hợp lệ</div>
+                <div class="bg-sky-100 p-3 rounded-xl border border-sky-300 text-xs font-bold text-sky-800">Cửa 3<br>AI Nhầm (Cả tử mẫu)</div>
+                <div class="bg-purple-100 p-3 rounded-xl border border-purple-300 text-xs font-bold text-purple-800">Cửa 4<br>AI Nhầm (Cộng mẫu)</div>
+                <div class="bg-rose-100 p-3 rounded-xl border border-rose-300 text-xs font-bold text-rose-800 col-span-2 sm:col-span-1">Cửa 5<br>Thực tế</div>
+            </div>
+            <button onclick="startJourney()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg transform transition active:scale-95 bounce-hover flex items-center justify-center gap-2 mx-auto">
+                <i class="fa-solid fa-play"></i> Bắt Đầu Hành Trình Khám Phá
+            </button>
+        </div>
+
+        <!-- MÀN HÌNH THỬ THÁCH (QUIZ) -->
+        <div id="screen-quiz" class="hidden castle-card rounded-3xl p-5 sm:p-8 max-w-3xl mx-auto w-full">
+            <!-- Tiến độ cửa -->
+            <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-amber-200">
+                <div>
+                    <span id="gate-badge" class="bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow">CỬA 1</span>
+                    <h3 id="gate-title" class="text-xl sm:text-2xl font-bold text-gray-800 mt-2">Cộng cùng mẫu số</h3>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-semibold text-gray-500 uppercase">Câu hỏi</span>
+                    <div class="text-lg font-bold text-amber-600"><span id="current-q-num">1</span> / <span id="total-q-num">2</span></div>
+                </div>
+            </div>
+
+            <!-- Khu vực hình ảnh minh họa sinh động -->
+            <div id="illustration-container" class="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-4 border border-amber-200 flex items-center justify-center gap-4 min-h-[120px]">
+                <!-- Hình ảnh hoặc icon minh họa sẽ được render bằng JS -->
+            </div>
+
+            <!-- Nội dung câu hỏi -->
+            <div class="mb-6">
+                <p id="question-text" class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 leading-relaxed">
+                    <!-- Nội dung câu hỏi -->
+                </p>
+                
+                <!-- Khu vực lựa chọn câu trả lời (Render tùy dạng) -->
+                <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Các lựa chọn -->
+                </div>
+            </div>
+
+            <!-- Khu vực phản hồi / Giải thích -->
+            <div id="feedback-box" class="hidden rounded-2xl p-4 mb-6 text-sm sm:text-base border-2 animate-fadeIn">
+                <div class="font-bold flex items-center gap-2 mb-1" id="feedback-title"></div>
+                <p id="feedback-desc" class="text-gray-700"></p>
+            </div>
+
+            <!-- Nút điều hướng -->
+            <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                <button onclick="goHome()" class="text-gray-500 hover:text-gray-700 font-semibold text-sm flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-house"></i> Về trang chủ
+                </button>
+                <button id="next-btn" onclick="nextQuestion()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap-2">
+                    Câu tiếp theo <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH KẾT QUẢ (RESULTS) -->
+        <div id="screen-result" class="hidden castle-card rounded-3xl p-6 sm:p-10 text-center max-w-2xl mx-auto my-auto animate-fadeIn">
+            <div class="text-6xl sm:text-7xl mb-4 animate-bounce">🏆🎉</div>
+            <h2 class="text-3xl font-bold text-amber-600 mb-2">Chúc Mừng Bạn Đã Hoàn Thành!</h2>
+            <p class="text-gray-600 mb-6">Bạn đã xuất sắc vượt qua toàn bộ 5 cửa thử thách trong Vương Quốc Phân Số.</p>
+            
+            <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 mb-6 max-w-md mx-auto">
+                <div class="text-sm font-semibold text-gray-500 uppercase">Tổng số điểm đạt được</div>
+                <div class="text-4xl font-extrabold text-amber-600 my-2"><span id="final-score">0</span> / 100</div>
+                <p id="result-message" class="text-sm font-medium text-amber-800 mt-2">Tuyệt vời! Bạn là Thần Đồng Toán Học!</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button onclick="restartJourney()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> Chơi Lại Từ Đầu
+                </button>
+                <button onclick="goHome()" class="bg-sky-500 hover:bg-sky-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-house"></i> Về Màn Hình Chính
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-white text-xs opacity-90 font-medium">
+        Vương Quốc Phân Số • Ứng dụng học Toán lớp 4 tương tác sinh động ✨
+    </footer>
+
+    <!-- Audio synthesizer bằng Web Audio API (Không cần file âm thanh ngoài) -->
+    <script>
+        const SoundFX = {
+            playCorrect() {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } catch(e) {}
+            },
+            playWrong() {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(150, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } catch(e) {}
+            }
+        };
+
+        // Dữ liệu 5 cửa (Mỗi cửa 2 câu hỏi: Câu 1 gốc từ file, Câu 2 bổ sung mới)
+        const quizData = [
+            // CỬA 1
+            {
+                gateId: "Cửa 1",
+                gateTitle: "Cộng Cùng Mẫu Số (Cơ Bản)",
+                icon: "🍕",
+                questions: [
+                    {
+                        type: "mcq",
+                        question: "Tính phép tính phân số sau: <br><span class='text-2xl text-amber-600 font-bold'>$$\\frac{1}{5} + \\frac{2}{5} = ?$$</span>",
+                        illustration: `
+                            <div class="flex items-center gap-3">
+                                <div class="text-center"><span class="text-3xl">🍕</span><div class="text-xs font-bold text-gray-600">1 phần 5</div></div>
+                                <span class="text-xl font-bold text-amber-600">+</span>
+                                <div class="text-center"><span class="text-3xl">🍕🍕</span><div class="text-xs font-bold text-gray-600">2 phần 5</div></div>
+                                <span class="text-xl font-bold text-amber-600">=</span>
+                                <div class="text-center"><span class="text-3xl">🍕🍕🍕</span><div class="text-xs font-bold text-gray-600">?</div></div>
+                            </div>
+                        `,
+                        options: [
+                            { text: "A. \\(\\frac{3}{10}\\)", correct: false },
+                            { text: "B. \\(\\frac{3}{5}\\)", correct: true },
+                            { text: "C. \\(\\frac{2}{25}\\)", correct: false },
+                            { text: "D. \\(\\frac{1}{5}\\)", correct: false }
+                        ],
+                        explanation: "Khi cộng hai phân số cùng mẫu số, ta cộng hai tử số với nhau và giữ nguyên mẫu số: \\(1 + 2 = 3\\), giữ nguyên mẫu \\(5\\). Kết quả là \\(\\frac{3}{5}\\)."
+                    },
+                    {
+                        type: "mcq",
+                        question: "<b>Câu hỏi bổ sung:</b> Tính giá trị biểu thức: <br><span class='text-2xl text-amber-600 font-bold'>$$\\frac{3}{8} + \\frac{4}{8} = ?$$</span>",
+                        illustration: `
+                            <div class="flex items-center gap-3">
+                                <div class="text-center"><span class="text-3xl">🍰🍰🍰</span><div class="text-xs font-bold text-gray-600">3 phần 8</div></div>
+                                <span class="text-xl font-bold text-amber-600">+</span>
+                                <div class="text-center"><span class="text-3xl">🍰🍰🍰🍰</span><div class="text-xs font-bold text-gray-600">4 phần 8</div></div>
+                                <span class="text-xl font-bold text-amber-600">=</span>
+                                <div class="text-center"><span class="text-3xl">🍰...</span><div class="text-xs font-bold text-gray-600">?</div></div>
+                            </div>
+                        `,
+                        options: [
+                            { text: "A. \\(\\frac{7}{16}\\)", correct: false },
+                            { text: "B. \\(\\frac{7}{8}\\)", correct: true },
+                            { text: "C. \\(\\frac{12}{8}\\)", correct: false },
+                            { text: "D. \\(\\frac{1}{8}\\)", correct: false }
+                        ],
+                        explanation: "Cộng tử số: \\(3 + 4 = 7\\). Giữ nguyên mẫu số: \\(8\\). Vậy kết quả là \\(\\frac{7}{8}\\)."
+                    }
+                ]
+            },
+            // CỬA 2
+            {
+                gateId: "Cửa 2",
+                gateTitle: "Tìm Số Hợp Lệ Trong Phép Cộng",
+                icon: "🍏",
+                questions: [
+                    {
+                        type: "input",
+                        question: "Điền số thích hợp vào dấu hỏi chấm (?) để được đẳng thức đúng:<br><span class='text-xl text-emerald-700 font-bold'>$$\\frac{7}{15} + \\frac{?}{15} = \\frac{10}{15}$$</span>",
+                        illustration: `
+                            <div class="flex items-center gap-2">
+                                <span class="text-3xl">🍏🍏🍏🍏🍏🍏🍏</span>
+                                <span class="text-xl font-bold text-emerald-600">+ [ ? ] =</span>
+                                <span class="text-3xl">🍏🍏🍏🍏🍏🍏🍏🍏🍏🍏</span>
+                            </div>
+                        `,
+                        correctAnswer: "3",
+                        placeholder: "Nhập số vào đây...",
+                        explanation: "Vì mẫu số đã bằng nhau (\\(15\\)), ta tìm tử số còn thiếu: \\(7 + ? = 10\\). Suy ra \\(? = 10 - 7 = 3\\)."
+                    },
+                    {
+                        type: "input",
+                        question: "<b>Câu hỏi bổ sung:</b> Điền số thích hợp vào dấu ?:<br><span class='text-xl text-emerald-700 font-bold'>a) \\(\\frac{5}{12} + \\frac{?}{12} = \\frac{11}{12}\\)<br>b) \\(\\frac{4}{7} + \\frac{3}{?} = \\frac{7}{7}\\)</span><br><span class='text-sm text-gray-600 mt-2 block'>(Hãy nhập 2 số cách nhau bằng dấu phẩy, ví dụ: 6, 7)</span>",
+                        illustration: `
+                            <div class="flex items-center gap-2">
+                                <span class="text-3xl">🍉🍉🍉🍉🍉</span>
+                                <span class="text-xl font-bold text-emerald-600">+ [ ? ] = \\(\\frac{11}{12}\\) & \\(\\frac{4}{7} + \\frac{3}{?} = 1\\)</span>
+                            </div>
+                        `,
+                        correctAnswer: "6, 7",
+                        placeholder: "Ví dụ: 6, 7",
+                        explanation: "a) \\(5 + ? = 11\\) nên \\(? = 6\\). b) Tử cộng nhau là \\(4 + 3 = 7\\), mẫu giữ nguyên bằng \\(7\\) nên \\(? = 7\\). Đáp án điền là: 6, 7."
+                    }
+                ]
+            },
+            // CỬA 3
+            {
+                gateId: "Cửa 3",
+                gateTitle: "Phát Hiện Lỗi Sai: AI Cộng Cả Tử Và Mẫu",
+                icon: "🤖",
+                questions: [
+                    {
+                        type: "mcq",
+                        question: "Bạn Robot giải phép tính: <br><span class='text-xl text-sky-800 font-bold'>$$\\frac{4}{9} + \\frac{1}{9} = \\frac{4+1}{9+9} = \\frac{5}{18}$$</span><br>Theo em, phép tính của Robot là <b>Đúng</b> hay <b>Sai</b>?",
+                        illustration: `
+                            <div class="flex items-center gap-3 bg-sky-50 p-3 rounded-xl border border-sky-200">
+                                <span class="text-4xl">🤖❓</span>
+                                <div class="text-sm text-sky-900 font-medium">Robot đã cộng cả mẫu số với mẫu số! Việc này có chính xác không nhỉ?</div>
+                            </div>
+                        `,
+                        options: [
+                            { text: "A. Đúng", correct: false },
+                            { text: "B. Sai", correct: true }
+                        ],
+                        explanation: "Sai hoàn toàn! Khi cộng phân số cùng mẫu, ta chỉ cộng tử số và <b>giữ nguyên mẫu số</b>. Phép tính đúng phải là \\(\\frac{4+1}{9} = \\frac{5}{9}\\)."
+                    },
+                    {
+                        type: "mcq",
+                        question: "<b>Câu hỏi bổ sung:</b> Robot lại tính tiếp:<br><span class='text-xl text-sky-800 font-bold'>$$\\frac{2}{7} + \\frac{3}{7} = \\frac{2+3}{7+7} = \\frac{5}{14}$$</span><br>Kết quả này Đúng hay Sai?",
+                        illustration: `
+                            <div class="flex items-center gap-3 bg-sky-50 p-3 rounded-xl border border-sky-200">
+                                <span class="text-4xl">🤖⚠️</span>
+                                <div class="text-sm text-sky-900 font-medium">Robot lại cộng mẫu số với nhau nữa rồi!</div>
+                            </div>
+                        `,
+                        options: [
+                            { text: "A. Đúng", correct: false },
+                            { text: "B. Sai", correct: true }
+                        ],
+                        explanation: "Sai! Mẫu số phải được giữ nguyên là \\(7\\), không được cộng mẫu với mẫu. Kết quả đúng phải là \\(\\frac{5}{7}\\)."
+                    }
+                ]
+            },
+            // CỬA 4
+            {
+                gateId: "Cửa 4",
+                gateTitle: "Phát Hiện Lỗi Sai: Cộng Mẫu Giữ Nguyên Tử",
+                icon: "🦉",
+                questions: [
+                    {
+                        type: "mcq",
+                        question: "Học sinh tò mò tính toán như sau: <br><span class='text-xl text-purple-800 font-bold'>$$\\frac{3}{5} + \\frac{3}{5} = \\frac{3}{5+5} = \\frac{3}{10}$$</span><br>Theo em kết quả này Đúng hay Sai?",
+                        illustration: `
+                            <div class="flex items-center gap-3 bg-purple-50 p-3 rounded-xl border border-purple-200">
+                                <span class="text-4xl">🦉🔍</span>
+                                <div class="text-sm text-purple-900 font-medium">Cộng mẫu số nhưng lại giữ nguyên tử số? Cú Thông Thái lắc đầu!</div>
+                            </div>
+                        `,
+                        options: [
+                            { text: "A. Đúng", correct: false },
+                            { text: "B. Sai", correct: true }
+                        ],
+                        explanation: "Sai! Quy tắc đúng là <b>cộng hai tử số với nhau và giữ nguyên mẫu số</b>. Phải là \\(\\frac{3+3}{5} = \\frac{6}{5}\\)."
+                    },
+                    {
+                        type: "mcq",
+                        question: "<b>Câu hỏi bổ sung:</b> Xem xét phép tính sau:<br><span class='text-xl text-purple-800 font-bold'>$$\\frac{2}{6} + \\frac{2}{6} = \\frac{2}{6+6} = \\frac{2}{12}$$</span><br>Phép tính này Đúng hay Sai?",
+                        illustration: `
+                            <div class="flex items-center gap-3 bg-purple-50 p-3 rounded-xl border border-purple-200">
+                                <span class="text-4xl">🦉💡</span>
+                                <div class="text-sm text-purple-900 font-medium">Hãy kiểm tra kỹ tử số và mẫu số nhé!</div>
+                            </div>
+                        `,
+                        options: [
+                            { text: "A. Đúng", correct: false },
+                            { text: "B. Sai", correct: true }
+                        ],
+                        explanation: "Sai! Tử số phải được cộng lại (\\(2 + 2 = 4\\)) và mẫu số giữ nguyên (\\(6\\)), kết quả đúng là \\(\\frac{4}{6}\\)."
+                    }
+                ]
+            },
+            // CỬA 5
+            {
+                gateId: "Cửa 5",
+                gateTitle: "Bài Toán Thực Tế Về Phân Số",
+                icon: "📚",
+                questions: [
+                    {
+                        type: "mcq",
+                        question: "Mai đọc sách: Ngày 1 Mai đọc được <span class='font-bold text-rose-600'>\\(\\frac{2}{7}\\)</span> cuốn sách, ngày 2 đọc được <span class='font-bold text-rose-600'>\\(\\frac{3}{7}\\)</span> cuốn sách. Hỏi cả hai ngày Mai đọc được bao nhiêu phần cuốn sách?",
+                        illustration: `
+                            <div class="flex items-center gap-3 bg-rose-50 p-3 rounded-xl border border-rose-200">
+                                <span class="text-4xl">📖👧</span>
+                                <div class="text-sm text-rose-900 font-medium">Ngày 1: 2/7 cuốn • Ngày 2: 3/7 cuốn. Tổng cộng là bao nhiêu phần?</div>
+                            </div>
+                        `,
+                        options: [
+                            { text: "A. \\(\\frac{5}{14}\\)", correct: false },
+                            { text: "B. \\(\\frac{5}{7}\\)", correct: true },
+                            { text: "C. \\(\\frac{1}{7}\\)", correct: false },
+                            { text: "D. \\(\\frac{6}{7}\\)", correct: false }
+                        ],
+                        explanation: "Lời giải: Cả hai ngày Mai đọc được số phần cuốn sách là:<br>\\(\\frac{2}{7} + \\frac{3}{7} = \\frac{2+3}{7} = \\frac{5}{7}\\) (cuốn sách)."
+                    },
+                    {
+                        type: "mcq",
+                        question: "<b>Câu hỏi bổ sung:</b> Vườn hoa hồng nhà Nam: ngày đầu tưới được <span class='font-bold text-rose-600'>\\(\\frac{3}{10}\\)</span> vườn, ngày thứ hai tưới được <span class='font-bold text-rose-600'>\\(\\frac{4}{10}\\)</span> vườn. Hỏi cả hai ngày Nam tưới được bao nhiêu phần của vườn hoa?",
+                        illustration: `
+                            <div class="flex items-center gap-3 bg-rose-50 p-3 rounded-xl border border-rose-200">
+                                <span class="text-4xl">🌷🌿</span>
+                                <div class="text-sm text-rose-900 font-medium">Ngày 1: 3/10 • Ngày 2: 4/10 vườn hoa hồng.</div>
+                            </div>
+                        `,
+                        options: [
+                            { text: "A. \\(\\frac{7}{20}\\)", correct: false },
+                            { text: "B. \\(\\frac{1}{10}\\)", correct: false },
+                            { text: "C. \\(\\frac{7}{10}\\)", correct: true },
+                            { text: "D. \\(\\frac{12}{10}\\)", correct: false }
+                        ],
+                        explanation: "Lời giải: Cả hai ngày Nam tưới được số phần vườn hoa là:<br>\\(\\frac{3}{10} + \\frac{4}{10} = \\frac{3+4}{10} = \\frac{7}{10}\\) (vườn hoa)."
+                    }
+                ]
+            }
+        ];
+
+        let currentGateIndex = 0;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let answeredCurrent = false;
+
+        function startJourney() {
+            currentGateIndex = 0;
+            currentQuestionIndex = 0;
+            score = 0;
+            streak = 0;
+            updateStats();
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        function goHome() {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-home').classList.remove('hidden');
+        }
+
+        function restartJourney() {
+            startJourney();
+        }
+
+        function updateStats() {
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('streak-display').innerText = streak;
+        }
+
+        function loadQuestion() {
+            answeredCurrent = false;
+            const gate = quizData[currentGateIndex];
+            const q = gate.questions[currentQuestionIndex];
+
+            document.getElementById('gate-badge').innerText = gate.gateId;
+            document.getElementById('gate-title').innerText = gate.gateTitle;
+            document.getElementById('current-q-num').innerText = currentQuestionIndex + 1;
+            document.getElementById('total-q-num').innerText = gate.questions.length;
+            document.getElementById('illustration-container').innerHTML = q.illustration;
+            document.getElementById('question-text').innerHTML = q.question;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            if (q.type === 'mcq') {
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "p-4 text-left font-semibold text-gray-800 bg-white border-2 border-amber-200 rounded-2xl hover:bg-amber-50 hover:border-amber-400 transition shadow-sm flex items-center justify-between group";
+                    btn.innerHTML = `<span>${opt.text}</span><span class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs group-hover:border-amber-500 group-hover:text-amber-500">${String.fromCharCode(65 + idx)}</span>`;
+                    btn.onclick = () => handleMCQAnswer(opt.correct, btn, q.options);
+                    optionsContainer.appendChild(btn);
+                });
+            } else if (q.type === 'input') {
+                const wrapper = document.createElement('div');
+                wrapper.className = "flex flex-col sm:flex-row gap-3 col-span-2";
+                wrapper.innerHTML = `
+                    <input type="text" id="user-input-answer" placeholder="${q.placeholder}" class="flex-grow p-4 border-2 border-emerald-300 rounded-2xl focus:outline-none focus:border-emerald-500 font-semibold text-lg bg-white">
+                    <button onclick="checkInputAnswer()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 py-4 rounded-2xl shadow transition">Nộp Bài</button>
+                `;
+                optionsContainer.appendChild(wrapper);
+            }
+
+            document.getElementById('feedback-box').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+        }
+
+        function handleMCQAnswer(isCorrect, selectedBtn, options) {
+            if (answeredCurrent) return;
+            answeredCurrent = true;
+
+            const allBtns = document.getElementById('options-container').querySelectorAll('button');
+            allBtns.forEach(b => b.disabled = true);
+
+            const gate = quizData[currentGateIndex];
+            const q = gate.questions[currentQuestionIndex];
+
+            if (isCorrect) {
+                selectedBtn.classList.remove('bg-white', 'border-amber-200');
+                selectedBtn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                score += 10;
+                streak += 1;
+                SoundFX.playCorrect();
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+                showFeedback(true, q.explanation);
+            } else {
+                selectedBtn.classList.remove('bg-white', 'border-amber-200');
+                selectedBtn.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-900');
+                
+                // Highlight đáp án đúng
+                allBtns.forEach((b, idx) => {
+                    if (q.options[idx].correct) {
+                        b.classList.remove('bg-white', 'border-amber-200');
+                        b.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                    }
+                });
+
+                streak = 0;
+                SoundFX.playWrong();
+                showFeedback(false, q.explanation);
+            }
+            updateStats();
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function checkInputAnswer() {
+            if (answeredCurrent) return;
+            const inputVal = document.getElementById('user-input-answer').value.trim();
+            if (!inputVal) return;
+
+            answeredCurrent = true;
+            document.getElementById('user-input-answer').disabled = true;
+
+            const gate = quizData[currentGateIndex];
+            const q = gate.questions[currentQuestionIndex];
+
+            // So sánh chuỗi (chuẩn hóa bỏ khoảng trắng)
+            const userNorm = inputVal.replace(/\s+/g, '').toLowerCase();
+            const correctNorm = q.correctAnswer.replace(/\s+/g, '').toLowerCase();
+
+            if (userNorm === correctNorm) {
+                score += 10;
+                streak += 1;
+                SoundFX.playCorrect();
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+                showFeedback(true, q.explanation);
+            } else {
+                streak = 0;
+                SoundFX.playWrong();
+                showFeedback(false, `Chưa chính xác! Đáp án đúng là: <b>${q.correctAnswer}</b>.<br>` + q.explanation);
+            }
+            updateStats();
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function showFeedback(isCorrect, explanationText) {
+            const fbBox = document.getElementById('feedback-box');
+            fbBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-900', 'bg-rose-50', 'border-rose-300', 'text-rose-900');
+            
+            const titleEl = document.getElementById('feedback-title');
+            const descEl = document.getElementById('feedback-desc');
+
+            if (isCorrect) {
+                fbBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+                titleEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i> Chính xác tuyệt vời!`;
+            } else {
+                fbBox.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-900');
+                titleEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 text-lg"></i> Cần lưu ý hơn nhé!`;
+            }
+            descEl.innerHTML = explanationText;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            const gate = quizData[currentGateIndex];
+            if (currentQuestionIndex < gate.questions.length) {
+                loadQuestion();
+            } else {
+                // Chuyển sang cửa tiếp theo
+                currentGateIndex++;
+                currentQuestionIndex = 0;
+                if (currentGateIndex < quizData.length) {
+                    loadQuestion();
+                } else {
+                    // Hoàn thành toàn bộ 5 cửa
+                    showResults();
+                }
+            }
+        }
+
+        function showResults() {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+            document.getElementById('final-score').innerText = score;
+
+            const resMsg = document.getElementById('result-message');
+            if (score === 100) {
+                resMsg.innerText = "🏆 Xuất sắc tuyệt đối! Bạn là Thần Đồng Phân Số thực thụ!";
+                confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+            } else if (score >= 70) {
+                resMsg.innerText = "🌟 Rất tốt! Bạn đã nắm vững kiến thức cộng phân số cùng mẫu!";
+            } else {
+                resMsg.innerText = "💡 Hãy cố gắng ôn tập thêm lý thuyết cộng phân số cùng mẫu nhé!";
+            }
+        }
+    </script>
+</body>
+</html>
