@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bảng Hoạt Động ClassPoint - Phép Cộng Phân Số (Toán 4)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 50%, #fdf2f8 100%);
+      min-height: 100vh;
+    }
+    /* Kiểu hiển thị phân số chuẩn toán học */
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+      line-height: 1.1;
+      font-weight: 800;
+    }
+    .frac .top {
+      border-bottom: 2.5px solid currentColor;
+      padding-bottom: 2px;
+      display: block;
+    }
+    .frac .bottom {
+      padding-top: 2px;
+      display: block;
+    }
+    .frac-lg {
+      font-size: 1.5rem;
+    }
+    .frac-xl {
+      font-size: 2rem;
+    }
+    /* Hiệu ứng nảy nút */
+    .btn-bounce {
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-bounce:hover {
+      transform: translateY(-3px) scale(1.02);
+    }
+    .btn-bounce:active {
+      transform: translateY(1px) scale(0.98);
+    }
+    /* Animation pulse nhẹ */
+    @keyframes subtle-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+    .pulse-ai {
+      animation: subtle-pulse 2.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="text-slate-800 flex flex-col justify-between p-3 sm:p-6">
+
+  <!-- HEADER & ĐIỀU HƯỚNG CHẾ ĐỘ -->
+  <header class="max-w-5xl mx-auto w-full mb-6">
+    <div class="bg-white/90 backdrop-blur-md shadow-lg rounded-3xl p-4 sm:p-6 border-2 border-indigo-100 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-2xl shadow-md">
+          <i class="fa-solid fa-shapes"></i>
+        </div>
+        <div>
+          <span class="inline-block px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-100 text-indigo-700 mb-1">
+            Chủ đề 11 • Bài 60: Phép cộng phân số (Toán 4)
+          </span>
+          <h1 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
+            ClassPoint: 5 Cửa Ải Chinh Phục & Bắt Lỗi AI
+          </h1>
+        </div>
+      </div>
+
+      <!-- Mode Selector & Stats -->
+      <div class="flex items-center gap-3">
+        <div class="bg-amber-100 border border-amber-300 text-amber-900 px-4 py-2 rounded-2xl font-black flex items-center gap-2 shadow-sm text-sm">
+          <i class="fa-solid fa-star text-amber-500 text-lg"></i>
+          <span>Điểm: <span id="scoreDisplay" class="text-indigo-600 font-extrabold text-lg">0</span>/5</span>
+        </div>
+        
+        <button id="toggleRoleBtn" onclick="toggleRole()" class="btn-bounce bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-2xl font-bold text-sm flex items-center gap-2 shadow">
+          <i class="fa-solid fa-chalkboard-user text-emerald-400"></i>
+          <span id="roleLabel">Chế độ Học sinh</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- BẢNG ĐIỀU HƯỚNG 5 CỬA ẢI (STEPPER) -->
+    <div class="mt-4 flex items-center justify-between overflow-x-auto py-2 gap-2 max-w-full">
+      <button onclick="goToStage(1)" id="step-1" class="stage-step flex-1 min-w-[130px] p-2.5 rounded-2xl bg-indigo-600 text-white font-black text-xs sm:text-sm flex flex-col items-center shadow-md transition-all">
+        <span class="text-xs uppercase tracking-wide opacity-80">Cửa 1</span>
+        <span class="truncate">Cộng cùng mẫu</span>
+      </button>
+      <button onclick="goToStage(2)" id="step-2" class="stage-step flex-1 min-w-[130px] p-2.5 rounded-2xl bg-white text-slate-600 border border-slate-200 font-bold text-xs sm:text-sm flex flex-col items-center shadow-sm hover:bg-indigo-50 transition-all">
+        <span class="text-xs uppercase tracking-wide opacity-70">Cửa 2</span>
+        <span class="truncate">Tìm số hợp lệ</span>
+      </button>
+      <button onclick="goToStage(3)" id="step-3" class="stage-step flex-1 min-w-[130px] p-2.5 rounded-2xl bg-white text-slate-600 border border-slate-200 font-bold text-xs sm:text-sm flex flex-col items-center shadow-sm hover:bg-indigo-50 transition-all">
+        <span class="text-xs uppercase tracking-wide opacity-70">Cửa 3</span>
+        <span class="truncate">AI Bị Nhầm (1)</span>
+      </button>
+      <button onclick="goToStage(4)" id="step-4" class="stage-step flex-1 min-w-[130px] p-2.5 rounded-2xl bg-white text-slate-600 border border-slate-200 font-bold text-xs sm:text-sm flex flex-col items-center shadow-sm hover:bg-indigo-50 transition-all">
+        <span class="text-xs uppercase tracking-wide opacity-70">Cửa 4</span>
+        <span class="truncate">AI Bị Nhầm (2)</span>
+      </button>
+      <button onclick="goToStage(5)" id="step-5" class="stage-step flex-1 min-w-[130px] p-2.5 rounded-2xl bg-white text-slate-600 border border-slate-200 font-bold text-xs sm:text-sm flex flex-col items-center shadow-sm hover:bg-indigo-50 transition-all">
+        <span class="text-xs uppercase tracking-wide opacity-70">Cửa 5</span>
+        <span class="truncate">Toán thực tế</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN STAGE CONTAINER -->
+  <main class="max-w-5xl mx-auto w-full flex-1">
+
+    <!-- KHUNG HIỂN THỊ MỤC TIÊU SƯ PHẠM (Dành cho Giáo viên & Định hướng) -->
+    <div id="pedagogyBox" class="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-500 rounded-2xl p-4 mb-5 shadow-sm hidden">
+      <div class="flex items-start gap-3">
+        <i class="fa-solid fa-graduation-cap text-amber-600 text-xl mt-0.5"></i>
+        <div>
+          <div class="text-xs font-black uppercase text-amber-700 tracking-wider">Mục tiêu sư phạm (GDPT 2018) & Dạng ClassPoint:</div>
+          <p id="pedagogyText" class="text-slate-700 font-semibold text-sm mt-0.5 leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- NỘI DUNG TỪNG CỬA ẢI -->
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-200/80 p-5 sm:p-8 relative overflow-hidden min-h-[440px] flex flex-col justify-between">
+
+      <!-- ================= CỬA 1 ================= -->
+      <section id="stage-card-1" class="stage-content space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-extrabold rounded-full flex items-center gap-1.5">
+            <i class="fa-solid fa-list-check"></i> Cửa 1 • Multiple Choice + Competition
+          </span>
+          <span class="text-xs font-bold text-slate-400">Quy tắc vàng: Cộng tử - Giữ nguyên mẫu</span>
+        </div>
+
+        <div class="text-center py-4">
+          <p class="text-base sm:text-lg text-slate-600 font-bold mb-4">Em hãy thực hiện phép tính sau:</p>
+          <div class="inline-flex items-center gap-4 bg-slate-50 px-8 py-5 rounded-2xl border-2 border-indigo-100 text-slate-800 shadow-inner">
+            <span class="frac frac-xl"><span class="top">1</span><span class="bottom">5</span></span>
+            <span class="text-3xl font-extrabold text-indigo-600">+</span>
+            <span class="frac frac-xl"><span class="top">2</span><span class="bottom">5</span></span>
+            <span class="text-3xl font-extrabold text-slate-400">=</span>
+            <span class="text-3xl font-black text-indigo-500">?</span>
+          </div>
+        </div>
+
+        <!-- 4 Lựa chọn -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+          <!-- A -->
+          <button onclick="handleAnswerStage1('A')" class="choice-btn group p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 flex items-center gap-4 transition-all text-left">
+            <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-black flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition">A</span>
+            <span class="frac frac-lg"><span class="top">3</span><span class="bottom">10</span></span>
+          </button>
+          <!-- B (Đúng) -->
+          <button onclick="handleAnswerStage1('B')" class="choice-btn group p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 flex items-center gap-4 transition-all text-left">
+            <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-black flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition">B</span>
+            <span class="frac frac-lg"><span class="top">3</span><span class="bottom">5</span></span>
+          </button>
+          <!-- C -->
+          <button onclick="handleAnswerStage1('C')" class="choice-btn group p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 flex items-center gap-4 transition-all text-left">
+            <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-black flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition">C</span>
+            <span class="frac frac-lg"><span class="top">2</span><span class="bottom">25</span></span>
+          </button>
+          <!-- D -->
+          <button onclick="handleAnswerStage1('D')" class="choice-btn group p-4 rounded-2xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 flex items-center gap-4 transition-all text-left">
+            <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-black flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition">D</span>
+            <span class="frac frac-lg"><span class="top">1</span><span class="bottom">5</span></span>
+          </button>
+        </div>
+
+        <div id="feedback-1" class="hidden rounded-2xl p-4 text-sm font-semibold max-w-2xl mx-auto"></div>
+      </section>
+
+      <!-- ================= CỬA 2 ================= -->
+      <section id="stage-card-2" class="stage-content space-y-6 hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <span class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-extrabold rounded-full flex items-center gap-1.5">
+            <i class="fa-solid fa-pen-to-square"></i> Cửa 2 • Fill in the Blank (Điền số khuyết)
+          </span>
+          <span class="text-xs font-bold text-slate-400">Rèn luyện nhận biết cấu trúc phân số</span>
+        </div>
+
+        <div class="max-w-2xl mx-auto space-y-6 py-2">
+          <!-- Câu a -->
+          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="font-extrabold text-indigo-600 text-lg">a)</span>
+              <div class="inline-flex items-center gap-2">
+                <span class="frac frac-lg"><span class="top">7</span><span class="bottom">15</span></span>
+                <span class="text-2xl font-black text-indigo-500">+</span>
+                <span class="frac frac-lg">
+                  <span class="top text-amber-600 font-black">?</span>
+                  <span class="bottom">15</span>
+                </span>
+                <span class="text-2xl font-black text-slate-400">=</span>
+                <span class="frac frac-lg"><span class="top">10</span><span class="bottom">15</span></span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-bold text-slate-600">Dấu ? là:</span>
+              <input id="input-2a" type="number" min="0" max="99" placeholder="Số..." class="w-20 text-center font-black text-xl py-2 px-3 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:outline-none">
+            </div>
+          </div>
+
+          <!-- Câu b -->
+          <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="font-extrabold text-indigo-600 text-lg">b)</span>
+              <div class="inline-flex items-center gap-2">
+                <span class="frac frac-lg"><span class="top">9</span><span class="bottom">8</span></span>
+                <span class="text-2xl font-black text-indigo-500">+</span>
+                <span class="frac frac-lg">
+                  <span class="top">2</span>
+                  <span class="bottom text-amber-600 font-black">?</span>
+                </span>
+                <span class="text-2xl font-black text-slate-400">=</span>
+                <span class="frac frac-lg"><span class="top">11</span><span class="bottom">8</span></span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-bold text-slate-600">Dấu ? là:</span>
+              <input id="input-2b" type="number" min="0" max="99" placeholder="Số..." class="w-20 text-center font-black text-xl py-2 px-3 border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="text-center pt-2">
+            <button onclick="checkStage2()" class="btn-bounce bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-8 py-3 rounded-2xl shadow-lg inline-flex items-center gap-2">
+              <i class="fa-solid fa-check"></i> Kiểm tra kết quả
+            </button>
+          </div>
+        </div>
+
+        <div id="feedback-2" class="hidden rounded-2xl p-4 text-sm font-semibold max-w-2xl mx-auto"></div>
+      </section>
+
+      <!-- ================= CỬA 3 ================= -->
+      <section id="stage-card-3" class="stage-content space-y-6 hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <span class="px-3 py-1 bg-rose-100 text-rose-800 text-xs font-extrabold rounded-full flex items-center gap-1.5">
+            <i class="fa-solid fa-robot"></i> Cửa 3 • AI bị nhầm? (Cộng cả tử và mẫu)
+          </span>
+          <span class="text-xs font-bold text-slate-400">Kỹ năng phát hiện lỗi sai kinh điển</span>
+        </div>
+
+        <div class="max-w-2xl mx-auto">
+          <!-- Hộp mô phỏng AI Bot đưa ra phép tính -->
+          <div class="bg-rose-50/60 border-2 border-rose-200 rounded-3xl p-6 relative pulse-ai shadow-sm">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-lg shadow">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <div>
+                <div class="font-extrabold text-slate-800">Robot AI làm tính:</div>
+                <div class="text-xs text-rose-600 font-bold">Hãy xem Robot tính thế này đúng hay sai nhé!</div>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-rose-100 text-center my-3 shadow-inner">
+              <div class="inline-flex items-center gap-3 text-lg sm:text-xl font-bold flex-wrap justify-center">
+                <span class="frac frac-lg"><span class="top">4</span><span class="bottom">9</span></span>
+                <span>+</span>
+                <span class="frac frac-lg"><span class="top">1</span><span class="bottom">9</span></span>
+                <span>=</span>
+                <span class="frac frac-lg">
+                  <span class="top">4 + 1</span>
+                  <span class="bottom text-rose-600 font-black">9 + 9</span>
+                </span>
+                <span>=</span>
+                <span class="frac frac-lg font-black text-rose-600"><span class="top">5</span><span class="bottom">18</span></span>
+              </div>
+            </div>
+
+            <p class="text-center font-bold text-slate-700 mt-4 text-base">
+              Theo em, lời giải của AI là <strong class="text-emerald-600">Đúng</strong> hay <strong class="text-rose-600">Sai</strong>?
+            </p>
+          </div>
+
+          <!-- Lựa chọn Đúng/Sai -->
+          <div class="grid grid-cols-2 gap-4 mt-6">
+            <button onclick="handleAnswerStage3('dung')" class="choice-btn-3 btn-bounce p-4 rounded-2xl border-2 border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-slate-800 font-black text-lg flex items-center justify-center gap-3 transition">
+              <i class="fa-solid fa-circle-check text-emerald-500 text-2xl"></i> A. Đúng
+            </button>
+            <button onclick="handleAnswerStage3('sai')" class="choice-btn-3 btn-bounce p-4 rounded-2xl border-2 border-slate-200 hover:border-rose-400 hover:bg-rose-50 text-slate-800 font-black text-lg flex items-center justify-center gap-3 transition">
+              <i class="fa-solid fa-circle-xmark text-rose-500 text-2xl"></i> B. Sai
+            </button>
+          </div>
+        </div>
+
+        <div id="feedback-3" class="hidden rounded-2xl p-4 text-sm font-semibold max-w-2xl mx-auto"></div>
+      </section>
+
+      <!-- ================= CỬA 4 ================= -->
+      <section id="stage-card-4" class="stage-content space-y-6 hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-extrabold rounded-full flex items-center gap-1.5">
+            <i class="fa-solid fa-triangle-exclamation"></i> Cửa 4 • AI bị nhầm? (Cộng mẫu, giữ nguyên tử)
+          </span>
+          <span class="text-xs font-bold text-slate-400">Kỹ năng phát hiện lỗi ngụy biện</span>
+        </div>
+
+        <div class="max-w-2xl mx-auto">
+          <!-- Khung Robot AI lần 2 -->
+          <div class="bg-purple-50/60 border-2 border-purple-200 rounded-3xl p-6 relative pulse-ai shadow-sm">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-lg shadow">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <div>
+                <div class="font-extrabold text-slate-800">Robot AI làm lại lần nữa:</div>
+                <div class="text-xs text-purple-600 font-bold">"Lần này mình giữ nguyên tử số, cộng mẫu số nhé!"</div>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-purple-100 text-center my-3 shadow-inner">
+              <div class="inline-flex items-center gap-3 text-lg sm:text-xl font-bold flex-wrap justify-center">
+                <span class="frac frac-lg"><span class="top">3</span><span class="bottom">5</span></span>
+                <span>+</span>
+                <span class="frac frac-lg"><span class="top">3</span><span class="bottom">5</span></span>
+                <span>=</span>
+                <span class="frac frac-lg">
+                  <span class="top text-purple-600">3</span>
+                  <span class="bottom text-purple-600 font-black">5 + 5</span>
+                </span>
+                <span>=</span>
+                <span class="frac frac-lg font-black text-purple-700"><span class="top">3</span><span class="bottom">10</span></span>
+              </div>
+            </div>
+
+            <p class="text-center font-bold text-slate-700 mt-4 text-base">
+              Theo em, Robot AI tính như vậy là <strong class="text-emerald-600">Đúng</strong> hay <strong class="text-rose-600">Sai</strong>?
+            </p>
+          </div>
+
+          <!-- Lựa chọn Đúng/Sai -->
+          <div class="grid grid-cols-2 gap-4 mt-6">
+            <button onclick="handleAnswerStage4('dung')" class="choice-btn-4 btn-bounce p-4 rounded-2xl border-2 border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-slate-800 font-black text-lg flex items-center justify-center gap-3 transition">
+              <i class="fa-solid fa-circle-check text-emerald-500 text-2xl"></i> A. Đúng
+            </button>
+            <button onclick="handleAnswerStage4('sai')" class="choice-btn-4 btn-bounce p-4 rounded-2xl border-2 border-slate-200 hover:border-rose-400 hover:bg-rose-50 text-slate-800 font-black text-lg flex items-center justify-center gap-3 transition">
+              <i class="fa-solid fa-circle-xmark text-rose-500 text-2xl"></i> B. Sai
+            </button>
+          </div>
+        </div>
+
+        <div id="feedback-4" class="hidden rounded-2xl p-4 text-sm font-semibold max-w-2xl mx-auto"></div>
+      </section>
+
+      <!-- ================= CỬA 5 ================= -->
+      <section id="stage-card-5" class="stage-content space-y-6 hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <span class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-extrabold rounded-full flex items-center gap-1.5">
+            <i class="fa-solid fa-book-open-reader"></i> Cửa 5 • Bài toán thực tế (Short Answer)
+          </span>
+          <span class="text-xs font-bold text-slate-400">Vận dụng giải quyết tình huống thực tiễn</span>
+        </div>
+
+        <div class="max-w-2xl mx-auto bg-amber-50/50 rounded-3xl p-6 border-2 border-amber-200">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-400 text-amber-950 flex items-center justify-center text-2xl shrink-0 shadow">
+              <i class="fa-solid fa-book"></i>
+            </div>
+            <div class="text-slate-800 font-semibold space-y-2 leading-relaxed">
+              <p>
+                Mai rất thích đọc sách. 
+                Ngày thứ nhất Mai đọc được <span class="frac font-bold text-indigo-700"><span class="top">2</span><span class="bottom">7</span></span> cuốn sách, 
+                ngày thứ hai Mai đọc được <span class="frac font-bold text-indigo-700"><span class="top">3</span><span class="bottom">7</span></span> cuốn sách.
+              </p>
+              <p class="font-bold text-slate-900 text-base">
+                Hỏi cả hai ngày Mai đọc được bao nhiêu phần cuốn sách?
+              </p>
+            </div>
+          </div>
+
+          <!-- Dải băng trực quan 7 phần minh họa cuốn sách -->
+          <div class="mt-6 bg-white p-4 rounded-2xl border border-amber-200">
+            <div class="text-xs font-bold text-slate-500 mb-2 flex justify-between">
+              <span>Mô hình cuốn sách chia thành 7 phần bằng nhau:</span>
+              <span><span class="text-sky-600 font-bold">Ngày 1 (2 phần)</span> + <span class="text-emerald-600 font-bold">Ngày 2 (3 phần)</span></span>
+            </div>
+            <div class="grid grid-cols-7 gap-1 h-9 bg-slate-100 p-1 rounded-xl">
+              <div class="bg-sky-400 rounded-lg flex items-center justify-center text-white text-xs font-black" title="Ngày 1">1/7</div>
+              <div class="bg-sky-400 rounded-lg flex items-center justify-center text-white text-xs font-black" title="Ngày 1">1/7</div>
+              <div class="bg-emerald-400 rounded-lg flex items-center justify-center text-white text-xs font-black" title="Ngày 2">1/7</div>
+              <div class="bg-emerald-400 rounded-lg flex items-center justify-center text-white text-xs font-black" title="Ngày 2">1/7</div>
+              <div class="bg-emerald-400 rounded-lg flex items-center justify-center text-white text-xs font-black" title="Ngày 2">1/7</div>
+              <div class="bg-slate-200 rounded-lg" title="Chưa đọc"></div>
+              <div class="bg-slate-200 rounded-lg" title="Chưa đọc"></div>
+            </div>
+          </div>
+
+          <!-- Khung nhập câu trả lời -->
+          <div class="mt-6 flex flex-col sm:flex-row items-center gap-3">
+            <div class="relative w-full">
+              <input id="input-5" type="text" placeholder="Nhập đáp án (VD: 5/7 hoặc 5/7 cuốn sách)..." class="w-full py-3 px-4 rounded-xl border-2 border-amber-300 font-bold text-slate-800 focus:outline-none focus:border-amber-500">
+            </div>
+            <button onclick="checkStage5()" class="btn-bounce w-full sm:w-auto shrink-0 bg-amber-500 hover:bg-amber-600 text-white font-black px-6 py-3 rounded-xl shadow flex items-center justify-center gap-2">
+              <i class="fa-solid fa-paper-plane"></i> Gửi đáp án
+            </button>
+          </div>
+        </div>
+
+        <div id="feedback-5" class="hidden rounded-2xl p-4 text-sm font-semibold max-w-2xl mx-auto"></div>
+      </section>
+
+      <!-- KHUNG ĐIỀU HƯỚNG TRƯỚC / SAU -->
+      <div class="mt-8 pt-4 border-t border-slate-100 flex items-center justify-between">
+        <button id="prevBtn" onclick="prevStage()" class="btn-bounce px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-sm flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+          <i class="fa-solid fa-arrow-left"></i> Cửa trước
+        </button>
+
+        <span id="progressIndicator" class="text-xs font-extrabold text-slate-400 tracking-wider">
+          CỬA 1 / 5
+        </span>
+
+        <button id="nextBtn" onclick="nextStage()" class="btn-bounce px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm flex items-center gap-2 shadow-md">
+          Cửa tiếp theo <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- TỔNG KẾT & CHÚC MỪNG KHI HOÀN THÀNH HẾT 5 CỬA -->
+    <div id="congratsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 text-center shadow-2xl relative animate-bounce-short">
+        <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-amber-500 shadow-inner">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-slate-800 mb-2">Xuất Sắc! Hoàn Thành Thử Thách!</h2>
+        <p class="text-slate-600 font-semibold mb-6">
+          Em đã vượt qua trọn vẹn 5 cửa ải của Bài 60: Phép cộng phân số và giúp Robot AI nhận biết lỗi sai thành công!
+        </p>
+
+        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 mb-6 text-left">
+          <h4 class="font-black text-indigo-900 text-sm mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-bookmark text-indigo-600"></i> Ghi nhớ quy tắc cốt lõi:
+          </h4>
+          <p class="text-xs sm:text-sm text-slate-700 font-bold leading-relaxed">
+            "Muốn cộng hai phân số cùng mẫu số, ta <span class="text-rose-600 underline">cộng hai tử số</span> với nhau và <span class="text-indigo-600 underline">giữ nguyên mẫu số</span>."
+          </p>
+        </div>
+
+        <div class="flex gap-3 justify-center">
+          <button onclick="restartActivity()" class="btn-bounce bg-indigo-600 hover:bg-indigo-700 text-white font-black px-6 py-3 rounded-2xl shadow">
+            <i class="fa-solid fa-rotate-right mr-2"></i> Làm lại thử thách
+          </button>
+          <button onclick="document.getElementById('congratsModal').classList.add('hidden')" class="btn-bounce bg-slate-200 hover:bg-slate-300 text-slate-800 font-black px-6 py-3 rounded-2xl">
+            Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="max-w-5xl mx-auto w-full text-center py-4 mt-6 text-xs text-slate-500 font-semibold border-t border-slate-200/60">
+    Hệ thống tài liệu sư phạm số hóa Toán 4 • Chương trình GDPT 2018 • Tương thích bảng tương tác & ClassPoint
+  </footer>
+
+  <!-- SCRIPT LOGIC VÀ SOUND SYNTHESIZER -->
+  <script>
+    // --- KHỞI TẠO ÂM THANH BẰNG WEB AUDIO API ---
+    class SoundEffects {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+      }
+      playCorrect() {
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          
+          const now = this.ctx.currentTime;
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+          osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+          osc.start(now);
+          osc.stop(now + 0.5);
+        } catch(e) {}
+      }
+      playWrong() {
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          
+          const now = this.ctx.currentTime;
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.linearRampToValueAtTime(160, now + 0.25);
+
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } catch(e) {}
+      }
+      playVictory() {
+        try {
+          this.init();
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            const now = this.ctx.currentTime + (idx * 0.12);
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+            osc.start(now);
+            osc.stop(now + 0.4);
+          });
+        } catch(e) {}
+      }
+    }
+
+    const sound = new SoundEffects();
+
+    // DỮ LIỆU SƯ PHẠM VÀ CỬA ẢI TỪ FILE DOCX
+    const stagesData = {
+      1: {
+        title: "Cửa 1 – Cộng cùng mẫu số",
+        type: "Multiple Choice + Competition",
+        target: "Kiểm tra kiến thức cơ bản: Cộng hai tử số và giữ nguyên mẫu số.",
+        correctExplanation: "Chính xác! 1/5 + 2/5 = (1 + 2)/5 = 3/5. Quy tắc: Muốn cộng hai phân số cùng mẫu số, ta cộng hai tử số với nhau và giữ nguyên mẫu số.",
+        wrongExplanation: "Chưa chính xác rồi! Hãy nhớ rằng khi cộng hai phân số có cùng mẫu số là 5, ta chỉ cộng hai tử số (1 + 2 = 3) và GIỮ NGUYÊN mẫu số là 5. Do đó đáp án đúng phải là 3/5."
+      },
+      2: {
+        title: "Cửa 2 – Tìm số hợp lệ",
+        type: "Fill in the Blank",
+        target: "Kiểm tra kỹ năng tính nhẩm tử số và nhận biết giữ nguyên mẫu số.",
+        correctExplanation: "Rất giỏi! Ở câu a: 7 + 3 = 10 nên số cần điền là 3. Ở câu b: Đây là phép cộng cùng mẫu số nên mẫu số giữ nguyên là 8.",
+        wrongExplanation: "Chưa đúng rồi! Gợi ý: Ở câu a, mấy cộng 7 bằng 10? (10 - 7 = 3). Ở câu b, hai phân số cùng mẫu số thì mẫu số giữ nguyên là 8."
+      },
+      3: {
+        title: "Cửa 3 – AI bị nhầm? (Cộng cả tử và mẫu)",
+        type: "Multiple Choice",
+        target: "Phát hiện lỗi sai điển hình của học sinh: Cộng cả mẫu số với nhau.",
+        correctExplanation: "Bắt lỗi AI rất chính xác! Lời giải của AI là SAI. Lỗi sai của AI là đã đem cộng hai mẫu số (9 + 9 = 18). Phép tính đúng phải là: 4/9 + 1/9 = (4 + 1)/9 = 5/9.",
+        wrongExplanation: "Ôi bạn ơi! AI làm SAI rồi đấy! AI đã mắc lỗi sai phổ biến là cộng cả hai mẫu số với nhau (9 + 9 = 18). Mẫu số phải được GIỮ NGUYÊN là 9 nhé!"
+      },
+      4: {
+        title: "Cửa 4 – AI bị nhầm? (Cộng mẫu, giữ nguyên tử)",
+        type: "Multiple Choice",
+        target: "Phát hiện lỗi sai: Cộng hai mẫu số nhưng giữ nguyên tử số.",
+        correctExplanation: "Tuyệt vời! AI lại làm SAI tiếp. AI đã cộng hai mẫu số (5 + 5 = 10) mà lại giữ nguyên tử số 3. Phép tính đúng phải là: 3/5 + 3/5 = (3 + 3)/5 = 6/5.",
+        wrongExplanation: "Chưa đúng rồi, AI làm SAI hoàn toàn! Quy tắc là cộng tử số và giữ nguyên mẫu số. Phép tính đúng là: 3/5 + 3/5 = 6/5 chứ không phải 3/10."
+      },
+      5: {
+        title: "Cửa 5 – Bài toán thực tế",
+        type: "Short Answer / Word Cloud",
+        target: "Vận dụng phép cộng phân số cùng mẫu vào giải bài toán có lời văn thực tế.",
+        correctExplanation: "Chúc mừng em! Cả hai ngày Mai đọc được: 2/7 + 3/7 = 5/7 (cuốn sách). Em đã hoàn thành xuất sắc bài học!",
+        wrongExplanation: "Hãy kiểm tra lại: Ngày 1 đọc 2/7, ngày 2 đọc 3/7. Cả hai ngày ta làm phép tính cộng: 2/7 + 3/7 = (2 + 3)/7 = 5/7 cuốn sách."
+      }
+    };
+
+    let currentStage = 1;
+    let score = 0;
+    const stagePassed = { 1: false, 2: false, 3: false, 4: false, 5: false };
+    let isTeacherMode = false;
+
+    // CHUYỂN ĐỔI CHẾ ĐỘ GIÁO VIÊN / HỌC SINH
+    function toggleRole() {
+      isTeacherMode = !isTeacherMode;
+      const roleLabel = document.getElementById('roleLabel');
+      const pedagogyBox = document.getElementById('pedagogyBox');
+      const toggleBtn = document.getElementById('toggleRoleBtn');
+
+      if (isTeacherMode) {
+        roleLabel.innerText = "Chế độ Giáo viên";
+        toggleBtn.classList.replace('bg-slate-800', 'bg-emerald-700');
+        pedagogyBox.classList.remove('hidden');
+      } else {
+        roleLabel.innerText = "Chế độ Học sinh";
+        toggleBtn.classList.replace('bg-emerald-700', 'bg-slate-800');
+        pedagogyBox.classList.add('hidden');
+      }
+      updatePedagogyBox();
+    }
+
+    function updatePedagogyBox() {
+      const pText = document.getElementById('pedagogyText');
+      const st = stagesData[currentStage];
+      pText.innerHTML = `<strong>Dạng hoạt động:</strong> ${st.type}<br><strong>Mục tiêu:</strong> ${st.target}`;
+    }
+
+    // ĐIỀU HƯỚNG CỬA ẢI
+    function goToStage(num) {
+      currentStage = num;
+
+      // Ẩn tất cả card
+      for (let i = 1; i <= 5; i++) {
+        const card = document.getElementById(`stage-card-${i}`);
+        const stepBtn = document.getElementById(`step-${i}`);
+        if (card) card.classList.add('hidden');
+        if (stepBtn) {
+          stepBtn.classList.remove('bg-indigo-600', 'text-white');
+          stepBtn.classList.add('bg-white', 'text-slate-600');
+        }
+      }
+
+      // Hiện card được chọn
+      const activeCard = document.getElementById(`stage-card-${num}`);
+      const activeStepBtn = document.getElementById(`step-${num}`);
+      if (activeCard) activeCard.classList.remove('hidden');
+      if (activeStepBtn) {
+        activeStepBtn.classList.remove('bg-white', 'text-slate-600');
+        activeStepBtn.classList.add('bg-indigo-600', 'text-white');
+      }
+
+      // Cập nhật nút điều hướng
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const progressIndicator = document.getElementById('progressIndicator');
+
+      progressIndicator.innerText = `CỬA ${num} / 5`;
+
+      if (num === 1) {
+        prevBtn.disabled = true;
+        prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        prevBtn.disabled = false;
+        prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+
+      if (num === 5) {
+        nextBtn.innerHTML = `Tổng kết <i class="fa-solid fa-flag-checkered"></i>`;
+      } else {
+        nextBtn.innerHTML = `Cửa tiếp theo <i class="fa-solid fa-arrow-right"></i>`;
+      }
+
+      updatePedagogyBox();
+    }
+
+    function nextStage() {
+      if (currentStage < 5) {
+        goToStage(currentStage + 1);
+      } else {
+        // Kiểm tra xem đã hoàn thành chưa
+        if (score >= 4) {
+          triggerConfetti();
+          sound.playVictory();
+          document.getElementById('congratsModal').classList.remove('hidden');
+        } else {
+          document.getElementById('congratsModal').classList.remove('hidden');
+        }
+      }
+    }
+
+    function prevStage() {
+      if (currentStage > 1) {
+        goToStage(currentStage - 1);
+      }
+    }
+
+    function addScore(stageNum) {
+      if (!stagePassed[stageNum]) {
+        stagePassed[stageNum] = true;
+        score += 1;
+        document.getElementById('scoreDisplay').innerText = score;
+        
+        // Thêm tick vào step tab
+        const stepBtn = document.getElementById(`step-${stageNum}`);
+        if (stepBtn && !stepBtn.innerHTML.includes('fa-check')) {
+          stepBtn.querySelector('span:first-child').innerHTML += ' <i class="fa-solid fa-check text-emerald-400"></i>';
+        }
+      }
+    }
+
+    // XỬ LÝ CỬA 1
+    function handleAnswerStage1(ans) {
+      const fb = document.getElementById('feedback-1');
+      fb.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-900', 'border-emerald-300', 'bg-rose-50', 'text-rose-900', 'border-rose-300', 'border');
+      
+      if (ans === 'B') {
+        sound.playCorrect();
+        addScore(1);
+        fb.classList.add('bg-emerald-50', 'text-emerald-900', 'border-2', 'border-emerald-300');
+        fb.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-lg mt-0.5"></i>
+            <div>
+              <div class="font-black text-emerald-700">Chính xác tuyệt đối! Đáp án là B. 3/5</div>
+              <p class="mt-1">${stagesData[1].correctExplanation}</p>
+            </div>
+          </div>
+        `;
+      } else {
+        sound.playWrong();
+        fb.classList.add('bg-rose-50', 'text-rose-900', 'border-2', 'border-rose-300');
+        fb.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-xmark text-rose-600 text-lg mt-0.5"></i>
+            <div>
+              <div class="font-black text-rose-700">Rất tiếc! Chưa đúng rồi!</div>
+              <p class="mt-1">${stagesData[1].wrongExplanation}</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // XỬ LÝ CỬA 2
+    function checkStage2() {
+      const valA = document.getElementById('input-2a').value.trim();
+      const valB = document.getElementById('input-2b').value.trim();
+      const fb = document.getElementById('feedback-2');
+      fb.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-900', 'border-emerald-300', 'bg-rose-50', 'text-rose-900', 'border-rose-300', 'border');
+
+      if (valA === "3" && valB === "8") {
+        sound.playCorrect();
+        addScore(2);
+        fb.classList.add('bg-emerald-50', 'text-emerald-900', 'border-2', 'border-emerald-300');
+        fb.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-lg mt-0.5"></i>
+            <div>
+              <div class="font-black text-emerald-700">Hoàn hảo! Cả 2 câu đều chính xác!</div>
+              <p class="mt-1">${stagesData[2].correctExplanation}</p>
+            </div>
+          </div>
+        `;
+      } else {
+        sound.playWrong();
+        fb.classList.add('bg-rose-50', 'text-rose-900', 'border-2', 'border-rose-300');
+        let details = [];
+        if (valA !== "3") details.push("Câu a: cần điền số 3 (vì 7 + 3 = 10)");
+        if (valB !== "8") details.push("Câu b: cần điền số 8 (vì giữ nguyên mẫu số)");
+        fb.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-xmark text-rose-600 text-lg mt-0.5"></i>
+            <div>
+              <div class="font-black text-rose-700">Chưa chính xác!</div>
+              <p class="mt-1">${details.join('<br>')}</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // XỬ LÝ CỬA 3
+    function handleAnswerStage3(ans) {
+      const fb = document.getElementById('feedback-3');
+      fb.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-900', 'border-emerald-300', 'bg-rose-50', 'text-rose-900', 'border-rose-300', 'border');
+
+      if (ans === 'sai') {
+        sound.playCorrect();
+        addScore(3);
+        fb.classList.add('bg-emerald-50', 'text-emerald-900', 'border-2', 'border-emerald-300');
+        fb.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-lg mt-0.5"></i>
+            <div>
+              <div class="font-black text-emerald-700">Chúc mừng em! Đáp án chính xác là: B. SAI</div>
+              <p class="mt-1">${stagesData[3].correctExplanation}</p>
+            </div>
+          </div>
+        `;
+      } else {
+        sound.playWrong();
+        fb.classList.add('bg-rose-50', 'text-rose-900', 'border-2', 'border-rose-300');
+        fb.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-xmark text-rose-600 text-lg mt-0.5"></i>
+            <div>
+              <div class="font-black text-rose-700">Coi chừng bị AI lừa nhé!</div>
+              <p class="mt-1">${stagesData[3].wrongExplanation}</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // XỬ LÝ CỬA 4
+    function handleAnswerStage4(ans) {
+      const fb = document.getElementById('feedback-4');
+      fb.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-900', 'border-emerald-300', 'bg-rose-50', 'text-rose-900', 'border-rose-300', 'border');
+
+      if (ans === 'sai') {
+        sound.playCorrect();
+        addScore(4);
+        fb.classList.add('bg-emerald-50', 'text-emerald-900', 'border-2', 'border-emerald-300');
+        fb.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-lg mt-0.5"></i>
+            <div>
+              <div class="font-black text-emerald-700">Chính xác! Lời giải của AI là: B. SAI</div>
+              <p class="mt-1">${stagesData[4].correctExplanation}</p>
+            </div>
+          </div>
+        `;
+      } else {
+        sound.playWrong();
+        fb.classList.add('bg-rose-50', 'text-rose-900', 'border-2', 'border-rose-300');
+        fb.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-xmark text-rose-600 text-lg mt-0.5"></i>
+            <div>
+              <div class="font-black text-rose-700">Chưa đúng rồi!</div>
+              <p class="mt-1">${stagesData[4].wrongExplanation}</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // XỬ LÝ CỬA 5
+    function checkStage5() {
+      const val = document.getElementById('input-5').value.trim().toLowerCase();
+      const fb = document.getElementById('feedback-5');
+      fb.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-900', 'border-emerald-300', 'bg-rose-50', 'text-rose-900', 'border-rose-300', 'border');
+
+      // Chấp nhận nhiều cách ghi: 5/7, 5/7 cuốn sách, 5/7 quyển sách, năm phần bảy
+      const isCorrect = val.includes('5/7') || val.includes('năm phần bảy');
+
+      if (isCorrect) {
+        sound.playCorrect();
+        addScore(5);
+        fb.classList.add('bg-emerald-50', 'text-emerald-900', 'border-2', 'border-emerald-300');
+        fb.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-lg mt-0.5"></i>
+            <div>
+              <div class="font-black text-emerald-700">Đáp án chính xác: 5/7 cuốn sách!</div>
+              <p class="mt-1">${stagesData[5].correctExplanation}</p>
+            </div>
+          </div>
+        `;
+        // Hiệu ứng ăn mừng khi hoàn thành cửa cuối
+        triggerConfetti();
+      } else {
+        sound.playWrong();
+        fb.classList.add('bg-rose-50', 'text-rose-900', 'border-2', 'border-rose-300');
+        fb.innerHTML = `
+          <div class="flex items-start gap-2">
+            <i class="fa-solid fa-circle-xmark text-rose-600 text-lg mt-0.5"></i>
+            <div>
+              <div class="font-black text-rose-700">Em hãy thử tính lại nhé!</div>
+              <p class="mt-1">${stagesData[5].wrongExplanation}</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // PHÁO HOA ĂN MỪNG
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    // RESET LÀM LẠI TOÀN BỘ
+    function restartActivity() {
+      score = 0;
+      document.getElementById('scoreDisplay').innerText = "0";
+      for (let i = 1; i <= 5; i++) {
+        stagePassed[i] = false;
+        const stepBtn = document.getElementById(`step-${i}`);
+        if (stepBtn) {
+          stepBtn.querySelector('span:first-child').innerHTML = `Cửa ${i}`;
+        }
+        const fb = document.getElementById(`feedback-${i}`);
+        if (fb) fb.classList.add('hidden');
+      }
+      document.getElementById('input-2a').value = '';
+      document.getElementById('input-2b').value = '';
+      document.getElementById('input-5').value = '';
+      document.getElementById('congratsModal').classList.add('hidden');
+      goToStage(1);
+    }
+
+    // Khởi tạo ban đầu
+    window.onload = function() {
+      goToStage(1);
+    };
+  </script>
+</body>
+</html>
