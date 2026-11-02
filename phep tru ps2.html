@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biệt Đội Phân Số - Hành Trình Vương Quốc Toán Học</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle, #f0fdf4 0%, #dcfce7 100%);
+            overflow-x: hidden;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4ade80;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #22c55e;
+        }
+        /* Floating animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.03); }
+        }
+        .animate-pulse-soft {
+            animation: pulse-soft 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Sound generator using Web Audio API to prevent broken external links
+        const playSound = (type) => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'success') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+                    osc.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.3); // C6
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.5);
+                } else if (type === 'fail') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime); // A3
+                    osc.frequency.setValueAtTime(147, ctx.currentTime + 0.15); // D3
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.4);
+                } else if (type === 'click') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.15);
+                } else if (type === 'win') {
+                    // Winning fanfare
+                    const freqs = [523, 587, 659, 698, 783, 880, 987, 1046];
+                    freqs.forEach((f, i) => {
+                        const o = ctx.createOscillator();
+                        const g = ctx.createGain();
+                        o.connect(g);
+                        g.connect(ctx.destination);
+                        o.type = 'triangle';
+                        o.frequency.value = f;
+                        g.gain.setValueAtTime(0.1, ctx.currentTime + i*0.08);
+                        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i*0.08 + 0.2);
+                        o.start(ctx.currentTime + i*0.08);
+                        o.stop(ctx.currentTime + i*0.08 + 0.25);
+                    });
+                }
+            } catch (e) {
+                console.log("Audio not supported or interaction needed first.", e);
+            }
+        };
+
+        // --- FULL DATABASE OF 40 QUESTIONS ---
+        const gate1Questions = [
+            { id: 1, type: "calc", q: "9/11 - 3/11", options: ["6/11", "12/11", "6/22", "3/11"], ans: "6/11", explain: "Vì hai phân số cùng mẫu số là 11, ta lấy tử số trừ tử số: 9 - 3 = 6 và giữ nguyên mẫu số 11. Kết quả là 6/11." },
+            { id: 2, type: "calc", q: "10/4 - 5/4", options: ["5/4", "15/4", "5/8", "5/2"], ans: "5/4", explain: "Ta trừ tử số cho tử số: 10 - 5 = 5 và giữ nguyên mẫu số 4. Kết quả là 5/4." },
+            { id: 3, type: "calc", q: "22/15 - 8/15", options: ["14/15", "14/30", "30/15", "6/15"], ans: "14/15", explain: "Trừ hai tử số: 22 - 8 = 14, giữ nguyên mẫu số 15. Kết quả là 14/15." },
+            { id: 4, type: "calc", q: "7/8 - 2/8", options: ["5/8", "9/8", "5/16", "1/2"], ans: "5/8", explain: "Trừ tử số: 7 - 2 = 5, mẫu số giữ nguyên là 8. Kết quả là 5/8." },
+            { id: 5, type: "calc", q: "15/18 - 5/18", options: ["10/18", "10/36", "5/9", "20/18"], ans: "10/18", explain: "Ta tính được 10/18 (có thể rút gọn thành 5/9, nhưng ở đây đáp án dạng cùng mẫu là 10/18)." },
+            { id: 6, type: "calc", q: "9/10 - 3/10", options: ["6/10", "12/10", "6/20", "3/5"], ans: "6/10", explain: "Trừ tử số: 9 - 3 = 6, giữ nguyên mẫu số 10. Kết quả là 6/10 (hoặc 3/5)." },
+            { id: 7, type: "calc", q: "8/7 - 3/7", options: ["5/7", "11/7", "5/14", "1"], ans: "5/7", explain: "Trừ tử số: 8 - 3 = 5, giữ nguyên mẫu số 7. Kết quả là 5/7." },
+            { id: 8, type: "calc", q: "14/9 - 5/9", options: ["9/9", "19/9", "1", "9/18"], ans: "9/9", explain: "Trừ tử số: 14 - 5 = 9, giữ nguyên mẫu số 9. Kết quả là 9/9 (bằng 1)." },
+            { id: 9, type: "calc", q: "11/12 - 7/12", options: ["4/12", "18/12", "4/24", "1/3"], ans: "4/12", explain: "Ta trừ tử số: 11 - 7 = 4, mẫu giữ nguyên là 12. Kết quả thu được là 4/12." },
+            { id: 10, type: "calc", q: "13/6 - 7/6", options: ["6/6", "20/6", "1", "6/12"], ans: "6/6", explain: "Ta lấy 13 - 7 = 6, mẫu số giữ nguyên 6. Ta được 6/6 (bằng 1)." },
+            { id: 11, type: "calc", q: "17/20 - 11/20", options: ["6/20", "28/20", "3/10", "6/40"], ans: "6/20", explain: "Lấy tử trừ tử: 17 - 11 = 6, giữ nguyên mẫu 20. Ta được 6/20." },
+            { id: 12, type: "calc", q: "25/24 - 13/24", options: ["12/24", "38/24", "1/2", "12/48"], ans: "12/24", explain: "Lấy 25 - 13 = 12, giữ nguyên mẫu 24. Kết quả là 12/24." },
+            { id: 13, type: "calc", q: "19/16 - 7/16", options: ["12/16", "26/16", "3/4", "12/32"], ans: "12/16", explain: "Lấy tử trừ tử: 19 - 7 = 12, mẫu số 16 giữ nguyên. Đáp án là 12/16." },
+            { id: 14, type: "calc", q: "29/30 - 11/30", options: ["18/30", "40/30", "9/15", "18/60"], ans: "18/30", explain: "Lấy 29 - 11 = 18, giữ nguyên mẫu số 30. Kết quả thu được là 18/30." },
+            { id: 15, type: "calc", q: "7/5 - 3/5", options: ["4/5", "10/5", "4/10", "2"], ans: "4/5", explain: "Trừ hai tử số: 7 - 3 = 4, mẫu số 5 giữ nguyên. Đáp án đúng là 4/5." },
+            // Word problems
+            { id: 16, type: "word", q: "Huyền có một chiếc bánh Pizza được cắt thành 8 phần bằng nhau. Huyền ăn hết 3 phần chiếc bánh (3/8 cái bánh). Hỏi chiếc bánh Pizza còn lại mấy phần?", options: ["5/8 cái bánh", "3/8 cái bánh", "1/8 cái bánh", "8/8 cái bánh"], ans: "5/8 cái bánh", explain: "Cả chiếc bánh là 8/8. Huyền ăn 3/8, số bánh còn lại là: 8/8 - 3/8 = 5/8 (cái bánh)." },
+            { id: 17, type: "word", q: "Một thanh sô-cô-la có 12 thanh nhỏ bằng nhau. Nam ăn 7/12 thanh, Robot ăn 3/12 thanh. Hỏi Nam ăn nhiều hơn Robot bao nhiêu phần của thanh sô-cô-la?", options: ["4/12 thanh", "10/12 thanh", "3/12 thanh", "5/12 thanh"], ans: "4/12 thanh", explain: "Phép tính so sánh hơn kém: 7/12 - 3/12 = 4/12 thanh sô-cô-la." },
+            { id: 18, type: "word", q: "Mẹ mua một ổ bánh mì dài, chia làm 10 phần bằng nhau. Bố ăn hết 4/10 ổ bánh, Mai ăn hết 3/10 ổ bánh. Hỏi phần bánh còn lại là bao nhiêu?", options: ["3/10 ổ bánh", "7/10 ổ bánh", "1/10 ổ bánh", "4/10 ổ bánh"], ans: "3/10 ổ bánh", explain: "Tổng phần bánh đã ăn: 4/10 + 3/10 = 7/10. Phần bánh mì còn lại: 10/10 - 7/10 = 3/10 ổ bánh." },
+            { id: 19, type: "word", q: "Một bình nước chứa đầy nước. Sáng nay Lâm uống hết 2/7 bình nước, chiều Lâm uống tiếp 3/7 bình nước. Hỏi bình nước còn lại bao nhiêu phần?", options: ["2/7 bình nước", "5/7 bình nước", "1/7 bình nước", "4/7 bình nước"], ans: "2/7 bình nước", explain: "Tổng lượng nước Lâm uống: 2/7 + 3/7 = 5/7 bình. Phần nước còn lại trong bình: 7/7 - 5/7 = 2/7 bình nước." },
+            { id: 20, type: "word", q: "Một hộp bánh trung thu được cắt làm 6 miếng bằng nhau. Cả nhà đã ăn hết 5/6 hộp bánh. Hỏi trong hộp còn lại bao nhiêu phần bánh?", options: ["1/6 hộp bánh", "5/6 hộp bánh", "2/6 hộp bánh", "6/6 hộp bánh"], ans: "1/6 hộp bánh", explain: "Cả hộp bánh ban đầu là 6/6. Sau khi ăn hết 5/6 thì hộp bánh còn lại: 6/6 - 5/6 = 1/6 hộp bánh." }
+        ];
+
+        const gate2Questions = [
+            { id: 1, type: "calc", q: "1/2 - 1/6", options: ["2/6", "1/4", "1/3", "2/3"], ans: "2/6", explain: "Quy đồng mẫu số chung là 6: 1/2 = 3/6. Thực hiện phép trừ: 3/6 - 1/6 = 2/6 (Rút gọn được thành 1/3)." },
+            { id: 2, type: "calc", q: "3/4 - 5/8", options: ["1/8", "2/8", "1/4", "3/8"], ans: "1/8", explain: "Quy đồng mẫu số chung là 8: 3/4 = (3x2)/(4x2) = 6/8. Trừ phân số: 6/8 - 5/8 = 1/8." },
+            { id: 3, type: "calc", q: "7/10 - 2/5", options: ["3/10", "5/10", "1/5", "3/5"], ans: "3/10", explain: "Quy đồng mẫu số chung là 10: 2/5 = (2x2)/(5x2) = 4/10. Phép trừ: 7/10 - 4/10 = 3/10." },
+            { id: 4, type: "calc", q: "7/12 - 1/3", options: ["3/12", "1/4", "6/12", "5/12"], ans: "3/12", explain: "Mẫu số chung là 12: Quy đồng 1/3 = 4/12. Ta có: 7/12 - 4/12 = 3/12 (Rút gọn là 1/4)." },
+            { id: 5, type: "calc", q: "2/3 - 2/6", options: ["2/6", "1/3", "4/6", "1/2"], ans: "2/6", explain: "Rút gọn 2/6 = 1/3 rồi lấy 2/3 - 1/3 = 1/3 (bằng 2/6); Hoặc quy đồng mẫu số chung là 6: 2/3 = 4/6. Thực hiện trừ: 4/6 - 2/6 = 2/6." },
+            { id: 6, type: "calc", q: "5/6 - 3/18", options: ["12/18", "2/3", "8/18", "10/18"], ans: "12/18", explain: "Quy đồng mẫu số chung 18: 5/6 = 15/18. Thực hiện trừ: 15/18 - 3/18 = 12/18 (Rút gọn thành 2/3)." },
+            { id: 7, type: "calc", q: "8/14 - 2/7", options: ["4/14", "2/7", "6/14", "1/7"], ans: "4/14", explain: "Quy đồng 2/7 thành 4/14. Ta lấy 8/14 - 4/14 = 4/14 (Rút gọn bằng 2/7)." },
+            { id: 8, type: "calc", q: "12/20 - 2/5", options: ["4/20", "1/5", "8/20", "2/20"], ans: "4/20", explain: "Quy đồng mẫu số chung là 20: 2/5 = 8/20. Tính toán: 12/20 - 8/20 = 4/20." },
+            { id: 9, type: "calc", q: "7/8 - 1/4", options: ["5/8", "6/8", "3/8", "1/2"], ans: "5/8", explain: "Quy đồng 1/4 thành 2/8. Thực hiện trừ: 7/8 - 2/8 = 5/8." },
+            { id: 10, type: "calc", q: "2/3 - 4/9", options: ["2/9", "6/9", "1/9", "4/9"], ans: "2/9", explain: "Quy đồng 2/3 thành 6/9. Lấy 6/9 - 4/9 = 2/9." },
+            { id: 11, type: "calc", q: "2/5 - 1/10", options: ["3/10", "1/5", "2/10", "4/10"], ans: "3/10", explain: "Quy đồng 2/5 thành 4/10. Phép tính: 4/10 - 1/10 = 3/10." },
+            { id: 12, type: "calc", q: "7/22 - 3/11", options: ["1/22", "4/22", "1/11", "3/22"], ans: "1/22", explain: "Quy đồng 3/11 thành 6/22. Thực hiện trừ: 7/22 - 6/22 = 1/22." },
+            // Word problems
+            { id: 13, type: "word", q: "Một sợi dây thừng dài 3/4 m, một cây gậy dài 5/12 m. Hỏi sợi dây thừng dài hơn cây gậy bao nhiêu mét?", options: ["4/12 m", "1/3 m", "2/12 m", "8/12 m"], ans: "4/12 m", explain: "Quy đồng 3/4 m = 9/12 m. Sợi dây dài hơn cây gậy: 9/12 - 5/12 = 4/12 m (Rút gọn là 1/3 m)." },
+            { id: 14, type: "word", q: "Một cây tre dài 6/5 m, một sợi dây dài 17/10 m. Hỏi sợi dây dài hơn cây tre bao nhiêu mét?", options: ["5/10 m", "11/10 m", "1/2 m", "3/10 m"], ans: "5/10 m", explain: "Quy đồng 6/5 m = 12/10 m. Sợi dây dài hơn cây tre: 17/10 - 12/10 = 5/10 m (Rút gọn là 1/2 m)." },
+            { id: 15, type: "word", q: "Bác Tân có một mảnh đất. Bác đã sử dụng 7/12 diện tích mảnh đất để trồng rau và hoa. Biết phần đất trồng rau chiếm 1/3 diện tích. Hỏi phần đất trồng hoa chiếm bao nhiêu phần diện tích?", options: ["3/12 diện tích", "1/4 diện tích", "4/12 diện tích", "5/12 diện tích"], ans: "3/12 diện tích", explain: "Quy đồng phần đất trồng rau: 1/3 = 4/12 diện tích. Diện tích trồng hoa là: 7/12 - 4/12 = 3/12 diện tích (Rút gọn là 1/4)." },
+            { id: 16, type: "word", q: "Anh A Phan thu hoạch được 1/5 rẫy cà phê, chị Rang Hu thu hoạch được 3/10 rẫy, chú Y Phui thu hoạch được 7/20 rẫy. Hỏi cả ba người thu hoạch được tất cả bao nhiêu phần rẫy cà phê?", options: ["17/20 rẫy", "11/20 rẫy", "15/20 rẫy", "19/20 rẫy"], ans: "17/20 rẫy", explain: "Quy đồng các phân số về mẫu số chung là 20: 1/5 = 4/20; 3/10 = 6/20. Tổng số phần thu hoạch được: 4/20 + 6/20 + 7/20 = 17/20 rẫy." },
+            { id: 17, type: "word", q: "Một chú sâu cần bò từ đầu cành cây đến chiếc lá non. Đoạn đường dài 1/2 m, chú sâu đã bò được 5/12 m. Hỏi chú sâu còn phải bò thêm bao nhiêu mét nữa?", options: ["1/12 m", "2/12 m", "3/12 m", "4/12 m"], ans: "1/12 m", explain: "Quy đồng 1/2 m = 6/12 m. Đoạn đường chú sâu cần bò tiếp: 6/12 - 5/12 = 1/12 m." },
+            { id: 18, type: "word", q: "Để làm bánh chưng, mẹ cần 3/4 kg gạo nếp. Hiện mẹ chỉ còn 1/2 kg gạo nếp. Mẹ cần mua thêm bao nhiêu ki-lô-gam gạo nếp nữa?", options: ["1/4 kg", "1/2 kg", "1/8 kg", "2/4 kg"], ans: "1/4 kg", explain: "Quy đồng 1/2 kg = 2/4 kg. Số gạo nếp mẹ cần mua thêm: 3/4 - 2/4 = 1/4 kg." },
+            { id: 19, type: "word", q: "Một bể bơi có hai vòi nước. Vòi thứ nhất chảy được 5/6 bể, vòi thứ hai chảy được 5/12 bể. Hỏi vòi thứ nhất chảy được nhiều hơn vòi thứ hai bao nhiêu phần bể?", options: ["5/12 bể", "1/12 bể", "3/12 bể", "4/12 bể"], ans: "5/12 bể", explain: "Quy đồng 5/6 = 10/12. Vòi thứ nhất chảy nhiều hơn vòi thứ hai: 10/12 - 5/12 = 5/12 bể." },
+            { id: 20, type: "word", q: "Rút gọn rồi tính biểu thức sau: 15/16 - 5/16 - 1/4.", options: ["3/8", "6/16", "4/16", "1/2"], ans: "3/8", explain: "Ta tính: 15/16 - 5/16 = 10/16. Quy đồng 1/4 = 4/16. Thực hiện trừ tiếp: 10/16 - 4/16 = 6/16. Rút gọn 6/16 = 3/8." }
+        ];
+
+        // Custom Confetti Component on Canvas
+        const ConfettiEffect = ({ active }) => {
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                if (!active) return;
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                let animationId;
+                
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                const colors = ['#f43f5e', '#3b82f6', '#10b981', '#eab308', '#a855f7', '#ff7849'];
+                const particles = Array.from({ length: 100 }).map(() => ({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * canvas.height,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                }));
+
+                const draw = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach((p, idx) => {
+                        p.tiltAngle += p.tiltAngleIncremental;
+                        p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                        p.x += Math.sin(p.tiltAngle);
+                        p.tilt = Math.sin(p.tiltAngle - idx / 3) * 15;
+
+                        if (p.y > canvas.height) {
+                            p.x = Math.random() * canvas.width;
+                            p.y = -20;
+                            p.tilt = Math.random() * 10 - 5;
+                        }
+
+                        ctx.beginPath();
+                        ctx.lineWidth = p.r;
+                        ctx.strokeStyle = p.color;
+                        ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                        ctx.stroke();
+                    });
+                    animationId = requestAnimationFrame(draw);
+                };
+
+                draw();
+
+                const handleResize = () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                };
+                window.addEventListener('resize', handleResize);
+
+                return () => {
+                    cancelAnimationFrame(animationId);
+                    window.removeEventListener('resize', handleResize);
+                };
+            }, [active]);
+
+            if (!active) return null;
+            return <canvas ref={canvasRef} class="fixed inset-0 pointer-events-none z-50 w-full h-full" />;
+        };
+
+        // Standard dynamic Fraction renderer for visually stunning formulas
+        const RenderFraction = ({ fractionStr }) => {
+            if (!fractionStr.includes('/')) return <span class="font-extrabold text-2xl px-2">{fractionStr}</span>;
+            const [num, den] = fractionStr.split(' '); // handle strings with spaces if any
+            const parts = fractionStr.trim().split('/');
+            const numerator = parts[0];
+            const denominator = parts[1];
+            return (
+                <div class="inline-flex flex-col items-center justify-center mx-1 align-middle">
+                    <span class="text-xl font-bold text-slate-800 border-b-2 border-slate-700 pb-0.5 px-1">{numerator}</span>
+                    <span class="text-xl font-bold text-slate-800 pt-0.5 px-1">{denominator}</span>
+                </div>
+            );
+        };
+
+        // --- SUB-COMPONENT: PIZZA VISUALIZER FOR GATE 1 ---
+        const PizzaVisualizer = ({ question }) => {
+            // Parses "7/8 - 2/8" -> Minuend: 7, Subtrahend: 2, Total/Mẫu: 8
+            const parseFractionExpression = (exp) => {
+                try {
+                    const match = exp.match(/(\d+)\/(\d+)\s*-\s*(\d+)\/(\d+)/);
+                    if (match) {
+                        return {
+                            minuend: parseInt(match[1]),
+                            subtrahend: parseInt(match[3]),
+                            total: parseInt(match[2])
+                        };
+                    }
+                } catch (e) {}
+                return { minuend: 8, subtrahend: 0, total: 8 };
+            };
+
+            const { minuend, subtrahend, total } = parseFractionExpression(question.q);
+            const slices = [];
+            const radius = 60;
+            const cx = 75;
+            const cy = 75;
+
+            for (let i = 0; i < total; i++) {
+                const angleStart = (i * 360) / total - 90;
+                const angleEnd = ((i + 1) * 360) / total - 90;
+                const radStart = (angleStart * Math.PI) / 180;
+                const radEnd = (angleEnd * Math.PI) / 180;
+
+                const x1 = cx + radius * Math.cos(radStart);
+                const y1 = cy + radius * Math.sin(radStart);
+                const x2 = cx + radius * Math.cos(radEnd);
+                const y2 = cy + radius * Math.sin(radEnd);
+
+                const d = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
+
+                // Color coding
+                let color = "#e2e8f0"; // xám rỗng
+                let border = "#94a3b8";
+                if (i < (minuend - subtrahend)) {
+                    color = "#fb923c"; // cam - phần còn lại sau khi trừ
+                    border = "#ea580c";
+                } else if (i < minuend) {
+                    color = "#ef4444"; // đỏ - phần bị trừ đi
+                    border = "#b91c1c";
+                }
+
+                slices.push(
+                    <path
+                        key={i}
+                        d={d}
+                        fill={color}
+                        stroke={border}
+                        strokeWidth="1.5"
+                        class="transition-all duration-500 hover:opacity-90"
+                    />
+                );
+            }
+
+            return (
+                <div class="flex flex-col items-center justify-center p-3 bg-amber-50 rounded-2xl border-4 border-amber-200 shadow-inner">
+                    <h4 class="text-xs font-black uppercase text-amber-600 mb-1 tracking-wide">Mô phỏng Pizza thực tế</h4>
+                    <svg width="150" height="150" viewBox="0 0 150 150">
+                        {/* Pizza Crust Outline */}
+                        <circle cx={cx} cy={cy} r={radius + 4} fill="#fcd34d" stroke="#d97706" strokeWidth="2" />
+                        {slices}
+                        {/* Pizza Pepperonis inside slices (simulated with small circles inside colored slices) */}
+                        <circle cx={cx} cy={cy} r="6" fill="#fef08a" stroke="#ca8a04" />
+                    </svg>
+                    <div class="flex gap-4 mt-2 text-xs font-semibold">
+                        <span class="flex items-center gap-1">
+                            <span class="w-3 h-3 bg-orange-400 rounded-full inline-block border border-orange-600"></span> Còn lại
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <span class="w-3 h-3 bg-red-500 rounded-full inline-block border border-red-700"></span> Trừ đi
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <span class="w-3 h-3 bg-slate-200 rounded-full inline-block border border-slate-400"></span> Khuyết
+                        </span>
+                    </div>
+                </div>
+            );
+        };
+
+
+        // --- SUB-COMPONENT: GARDEN SCENE FOR GATE 2 ---
+        const GardenVisualizer = ({ questionIndex, totalQuestions }) => {
+            const progressPercentage = Math.round((questionIndex / totalQuestions) * 100);
+            
+            return (
+                <div class="bg-emerald-50 p-4 rounded-2xl border-4 border-emerald-200 shadow-inner relative overflow-hidden">
+                    <h4 class="text-xs font-black uppercase text-emerald-600 mb-2 tracking-wide text-center">Bản Đồ Cứu Hộ Sân Vườn</h4>
+                    
+                    {/* Garden Track */}
+                    <div class="relative w-full h-24 bg-gradient-to-b from-sky-100 to-emerald-100 rounded-xl border-2 border-emerald-200 overflow-hidden">
+                        {/* Clouds */}
+                        <div class="absolute top-2 left-4 text-slate-300 text-xl opacity-40">☁️</div>
+                        <div class="absolute top-4 right-8 text-slate-300 text-xl opacity-40">☁️</div>
+                        
+                        {/* Safe Zone (Fresh leaf/pond at the end) */}
+                        <div class="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col items-center z-10">
+                            <div class="text-3xl animate-float">🍃</div>
+                            <span class="text-[9px] bg-emerald-600 text-white px-1 rounded font-bold">Đích Đến</span>
+                        </div>
+
+                        {/* Path track representing the ecosystem road */}
+                        <div class="absolute bottom-2 left-0 right-0 h-3 bg-amber-800 border-t border-amber-950"></div>
+                        
+                        {/* Dynamic Caterpillar / Frog moving across the screen */}
+                        <div 
+                            className="absolute bottom-4 transition-all duration-1000 ease-out flex flex-col items-center"
+                            style={{ left: `calc(${progressPercentage}% * 0.8 + 5px)` }}
+                        >
+                            {/* Alternating cute characters based on index */}
+                            <div class="text-3xl animate-bounce" style={{ animationDuration: '1.2s' }}>
+                                {questionIndex % 2 === 0 ? "🐛" : "🐸"}
+                            </div>
+                            <span class="text-[9px] bg-amber-500 text-white px-1.5 py-0.5 rounded-full font-extrabold shadow">
+                                {questionIndex % 2 === 0 ? "Sâu con" : "Ếch xanh"}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-2 text-center text-xs text-emerald-800 font-bold">
+                        Đã giúp sinh vật đi được <span class="text-emerald-600 text-sm font-black">{progressPercentage}%</span> quãng đường!
+                    </div>
+                </div>
+            );
+        };
+
+
+        // --- MAIN APP COMPONENT ---
+        function App() {
+            const [currentTab, setCurrentTab] = useState("home"); // home, gate1, gate2, teacher
+            const [questionIdx, setQuestionIdx] = useState(0);
+            const [selectedAns, setSelectedAns] = useState(null);
+            const [isCorrect, setIsCorrect] = useState(null);
+            const [streak, setStreak] = useState(0);
+            const [passes, setPasses] = useState(0); // Transit passes earned
+            const [score, setScore] = useState(0);
+            const [showExplain, setShowExplain] = useState(false);
+            const [gameCompleted, setGameCompleted] = useState(false);
+            const [confettiActive, setConfettiActive] = useState(false);
+
+            const activeQuestions = currentTab === "gate1" ? gate1Questions : gate2Questions;
+            const activeQuestion = activeQuestions[questionIdx];
+
+            // Trigger a wave of confetti
+            const triggerConfetti = () => {
+                setConfettiActive(true);
+                setTimeout(() => setConfettiActive(false), 4000);
+            };
+
+            const selectGate = (gate) => {
+                playSound('click');
+                setCurrentTab(gate);
+                setQuestionIdx(0);
+                setSelectedAns(null);
+                setIsCorrect(null);
+                setStreak(0);
+                setPasses(0);
+                setScore(0);
+                setShowExplain(false);
+                setGameCompleted(false);
+            };
+
+            const handleAnswer = (option) => {
+                if (selectedAns !== null) return; // Prevent double clicking
+
+                setSelectedAns(option);
+                const correct = option === activeQuestion.ans;
+                setIsCorrect(correct);
+                setShowExplain(true);
+
+                if (correct) {
+                    playSound('success');
+                    const newStreak = streak + 1;
+                    setStreak(newStreak);
+                    setScore(score + 10);
+                    
+                    // Award Transit Pass every 5 straight correct answers
+                    if (newStreak % 5 === 0) {
+                        setPasses(prev => prev + 1);
+                        triggerConfetti();
+                    }
+                } else {
+                    playSound('fail');
+                    setStreak(0);
+                }
+            };
+
+            const handleNext = () => {
+                playSound('click');
+                setSelectedAns(null);
+                setIsCorrect(null);
+                setShowExplain(false);
+
+                if (questionIdx < activeQuestions.length - 1) {
+                    setQuestionIdx(prev => prev + 1);
+                } else {
+                    // Completed the Gate!
+                    setGameCompleted(true);
+                    playSound('win');
+                    triggerConfetti();
+                }
+            };
+
+            const handleRestart = () => {
+                selectGate(currentTab);
+            };
+
+            return (
+                <div class="flex-1 flex flex-col justify-between max-w-6xl w-full mx-auto p-3 sm:p-6">
+                    <ConfettiEffect active={confettiActive} />
+
+                    {/* Navbar */}
+                    <header class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 bg-white/80 backdrop-blur-md px-6 py-4 rounded-2xl shadow-md border-b-4 border-emerald-400">
+                        <div class="flex items-center gap-3 cursor-pointer" onClick={() => selectGate('home')}>
+                            <div class="w-12 h-12 bg-gradient-to-tr from-emerald-500 to-green-300 rounded-xl flex items-center justify-center shadow-lg text-white font-black text-2xl">
+                                🍕
+                            </div>
+                            <div>
+                                <h1 class="text-xl sm:text-2xl font-black text-emerald-800 tracking-tight leading-none">BIỆT ĐỘI PHÂN SỐ</h1>
+                                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Hành Trình Vương Quốc Toán Học</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <button 
+                                onClick={() => selectGate('home')}
+                                class={`px-4 py-2 rounded-xl text-sm font-extrabold transition-all duration-300 ${currentTab === 'home' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
+                            >
+                                🏠 Trang Chủ
+                            </button>
+                            <button 
+                                onClick={() => selectGate('teacher')}
+                                class={`px-4 py-2 rounded-xl text-sm font-extrabold transition-all duration-300 ${currentTab === 'teacher' ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
+                            >
+                                👩‍🏫 Góc Giáo Viên
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* Main Workspace Area */}
+                    <main class="flex-1 flex flex-col justify-center">
+
+                        {/* --- LANDING PAGE --- */}
+                        {currentTab === 'home' && (
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-white/90 p-6 sm:p-10 rounded-3xl shadow-xl border-4 border-emerald-100">
+                                <div class="md:col-span-7 space-y-6">
+                                    <div class="inline-block bg-amber-100 border-2 border-amber-400 text-amber-800 px-3 py-1.5 rounded-full text-xs font-black tracking-widest uppercase animate-pulse-soft">
+                                        ⚡ Trò chơi toán học lớp 4 mới nhất
+                                    </div>
+                                    <h2 class="text-3xl sm:text-5xl font-black text-slate-800 tracking-tight leading-tight">
+                                        Vượt Qua Thử Thách <br/>
+                                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-amber-500">Phép Trừ Phân Số</span>
+                                    </h2>
+                                    <p class="text-slate-600 font-medium text-base sm:text-lg leading-relaxed">
+                                        Đồng hành cùng bạn <span class="text-emerald-600 font-extrabold">Nam</span> và bạn <span class="text-amber-500 font-extrabold">Robot</span> tinh nghịch giải cứu Vương quốc Pizza tươi đẹp và chinh phục Khu vườn sinh thái đầy kỳ thú!
+                                    </p>
+
+                                    {/* Gate Cards Selection */}
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                                        {/* Gate 1 Card */}
+                                        <div 
+                                            onClick={() => selectGate('gate1')}
+                                            class="group cursor-pointer bg-gradient-to-b from-amber-50 to-orange-100/50 p-5 rounded-2xl border-4 border-amber-300 shadow-md hover:shadow-xl hover:border-orange-400 transition-all duration-300 transform hover:-translate-y-1"
+                                        >
+                                            <div class="flex items-center justify-between mb-3">
+                                                <span class="text-3xl group-hover:scale-110 transition-transform">🍕</span>
+                                                <span class="bg-amber-600 text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full">Cửa 1</span>
+                                            </div>
+                                            <h3 class="text-lg font-black text-amber-800 mb-1">Mẫu Số Đồng Nhất</h3>
+                                            <p class="text-xs text-amber-700/80 font-bold mb-3">20 Thử thách trừ phân số cùng mẫu & các câu đố chia Pizza vui nhộn.</p>
+                                            <span class="text-xs font-black text-orange-600 group-hover:underline">Bắt đầu ngay →</span>
+                                        </div>
+
+                                        {/* Gate 2 Card */}
+                                        <div 
+                                            onClick={() => selectGate('gate2')}
+                                            class="group cursor-pointer bg-gradient-to-b from-emerald-50 to-teal-100/50 p-5 rounded-2xl border-4 border-emerald-300 shadow-md hover:shadow-xl hover:border-emerald-400 transition-all duration-300 transform hover:-translate-y-1"
+                                        >
+                                            <div class="flex items-center justify-between mb-3">
+                                                <span class="text-3xl group-hover:scale-110 transition-transform">🌳</span>
+                                                <span class="bg-emerald-600 text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full">Cửa 2</span>
+                                            </div>
+                                            <h3 class="text-lg font-black text-emerald-800 mb-1">Quy Đồng Mẫu Số</h3>
+                                            <p class="text-xs text-emerald-700/80 font-bold mb-3">20 Thử thách quy đồng mẫu số, so sánh sợi dây & giúp Sâu, Ếch cứu vườn.</p>
+                                            <span class="text-xs font-black text-emerald-600 group-hover:underline">Bắt đầu ngay →</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Illustrator Column */}
+                                <div class="md:col-span-5 flex flex-col items-center justify-center space-y-4">
+                                    <div class="bg-gradient-to-tr from-emerald-100 to-amber-100 p-6 rounded-full shadow-inner animate-float relative">
+                                        <span class="text-8xl">🤖</span>
+                                        <span class="text-4xl absolute -top-2 -right-2">🎒</span>
+                                        <span class="text-4xl absolute -bottom-2 -left-2">🧁</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="font-extrabold text-slate-700">"Chào bạn! Tớ là Robot."</p>
+                                        <p class="text-xs text-slate-500 font-bold max-w-xs mt-1">Sẵn sàng cùng tớ giải quyết những mẫu số bướng bỉnh chưa nào?</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- INTERACTIVE GAME SCREEN --- */}
+                        {(currentTab === 'gate1' || currentTab === 'gate2') && !gameCompleted && (
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                                
+                                {/* Left Side: Question and visualizer */}
+                                <div class="lg:col-span-7 bg-white/95 p-5 sm:p-7 rounded-3xl shadow-lg border-4 border-emerald-300 space-y-6">
+                                    {/* Stat line */}
+                                    <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-slate-100 pb-4">
+                                        <span class="bg-slate-100 text-slate-700 font-extrabold text-xs px-3 py-1.5 rounded-xl">
+                                            Câu {questionIdx + 1} / {activeQuestions.length}
+                                        </span>
+                                        <div class="flex gap-3">
+                                            <span class="bg-amber-100 text-amber-800 font-extrabold text-xs px-3 py-1.5 rounded-xl flex items-center gap-1">
+                                                🔥 Chuỗi: {streak}
+                                            </span>
+                                            <span class="bg-purple-100 text-purple-800 font-extrabold text-xs px-3 py-1.5 rounded-xl flex items-center gap-1">
+                                                🎟️ Vé thông hành: {passes}
+                                            </span>
+                                            <span class="bg-emerald-100 text-emerald-800 font-extrabold text-xs px-3 py-1.5 rounded-xl">
+                                                ⭐ Điểm: {score}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Visual Representation Area */}
+                                    {currentTab === 'gate1' ? (
+                                        activeQuestion.type === "calc" ? <PizzaVisualizer question={activeQuestion} /> : null
+                                    ) : (
+                                        <GardenVisualizer questionIndex={questionIdx} totalQuestions={activeQuestions.length} />
+                                    )}
+
+                                    {/* Question Card */}
+                                    <div class="space-y-4">
+                                        {activeQuestion.type === "word" && (
+                                            <div class="bg-sky-50 border-2 border-sky-200 text-sky-900 p-4 rounded-2xl font-bold text-sm leading-relaxed shadow-sm">
+                                                📝 <span class="font-black text-xs uppercase text-sky-600 block mb-1">Bài toán thực tế:</span>
+                                                {activeQuestion.q}
+                                            </div>
+                                        )}
+
+                                        <div class="text-center p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                                            <span class="font-extrabold text-slate-500 text-xs block uppercase tracking-wider mb-2">Thực hiện phép tính</span>
+                                            <div class="flex items-center justify-center flex-wrap gap-2 text-3xl font-black">
+                                                {activeQuestion.type === "calc" ? (
+                                                    <>
+                                                        <RenderFraction fractionStr={activeQuestion.q.split('-')[0]} />
+                                                        <span class="text-red-500 font-bold mx-2">-</span>
+                                                        <RenderFraction fractionStr={activeQuestion.q.split('-')[1]} />
+                                                        <span class="text-slate-400 font-bold mx-2">=</span>
+                                                        <span class="text-emerald-500 bg-emerald-50 px-3 py-1.5 border-2 border-dashed border-emerald-400 rounded-xl animate-pulse">?</span>
+                                                    </>
+                                                ) : (
+                                                    <span class="text-lg sm:text-xl font-black text-slate-800 text-center">Hãy chọn đáp án đúng cho bài toán đố bên trên!</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Options Selection */}
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                                        {activeQuestion.options.map((opt, i) => {
+                                            const isSelected = selectedAns === opt;
+                                            const isCorrectAns = opt === activeQuestion.ans;
+                                            let btnStyle = "bg-white border-slate-200 hover:border-emerald-400 text-slate-700 hover:bg-emerald-50/50";
+                                            
+                                            if (selectedAns !== null) {
+                                                if (isCorrectAns) {
+                                                    btnStyle = "bg-emerald-100 border-emerald-500 text-emerald-800 scale-102 font-black";
+                                                } else if (isSelected) {
+                                                    btnStyle = "bg-rose-100 border-rose-500 text-rose-800";
+                                                } else {
+                                                    btnStyle = "bg-white border-slate-200 text-slate-400 opacity-60";
+                                                }
+                                            }
+
+                                            return (
+                                                <button
+                                                    key={i}
+                                                    disabled={selectedAns !== null}
+                                                    onClick={() => handleAnswer(opt)}
+                                                    class={`p-4 border-2 rounded-2xl text-lg font-bold transition-all duration-300 shadow-sm flex items-center justify-center gap-2 ${btnStyle}`}
+                                                >
+                                                    <span class="text-xs text-slate-400 bg-slate-100 w-6 h-6 rounded-full flex items-center justify-center font-bold">
+                                                        {String.fromCharCode(65 + i)}
+                                                    </span>
+                                                    <RenderFraction fractionStr={opt} />
+                                                    {selectedAns !== null && isCorrectAns && <span class="text-emerald-600 text-xl">✅</span>}
+                                                    {selectedAns !== null && isSelected && !isCorrectAns && <span class="text-rose-600 text-xl">❌</span>}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Right Side: Explanation and mascot feedback */}
+                                <div class="lg:col-span-5 flex flex-col gap-4">
+                                    
+                                    {/* Mascot Advice Balloon */}
+                                    <div class="bg-white/95 p-5 rounded-3xl shadow-lg border-4 border-amber-300 flex items-start gap-4">
+                                        <div class="text-4xl">🤖</div>
+                                        <div class="space-y-1">
+                                            <h4 class="font-extrabold text-amber-800 text-sm">Gợi ý của Robot:</h4>
+                                            <p class="text-xs text-slate-600 font-bold leading-relaxed">
+                                                {currentTab === 'gate1' 
+                                                    ? "Muốn trừ hai phân số cùng mẫu số, ta trừ tử số của phân số thứ nhất cho tử số của phân số thứ hai và giữ nguyên mẫu số nhé!"
+                                                    : "Để thực hiện phép tính này, trước tiên ta cần quy đồng mẫu số của chúng về cùng một mẫu số chung đấy!"
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Verification Card (Visible after answering) */}
+                                    {showExplain && (
+                                        <div class={`p-5 rounded-3xl shadow-lg border-4 transition-all duration-300 ${isCorrect ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-rose-50 border-rose-300 text-rose-900'}`}>
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-2xl">{isCorrect ? '🎉' : '💡'}</span>
+                                                <h4 class="font-black text-base">{isCorrect ? 'Tuyệt vời! Đáp án chính xác!' : 'Chưa đúng rồi! Hãy xem lời giải nhé:'}</h4>
+                                            </div>
+                                            
+                                            <p class="text-xs font-bold leading-relaxed mb-4">
+                                                {activeQuestion.explain}
+                                            </p>
+
+                                            {/* Streak milestones message */}
+                                            {isCorrect && streak % 5 === 0 && (
+                                                <div class="bg-amber-100 border border-amber-400 text-amber-800 p-2.5 rounded-xl text-xs font-black text-center mb-3 animate-bounce">
+                                                    🎁 NHẬN ĐƯỢC 1 VÉ THÔNG HÀNH CHUYÊN NGHIỆP!
+                                                </div>
+                                            )}
+
+                                            <button
+                                                onClick={handleNext}
+                                                class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-extrabold rounded-2xl text-sm transition-all shadow-md active:translate-y-0.5"
+                                            >
+                                                {questionIdx < activeQuestions.length - 1 ? 'Câu Tiếp Theo ➔' : 'Xem Kết Quả Chung Cuộc ➔'}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- GAME COMPLETED SCREEN --- */}
+                        {gameCompleted && (
+                            <div class="max-w-2xl mx-auto bg-white/95 p-8 rounded-3xl shadow-xl border-4 border-amber-400 text-center space-y-6">
+                                <div class="text-6xl animate-float">🏆</div>
+                                <h2 class="text-3xl font-black text-amber-800 tracking-tight">Cựu Chiến Binh Hoàn Thành Thử Thách!</h2>
+                                <p class="text-slate-600 font-bold max-w-md mx-auto">
+                                    Chúc mừng bạn đã xuất sắc vượt qua toàn bộ 20 thử thách phân số tại <span class="text-emerald-600 font-black">{currentTab === 'gate1' ? 'Cửa 1: Mẫu Số Đồng Nhất' : 'Cửa 2: Quy Đồng Mẫu Số'}</span>!
+                                </p>
+
+                                <div class="grid grid-cols-3 gap-3 bg-amber-50 p-4 rounded-2xl border-2 border-amber-200">
+                                    <div>
+                                        <span class="block text-2xl">⭐</span>
+                                        <span class="block text-xs text-slate-500 font-bold mt-1">Tổng điểm</span>
+                                        <span class="block text-lg font-black text-amber-700">{score}</span>
+                                    </div>
+                                    <div>
+                                        <span class="block text-2xl">🎟️</span>
+                                        <span class="block text-xs text-slate-500 font-bold mt-1">Vé thông hành</span>
+                                        <span class="block text-lg font-black text-purple-700">{passes}</span>
+                                    </div>
+                                    <div>
+                                        <span class="block text-2xl">🎯</span>
+                                        <span class="block text-xs text-slate-500 font-bold mt-1">Chuỗi cao nhất</span>
+                                        <span class="block text-lg font-black text-emerald-700">{streak}</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                                    <button
+                                        onClick={handleRestart}
+                                        class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-2xl text-sm shadow-md transition-all"
+                                    >
+                                        🔄 Chơi Lại Cửa Này
+                                    </button>
+                                    <button
+                                        onClick={() => selectGate('home')}
+                                        class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-sm shadow-md transition-all"
+                                    >
+                                        🏠 Chọn Cửa Khác
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- TEACHER / CLASS CORNER --- */}
+                        {currentTab === 'teacher' && (
+                            <div class="bg-white/95 p-6 sm:p-8 rounded-3xl shadow-lg border-4 border-purple-400 space-y-6">
+                                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b-2 border-slate-100 pb-4">
+                                    <div>
+                                        <h2 class="text-2xl font-black text-purple-800">👩‍🏫 Góc Giáo Viên & Trọng Tài</h2>
+                                        <p class="text-xs text-slate-500 font-bold">In hoặc hiển thị đáp án trực tiếp để tổ chức trò chơi "Tiếp sức đồng đội" và "Giải cứu khu vườn" trên lớp.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => window.print()}
+                                        class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-black px-4 py-2 rounded-xl text-xs transition-all"
+                                    >
+                                        🖨️ In Danh Sách Câu Hỏi
+                                    </button>
+                                </div>
+
+                                {/* Tips for teachers */}
+                                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl">
+                                    <h3 class="font-extrabold text-amber-800 text-sm mb-1">💡 Hướng dẫn tổ chức trên lớp:</h3>
+                                    <ul class="text-xs font-bold text-slate-700 space-y-1 list-disc list-inside">
+                                        <li><span class="text-orange-600">Trò chơi "Tiếp sức đồng đội" (Dùng cho Cửa 1):</span> Chia lớp thành 2 - 3 đội. Mỗi học sinh trả lời đúng sẽ giúp đội tiến lên. Đạt được 5 câu đúng liên tiếp nhận được 1 "Vé thông hành" để mở khoá Cửa 2.</li>
+                                        <li><span class="text-emerald-600">Trò chơi "Giải cứu khu vườn" (Dùng cho Cửa 2):</span> Học sinh trả lời đúng để giúp Sâu nhỏ leo tới lá xanh, hoặc giúp Ếch xanh nhảy qua đầm lầy an toàn.</li>
+                                    </ul>
+                                </div>
+
+                                {/* Accordion / Tabs inside teacher menu */}
+                                <div class="space-y-6">
+                                    <div>
+                                        <h3 class="text-lg font-black text-amber-700 mb-3">🍕 ĐÁP ÁN CỬA 1: THỬ THÁCH MẪU SỐ ĐỒNG NHẤT (20 Câu)</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-2">
+                                            {gate1Questions.map((q, idx) => (
+                                                <div key={idx} class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                                                    <p class="font-extrabold text-slate-800 mb-1">
+                                                        Câu {idx + 1}: {q.type === 'word' ? '[Toán đố]' : '[Tính]'} {q.q}
+                                                    </p>
+                                                    <p class="text-emerald-700 font-black">Đáp án đúng: {q.ans}</p>
+                                                    <p class="text-slate-500 font-semibold mt-1">Lời giải: {q.explain}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 class="text-lg font-black text-emerald-700 mb-3">🌳 ĐÁP ÁN CỬA 2: THỬ THÁCH QUY ĐỒNG MẪU SỐ (20 Câu)</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-2">
+                                            {gate2Questions.map((q, idx) => (
+                                                <div key={idx} class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                                                    <p class="font-extrabold text-slate-800 mb-1">
+                                                        Câu {idx + 1}: {q.type === 'word' ? '[Toán đố]' : '[Tính]'} {q.q}
+                                                    </p>
+                                                    <p class="text-emerald-700 font-black">Đáp án đúng: {q.ans}</p>
+                                                    <p class="text-slate-500 font-semibold mt-1">Lời giải: {q.explain}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                    </main>
+
+                    {/* Footer */}
+                    <footer class="mt-8 text-center text-xs text-slate-400 font-bold border-t border-slate-200/50 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+                        <span>Chương trình GDPT 2018 - Môn Toán Lớp 4 (Cánh Diều / Kết nối tri thức)</span>
+                        <span class="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full text-[10px] font-black uppercase">QUOCRAU AI SYSTEM V3.0</span>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
