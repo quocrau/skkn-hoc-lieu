@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vương quốc Phân số Diệu kỳ - QUOCRAU AI SYSTEM</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: #f0f7ff;
+    }
+    /* Hiệu ứng lật thẻ 3D */
+    .flip-container {
+      perspective: 1000px;
+    }
+    .flipper {
+      transition: 0.6s;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .flipper.flipped {
+      transform: rotateY(180deg);
+    }
+    .front, .back {
+      backface-visibility: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    .back {
+      transform: rotateY(180deg);
+    }
+    /* Chữ lung linh cho tiêu đề */
+    .rainbow-text {
+      background: linear-gradient(to right, #4f46e5, #06b6d4, #10b981, #f59e0b, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    /* Animation cho hiệu ứng bay sao khi trả lời đúng */
+    @keyframes particle-fly {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+    }
+    .star-particle {
+      position: absolute;
+      pointer-events: none;
+      animation: particle-fly 0.8s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden select-none">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="bg-white shadow-md border-b-4 border-indigo-200 px-4 py-3 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <!-- Logo & Title -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="goHome()">
+        <span class="text-3xl">👑</span>
+        <div>
+          <h1 class="text-xl md:text-2xl font-bold rainbow-text tracking-wide">VƯƠNG QUỐC PHÂN SỐ</h1>
+          <p class="text-xs text-gray-500 font-semibold">QUOCRAU AI SYSTEM V4.0 - LUYỆN TẬP CHUYÊN SÂU</p>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="flex items-center space-x-4">
+        <!-- Tim (Mạng chơi) -->
+        <div class="flex items-center bg-red-50 px-3 py-1.5 rounded-full border border-red-200">
+          <span class="text-lg mr-1 text-red-500">❤️</span>
+          <span id="lives-display" class="font-bold text-red-600 text-lg">5</span>
+        </div>
+        <!-- Ngôi sao tích lũy -->
+        <div class="flex items-center bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
+          <span class="text-lg mr-1 text-amber-500">⭐</span>
+          <span id="stars-display" class="font-bold text-amber-600 text-lg">0</span>
+        </div>
+        <!-- Trợ giúp -->
+        <button onclick="showHelp()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 w-9 h-9 flex items-center justify-center rounded-full font-bold transition">?</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-grow max-w-6xl w-full mx-auto p-4 flex flex-col justify-center">
+    
+    <!-- DASHBOARD / HOME SCREEN -->
+    <section id="screen-home" class="space-y-8 py-4">
+      <div class="text-center space-y-3">
+        <h2 class="text-3xl md:text-5xl font-black text-indigo-900 tracking-tight">Học Luyện Chuyên Sâu Cùng Trạng Hiền</h2>
+        <p class="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">Mỗi ải dưới đây được thiết kế quy mô lớn từ 25 bài tập thực nghiệm sinh động của sách giáo khoa giúp em làm chủ phân số hoàn hảo nhất!</p>
+      </div>
+
+      <!-- Stage Selector Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Stage 1 -->
+        <div class="bg-white rounded-3xl border-4 border-emerald-300 shadow-lg p-5 flex flex-col justify-between transition transform hover:-translate-y-2 hover:shadow-xl">
+          <div class="space-y-3">
+            <div class="bg-emerald-100 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl">🗺️</div>
+            <div>
+              <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Ải 1 (25 câu hỏi)</span>
+              <h3 class="text-lg font-bold text-gray-800 leading-tight">Nhận Diện & So Sánh</h3>
+              <p class="text-xs text-gray-500 mt-1">Đọc phân số, tử số, mẫu số, quy đồng mẫu số và so sánh trên rào cừu, thăng bằng cân thỏ.</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-600" id="progress-s1">Hoàn thành: 0/25</span>
+            <button onclick="startStage(1)" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-md transition">Chơi ngay</button>
+          </div>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="bg-white rounded-3xl border-4 border-sky-300 shadow-lg p-5 flex flex-col justify-between transition transform hover:-translate-y-2 hover:shadow-xl">
+          <div class="space-y-3">
+            <div class="bg-sky-100 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl">⛰️</div>
+            <div>
+              <span class="text-[10px] font-bold text-sky-600 uppercase tracking-wider">Ải 2 (25 câu hỏi)</span>
+              <h3 class="text-lg font-bold text-gray-800 leading-tight">Cộng & Trừ Phân Số</h3>
+              <p class="text-xs text-gray-500 mt-1">Robot cưa gỗ, thùng nước giặt, mảnh đất trồng hoa bác Tân và mật mã chữ thiên văn.</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+            <span class="text-xs font-bold text-sky-600" id="progress-s2">Hoàn thành: 0/25</span>
+            <button onclick="startStage(2)" class="bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-md transition">Chơi ngay</button>
+          </div>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="bg-white rounded-3xl border-4 border-amber-300 shadow-lg p-5 flex flex-col justify-between transition transform hover:-translate-y-2 hover:shadow-xl">
+          <div class="space-y-3">
+            <div class="bg-amber-100 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl">🛠️</div>
+            <div>
+              <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Ải 3 (25 câu hỏi)</span>
+              <h3 class="text-lg font-bold text-gray-800 leading-tight">Nhân & Tính Chu Vi</h3>
+              <p class="text-xs text-gray-500 mt-1">Nhân phân số, tàu vũ trụ xoay vòng thiên thể, chu vi ao cá và khẩu phần cám đàn lợn.</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-600" id="progress-s3">Hoàn thành: 0/25</span>
+            <button onclick="startStage(3)" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-md transition">Chơi ngay</button>
+          </div>
+        </div>
+
+        <!-- Stage 4 -->
+        <div class="bg-white rounded-3xl border-4 border-pink-300 shadow-lg p-5 flex flex-col justify-between transition transform hover:-translate-y-2 hover:shadow-xl">
+          <div class="space-y-3">
+            <div class="bg-pink-100 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl">⚔️</div>
+            <div>
+              <span class="text-[10px] font-bold text-pink-600 uppercase tracking-wider">Ải 4 (25 câu hỏi)</span>
+              <h3 class="text-lg font-bold text-gray-800 leading-tight">Tìm Phân Số Của Số</h3>
+              <p class="text-xs text-gray-500 mt-1">Tìm số học sinh nữ, nước gõ nhạc cốc, hành trình tàu biển 50 năm, chim sẻ đậu dây điện.</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+            <span class="text-xs font-bold text-pink-600" id="progress-s4">Hoàn thành: 0/25</span>
+            <button onclick="startStage(4)" class="bg-pink-500 hover:bg-pink-600 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-md transition">Chơi ngay</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Achievements Box -->
+      <div class="bg-indigo-900 text-white rounded-3xl p-6 md:p-8 shadow-xl flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
+        <div class="space-y-2 text-center md:text-left">
+          <h3 class="text-2xl font-bold">🏆 Đền Thờ Trạng Nguyên Toán Học</h3>
+          <p class="text-indigo-200 text-sm max-w-lg">Giải đúng các bài toán để tích lũy huân chương và hoàn thành toàn bộ hệ thống câu hỏi sách giáo khoa!</p>
+        </div>
+        <div class="flex space-x-4 text-center">
+          <div class="bg-indigo-850 px-3 py-2 rounded-2xl border border-indigo-700">
+            <div id="trophy-1" class="text-2xl filter grayscale opacity-40">🗺️</div>
+            <span class="text-[10px] font-bold mt-1 block">La Bàn Kính</span>
+          </div>
+          <div class="bg-indigo-850 px-3 py-2 rounded-2xl border border-indigo-700">
+            <div id="trophy-2" class="text-2xl filter grayscale opacity-40">⛰️</div>
+            <span class="text-[10px] font-bold mt-1 block">Rìu Robot</span>
+          </div>
+          <div class="bg-indigo-850 px-3 py-2 rounded-2xl border border-indigo-700">
+            <div id="trophy-3" class="text-2xl filter grayscale opacity-40">🛠️</div>
+            <span class="text-[10px] font-bold mt-1 block">Bánh Răng Thép</span>
+          </div>
+          <div class="bg-indigo-850 px-3 py-2 rounded-2xl border border-indigo-700">
+            <div id="trophy-4" class="text-2xl filter grayscale opacity-40">🕊️</div>
+            <span class="text-[10px] font-bold mt-1 block">Chim Thần Kỳ</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAMEPLAY SCREEN -->
+    <section id="screen-game" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 py-2">
+      <!-- Left Column: Visual Models -->
+      <div class="lg:col-span-5 bg-white rounded-3xl border-4 border-indigo-150 p-4 shadow-md flex flex-col justify-between min-h-[350px]">
+        <div class="flex justify-between items-center border-b-2 border-indigo-50 pb-2 mb-3">
+          <span class="font-bold text-indigo-700 flex items-center text-sm">
+            <span class="text-xl mr-1">🔍</span> Mô hình học tập trực quan
+          </span>
+          <span id="visual-helper-text" class="text-[10px] text-gray-500 font-semibold italic">Phác họa số liệu SGK</span>
+        </div>
+        
+        <!-- Interactive Canvas / Visual Holder -->
+        <div class="flex-grow flex items-center justify-center min-h-[220px]" id="visual-area">
+          <!-- Dynamic SVG content will be injected here -->
+        </div>
+
+        <div class="bg-indigo-50 rounded-2xl p-3 text-xs text-indigo-900 border border-indigo-100 mt-2 font-semibold flex items-start space-x-2">
+          <span>💡</span>
+          <span id="visual-clue">Hãy quan sát kỹ mô hình phân số phía trên để tìm lời giải chính xác nhất.</span>
+        </div>
+      </div>
+
+      <!-- Right Column: Question & Answers -->
+      <div class="lg:col-span-7 flex flex-col justify-between space-y-4">
+        <!-- Question Header Card -->
+        <div class="bg-white rounded-3xl border-4 border-indigo-150 p-6 shadow-md relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-2" id="progressbar-theme-color"></div>
+          <div class="flex justify-between items-center text-[10px] font-bold text-gray-400 mb-2">
+            <span id="stage-title">ẢI 1: CHIẾC BÁNH PHÉP THUẬT</span>
+            <span id="question-index-display">CÂU 1 / 25</span>
+          </div>
+          <h3 id="question-text" class="text-base md:text-lg font-bold text-gray-800 leading-relaxed">
+            Đang tải dữ liệu câu hỏi từ vương quốc...
+          </h3>
+        </div>
+
+        <!-- Answers Layout: Dynamic Answers / Fraction Inputs -->
+        <div id="answer-container" class="space-y-3">
+          <!-- Dynamic Buttons or inputs injected here -->
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between items-center pt-2">
+          <button onclick="goHome()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2.5 rounded-2xl text-sm transition flex items-center space-x-1">
+            <span>🏠</span> <span>Về trang chủ</span>
+          </button>
+          <button id="btn-submit" onclick="checkAnswer()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-2xl text-sm shadow-md transition flex items-center space-x-1">
+            <span>Kiểm tra</span> <span>👉</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VICTORY SCREEN / STAGE COMPLETED -->
+    <section id="screen-victory" class="hidden text-center max-w-md mx-auto space-y-6 py-8">
+      <div class="text-7xl animate-bounce">🎉</div>
+      <h2 class="text-4xl font-extrabold text-indigo-900">Chiến Thắng Rực Rỡ!</h2>
+      <p class="text-gray-600 text-sm" id="victory-message">
+        Bạn đã xuất sắc vượt qua toàn bộ 25 thử thách học luyện và mang lại sự phồn vinh cho Vương quốc Phân số!
+      </p>
+      
+      <div class="bg-amber-50 rounded-3xl p-6 border-4 border-amber-200 space-y-4">
+        <h3 class="font-bold text-amber-800 text-base">Phần thưởng vinh dự đạt được</h3>
+        <div class="flex justify-center space-x-4">
+          <div class="bg-white p-4 rounded-2xl shadow-md border-2 border-amber-300 text-center">
+            <div class="text-4xl" id="victory-trophy-emoji">🏆</div>
+            <span class="text-xs font-bold mt-2 block text-amber-900" id="victory-trophy-name">Danh Hiệu Danh Giá</span>
+          </div>
+        </div>
+        <div class="text-amber-800 font-semibold text-xs">
+          Bạn nhận thêm <span class="text-lg font-extrabold">+100</span> Ngôi sao tích lũy vào tài khoản!
+        </div>
+      </div>
+
+      <div class="flex flex-col space-y-2">
+        <button onclick="goHome()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-2xl text-sm shadow-md transition">
+          Trở về Bản Đồ Vương Quốc
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- HELP MODAL -->
+  <div id="modal-help" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 border-4 border-indigo-300 shadow-2xl relative">
+      <button onclick="hideHelp()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-bold text-xl">✕</button>
+      <h3 class="text-xl font-bold text-indigo-900 flex items-center">
+        <span class="mr-2">📚</span> Bí Kíp Trạng Hiền
+      </h3>
+      <div class="space-y-3 text-xs text-gray-600 overflow-y-auto max-h-[300px] pr-2">
+        <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100">
+          <h4 class="font-bold text-indigo-900 mb-1">1. Phân số và các phép tính</h4>
+          <p>Khi cộng hoặc trừ hai phân số khác mẫu số, luôn quy đồng đưa chúng về cùng mẫu số rồi cộng/trừ tử số giữ nguyên mẫu số nhé!</p>
+        </div>
+        <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-100">
+          <h4 class="font-bold text-emerald-900 mb-1">2. Tìm phân số của một số</h4>
+          <p>Muốn tìm phân số của một số tự nhiên, ta lấy số tự nhiên đó nhân với phân số đề bài đã cho.</p>
+        </div>
+      </div>
+      <button onclick="hideHelp()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl text-sm transition">
+        Đã hiểu, tiếp tục chiến đấu!
+      </button>
+    </div>
+  </div>
+
+  <!-- ROBOT FEEDBACK MODAL (CUSTOM NOTIFICATION MODAL) -->
+  <div id="modal-feedback" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div id="feedback-card" class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 border-4 shadow-2xl relative transform transition duration-300 scale-95">
+      <!-- Floating Mascot -->
+      <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-white rounded-full border-4 border-indigo-300 flex items-center justify-center text-4xl shadow-lg" id="feedback-mascot">
+        🤖
+      </div>
+      <div class="pt-6 text-center space-y-3">
+        <h4 id="feedback-title" class="text-xl font-extrabold">Tiêu đề phản hồi</h4>
+        <div id="feedback-math-step" class="bg-indigo-50 rounded-2xl p-2.5 border border-indigo-100 font-bold text-indigo-900 text-base my-1">
+          <!-- Hiển thị công thức toán học -->
+        </div>
+        <p id="feedback-text" class="text-gray-600 text-xs leading-relaxed max-h-[200px] overflow-y-auto text-left px-2">
+          Giải thích chi tiết về bài tập cho các em học sinh dễ tiếp thu kiến thức...
+        </p>
+      </div>
+      <button id="btn-feedback-action" onclick="closeFeedback()" class="w-full font-bold py-3 rounded-2xl text-sm transition shadow-md">
+        Tiếp tục thôi!
+      </button>
+    </div>
+  </div>
+
+  <!-- GAME OVER OVERLAY -->
+  <div id="modal-gameover" class="hidden fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 text-center space-y-6 border-4 border-red-300 shadow-2xl">
+      <div class="text-7xl animate-pulse">💔</div>
+      <h2 class="text-3xl font-black text-red-600">Đã hết lượt chơi!</h2>
+      <p class="text-gray-500 text-sm">
+        Đừng nản chí nhé Trạng Hiền! Thất bại là mẹ thành công. Hãy nạp lại năng lượng hoàng gia và học tiếp thôi nào!
+      </p>
+      <button onclick="revive()" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3.5 rounded-2xl text-sm transition shadow-md">
+        ❤️ Hồi sinh ngay (Nhận đầy tim)
+      </button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-indigo-950 text-indigo-300 text-center py-3 text-[10px] border-t border-indigo-900">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+      <p>© 2026 QUOCRAU AI SYSTEM V4.0 - Thiết kế mô phỏng Sách giáo khoa Tiểu học GDPT 2018</p>
+      <p>Chúc các em học sinh học tốt môn Toán lớp 4!</p>
+    </div>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    const STAGE_QUESTIONS = {
+      1: [
+        { id: 1, type: "mc", question: "Hình vuông được chia chéo làm 4 phần bằng nhau, có 1 phần tô màu xanh lục. Phân số chỉ phần đã tô màu là gì?", options: ["1/4", "3/4", "2/4", "1/2"], answer: "1/4", model: "shaded-square", details: { parts: 4, shaded: 1 }, textExplain: "Hình vuông chia chéo thành 4 tam giác đều bằng nhau. Có 1 tam giác được tô màu xanh, tức là đã tô màu $\\frac{1}{4}$ hình vuông." },
+        { id: 2, type: "mc", question: "Ngôi sao 5 cánh chia làm 5 tam giác bằng nhau, có 3 tam giác tô màu vàng. Phân số chỉ phần đã tô màu là gì?", options: ["3/5", "2/5", "1/5", "5/3"], answer: "3/5", model: "shaded-pentagon", details: { parts: 5, shaded: 3 }, textExplain: "Hình có 5 phần bằng nhau, đã tô màu 3 phần. Phân số chỉ phần tô màu là $\\frac{3}{5}$." },
+        { id: 3, type: "mc", question: "Hình ngũ giác gồm 5 hình tam giác ghép lại, đã tô màu 2 hình xanh dương. Tìm phân số chỉ phần tô màu.", options: ["2/5", "3/5", "1/5", "4/5"], answer: "2/5", model: "shaded-pentagon", details: { parts: 5, shaded: 2 }, textExplain: "Hình có tổng số 5 phần bằng nhau, tô màu xanh dương 2 phần, ta có phân số $\\frac{2}{5}$." },
+        { id: 4, type: "mc", question: "Đọc phân số chỉ phần tô màu của một hình vẽ sau: 'Hai phần sáu'. Viết dưới dạng ký số.", options: ["2/6", "6/2", "1/3", "2/3"], answer: "2/6", model: "simple-read", details: { text: "Hai phần sáu" }, textExplain: "'Hai phần sáu' có tử số là 2 và mẫu số là 6, ký hiệu $\\frac{2}{6}$." },
+        { id: 5, type: "mc", question: "Đọc phân số: 'Năm phần tám'. Phân số đó viết như thế nào?", options: ["5/8", "8/5", "3/8", "1/8"], answer: "5/8", model: "simple-read", details: { text: "Năm phần tám" }, textExplain: "'Năm phần tám' có tử số là 5 và mẫu số là 8, viết là $\\frac{5}{8}$." },
+        { id: 6, type: "input", question: "Tìm tử số của phân số sau: 4/7", answer: "4", model: "find-num-den", details: { f: "4/7", target: "tử" }, textExplain: "Trong một phân số, số nằm trên dấu gạch ngang là tử số. Vậy tử số của $\\frac{4}{7}$ là 4." },
+        { id: 7, type: "input", question: "Tìm mẫu số của phân số sau: 6/10", answer: "10", model: "find-num-den", details: { f: "6/10", target: "mẫu" }, textExplain: "Số nằm dưới gạch ngang là mẫu số. Vậy mẫu số của $\\frac{6}{10}$ là 10." },
+        { id: 8, type: "mc", question: "Nhìn sơ đồ nối kết trong sách. Bạn Thỏ có phép chia 7 : 9. Phân số thương tương ứng là gì?", options: ["7/9", "9/7", "7/1", "9/1"], answer: "7/9", model: "animal-rabbit", details: { label: "7 : 9" }, textExplain: "Thương của phép chia số tự nhiên $7 : 9$ viết dưới dạng phân số là $\\frac{7}{9}$." },
+        { id: 9, type: "mc", question: "Bạn Trâu có phép chia 24 : 43. Thương số của bạn ấy ứng với phân số nào?", options: ["24/43", "43/24", "1/24", "1/43"], answer: "24/43", model: "animal-buffalo", details: { label: "24 : 43" }, textExplain: "Phép chia $24 : 43$ cho ra phân số thương $\\frac{24}{43}$." },
+        { id: 10, type: "mc", question: "Bạn Khỉ Con cầm phép tính 11 : 2. Thương của bạn Khỉ Con là gì?", options: ["11/2", "2/11", "11/1", "2/1"], answer: "11/2", model: "animal-monkey", details: { label: "11 : 2" }, textExplain: "Thương của phép chia $11 : 2$ tương đương phân số $\\frac{11}{2}$." },
+        { id: 11, type: "mc", question: "Bạn Sóc nhỏ cầm phép tính 11 : 5. Hãy tìm thương tương ứng dưới dạng phân số.", options: ["11/5", "5/11", "1/5", "11/1"], answer: "11/5", model: "animal-squirrel", details: { label: "11 : 5" }, textExplain: "Ta lấy số bị chia 11 làm tử số và số chia 5 làm mẫu số: $\\frac{11}{5}$." },
+        { id: 12, type: "mc", question: "Hãy so sánh hai phân số cùng mẫu số sau: 21/23 và 19/23. Điền dấu >, < hoặc = thích hợp.", options: [">", "<", "="], answer: ">", model: "compare-show", details: { left: "21/23", right: "19/23" }, textExplain: "Hai phân số có cùng mẫu số là 23, tử số $21 > 19$ nên $\\frac{21}{23} > \\frac{19}{23}$." },
+        { id: 13, type: "mc", question: "So sánh hai phân số khác mẫu số: 8/5 và 49/30.", options: ["<", ">", "="], answer: "<", model: "compare-show", details: { left: "8/5", right: "49/30" }, textExplain: "Quy đồng mẫu số phân số $\\frac{8}{5} = \\frac{8 \\times 6}{5 \\times 6} = \\frac{48}{30}$. Vì $48 < 49$ nên $\\frac{8}{5} < \\frac{49}{30}$." },
+        { id: 14, type: "mc", question: "So sánh hai biểu thức phân số sau: 20/36 và 5/9.", options: ["=", ">", "<"], answer: "=", model: "compare-show", details: { left: "20/36", right: "5/9" }, textExplain: "Rút gọn phân số $\\frac{20}{36}$ chia cả tử và mẫu cho 4 ta được phân số tối giản là $\\frac{5}{9}$." },
+        { id: 15, type: "mc", question: "Hình vẽ ngôi sao nào dưới đây đã tô màu chính xác 2/5 tổng số ngôi sao?", options: ["Hình có 10 ngôi sao tô màu 4 ngôi sao", "Hình có 10 ngôi sao tô màu 2 ngôi sao", "Hình có 5 ngôi sao tô màu 5 ngôi sao"], answer: "Hình có 10 ngôi sao tô màu 4 ngôi sao", model: "star-paints", details: { count: 10, colored: 4 }, textExplain: "Phân số $\\frac{2}{5} = \\frac{4}{10}$. Tức là nếu có 10 ngôi sao ta tô màu 4 ngôi sao." },
+        { id: 16, type: "mc", question: "Tìm phân số bằng phân số 5/6 trong các phân số dưới đây:", options: ["10/14", "18/15", "25/30", "24/28"], answer: "25/30", model: "simplify-flow", details: { base: "5/6" }, textExplain: "Nhân cả tử số và mẫu số của $\\frac{5}{6}$ với 5, ta được $\\frac{5 \\times 5}{6 \\times 5} = \\frac{25}{30}$." },
+        { id: 17, type: "input", question: "Quy đồng mẫu số hai phân số 1/6 và 7/18. Tìm mẫu số chung tối ưu nhất.", answer: "18", model: "lcd-find", details: { f1: "1/6", f2: "7/18" }, textExplain: "Vì 18 chia hết cho 6 nên ta chọn 18 làm mẫu số chung tối ưu." },
+        { id: 18, type: "input", question: "Tìm mẫu số chung nhỏ nhất của hai phân số: 4/5 và 11/60.", answer: "60", model: "lcd-find", details: { f1: "4/5", f2: "11/60" }, textExplain: "Vì 60 chia hết cho 5 nên 60 là mẫu số chung nhỏ nhất." },
+        { id: 19, type: "input", question: "Quy đồng mẫu số hai phân số 7/25 và 3/100. Tìm mẫu số chung tối ưu.", answer: "100", model: "lcd-find", details: { f1: "7/25", f2: "3/100" }, textExplain: "Mẫu số chung tối ưu nhất là 100 vì 100 chia hết cho 25." },
+        { id: 20, type: "mc", question: "Đoạn thẳng AC chia làm 4 đoạn bằng nhau, điểm B nằm ở vạch số 1 (AB = 1/4 AC). Đoạn BC bằng mấy phần của AC?", options: ["3/4 AC", "2/4 AC", "1/4 AC", "4/4 AC"], answer: "3/4 AC", model: "segment-ratio", details: { total: 4, mark: 1 }, textExplain: "Cả đoạn AC dài 4 phần. Đoạn AB chiếm 1 phần thì đoạn còn lại BC chiếm: $4 - 1 = 3$ phần, tức là $\\frac{3}{4}AC$." },
+        { id: 21, type: "mc", question: "Đoạn thẳng HK chia làm 5 phần bằng nhau. Điểm I ở vạch số 2 (HI = 2/5 HK). Tìm tỉ số của IK so với HK.", options: ["3/5 HK", "2/5 HK", "4/5 HK", "1/5 HK"], answer: "3/5 HK", model: "segment-ratio", details: { total: 5, mark: 2 }, textExplain: "Đoạn IK chiếm: $5 - 2 = 3$ phần, tức là bằng $\\frac{3}{5}HK$." },
+        { id: 22, type: "mc", question: "Quy đồng hai phân số 1/6 và 3/4 về chung mẫu số là 12 ta được hai phân số nào?", options: ["2/12 và 9/12", "1/12 và 3/12", "2/12 và 6/12", "3/12 và 9/12"], answer: "2/12 và 9/12", model: "lcd-double", details: { f1: "1/6", f2: "3/4", target: 12 }, textExplain: "$\\frac{1}{6} = \\frac{1 \\times 2}{6 \\times 2} = \\frac{2}{12}$ và $\\frac{3}{4} = \\frac{3 \\times 3}{4 \\times 3} = \\frac{9}{12}$." },
+        { id: 23, type: "mc", question: "Bạn Nam muốn lấy ra 1/4 mét dây thép từ một sợi dây dài đúng 1 mét mà không có thước đo. Nam nên làm thế nào?", options: ["Gấp đôi sợi dây 2 lần", "Gấp đôi sợi dây 1 lần", "Cắt ngẫu nhiên sợi dây", "Gấp sợi dây làm 3 phần"], answer: "Gấp đôi sợi dây 2 lần", model: "ribbon-fold", details: {}, textExplain: "Khi gấp đôi 2 lần, sợi dây 1 mét sẽ được chia đều làm 4 phần bằng nhau. Mỗi phần chính là $\\frac{1}{4}$ mét." },
+        { id: 24, type: "mc", question: "Có 15 bông hoa hướng dương, bạn ong đã hút mật ở 9 bông hoa. Ong đã hút mật bao nhiêu phần số bông hoa?", options: ["3/5 số bông hoa", "9/15 số bông hoa", "2/5 số bông hoa", "1/3 số bông hoa"], answer: "3/5 số bông hoa", model: "flowers-grid", details: { total: 15, active: 9 }, textExplain: "Phân số biểu thị là $\\frac{9}{15}$. Rút gọn chia cả tử và mẫu cho 3 ta được $\\frac{3}{5}$ số bông hoa." },
+        { id: 25, type: "mc", question: "Một rổ có 12 quả hồng, Chào mào đã ăn hết 8 quả hồng. Tìm phân số tối giản chỉ số quả hồng đã bị ăn.", options: ["2/3 rổ", "8/12 rổ", "3/4 rổ", "1/2 rổ"], answer: "2/3 rổ", model: "peaches-grid", details: { total: 12, active: 8 }, textExplain: "Phân số chỉ số quả bị ăn là $\\frac{8}{12}$. Rút gọn cho 4 ta được phân số tối giản là $\\frac{2}{3}$." }
+      ],
+      2: [
+        { id: 1, type: "mc", question: "Phép tính sau Đúng hay Sai: 1/2 - 1/8 = 3/8", options: ["Đúng", "Sai"], answer: "Đúng", model: "true-false", details: { text: "1/2 - 1/8 = 3/8" }, textExplain: "$\\frac{1}{2} - \\frac{1}{8} = \\frac{4}{8} - \\frac{1}{8} = \\frac{3}{8}$. Do đó phép tính là ĐÚNG." },
+        { id: 2, type: "mc", question: "Phép tính sau Đúng hay Sai: 7/10 - 1/5 = 6/5", options: ["Đúng", "Sai"], answer: "Sai", model: "true-false", details: { text: "7/10 - 1/5 = 6/5" }, textExplain: "$\\frac{7}{10} - \\frac{2}{10} = \\frac{5}{10} = \\frac{1}{2}$. Kết quả $6/5$ là SAI." },
+        { id: 3, type: "mc", question: "Phép tính sau Đúng hay Sai: 5/4 + 5/12 = 5/16", options: ["Đúng", "Sai"], answer: "Sai", model: "true-false", details: { text: "5/4 + 5/12 = 5/16" }, textExplain: "$\\frac{15}{12} + \\frac{5}{12} = \\frac{20}{12} = \\frac{5}{3}$. Phép tính cộng trực tiếp mẫu số là hoàn toàn SAI." },
+        { id: 4, type: "mc", question: "Phép tính sau Đúng hay Sai: 3/6 + 2/3 = 7/6", options: ["Đúng", "Sai"], answer: "Đúng", model: "true-false", details: { text: "3/6 + 2/3 = 7/6" }, textExplain: "$\\frac{3}{6} + \\frac{4}{6} = \\frac{7}{6}$. Phép tính này là ĐÚNG." },
+        { id: 5, type: "mc", question: "Rút gọn rồi tính kết quả phép cộng sau: 4/24 + 7/6", options: ["4/3", "11/24", "11/6", "1/2"], answer: "4/3", model: "simplify-add", details: { f1: "4/24", f2: "7/6" }, textExplain: "Rút gọn $\\frac{4}{24} = \\frac{1}{6}$. Phép tính trở thành $\\frac{1}{6} + \\frac{7}{6} = \\frac{8}{6} = \\frac{4}{3}$." },
+        { id: 6, type: "mc", question: "Rút gọn rồi tính kết quả phép trừ sau: 10/15 - 1/3", options: ["1/3", "9/15", "1/5", "2/3"], answer: "1/3", model: "simplify-sub", details: { f1: "10/15", f2: "1/3" }, textExplain: "Rút gọn $\\frac{10}{15} = \\frac{2}{3}$. Phép tính trở thành $\\frac{2}{3} - \\frac{1}{3} = \\frac{1}{3}$." },
+        { id: 7, type: "mc", question: "Rút gọn rồi tính kết quả phép trừ sau: 21/28 - 1/4", options: ["1/2", "20/28", "2/4", "3/4"], answer: "1/2", model: "simplify-sub", details: { f1: "21/28", f2: "1/4" }, textExplain: "Rút gọn $\\frac{21}{28} = \\frac{3}{4}$. Phép tính: $\\frac{3}{4} - \\frac{1}{4} = \\frac{2}{4} = \\frac{1}{2}$." },
+        { id: 8, type: "mc", question: "Rút gọn rồi tính kết quả phép cộng sau: 35/40 + 5/8", options: ["3/2", "40/40", "1", "5/4"], answer: "3/2", model: "simplify-add", details: { f1: "35/40", f2: "5/8" }, textExplain: "Rút gọn $\\frac{35}{40} = \\frac{7}{8}$. Thực hiện phép cộng: $\\frac{7}{8} + \\frac{5}{8} = \\frac{12}{8} = \\frac{3}{2}$." },
+        { id: 9, type: "mc", question: "Một ô tô chạy được 2/7 quãng đường trong giờ thứ nhất, giờ tiếp theo chạy thêm 3/7 quãng đường. Hỏi sau 2 giờ ô tô chạy được bao nhiêu phần quãng đường?", options: ["5/7 quãng đường", "6/7 quãng đường", "1 quãng đường", "6/49 quãng đường"], answer: "5/7 quãng đường", model: "car-road", details: { f1: "2/7", f2: "3/7" }, textExplain: "Tổng quãng đường ô tô chạy được sau 2 giờ là: $\\frac{2}{7} + \\frac{3}{7} = \\frac{5}{7}$ quãng đường." },
+        { id: 10, type: "mc", question: "Một cây gỗ dài 17/4 m. Robot cưa khúc thứ nhất dài 3/2 m, khúc thứ hai dài 9/8 m. Tìm chiều dài của khúc gỗ còn lại.", options: ["13/8 m", "11/8 m", "15/8 m", "5/8 m"], answer: "13/8 m", model: "robot-wood", details: { total: "17/4", first: "3/2", second: "9/8" }, textExplain: "Tổng chiều dài 2 khúc đã cưa là: $\\frac{3}{2} + \\frac{9}{8} = \\frac{12}{8} + \\frac{9}{8} = \\frac{21}{8}\\text{ m}$. Khúc gỗ còn lại dài: $\\frac{17}{4} - \\frac{21}{8} = \\frac{34}{8} - \\frac{21}{8} = \\frac{13}{8}\\text{ m}$." },
+        { id: 11, type: "mc", question: "Tính kết quả phép tính có số tự nhiên sau: 2 + 1/6", options: ["13/6", "3/6", "11/6", "12/6"], answer: "13/6", model: "num-add-frac", details: { num: 2, frac: "1/6" }, textExplain: "$2 + \\frac{1}{6} = \\frac{12}{6} + \\frac{1}{6} = \\frac{13}{6}$." },
+        { id: 12, type: "mc", question: "Tính kết quả phép tính sau: 1 - 1/4", options: ["3/4", "1/4", "4/4", "2/4"], answer: "3/4", model: "num-sub-frac", details: { num: 1, frac: "1/4" }, textExplain: "$1 - \\frac{1}{4} = \\frac{4}{4} - \\frac{1}{4} = \\frac{3}{4}$." },
+        { id: 13, type: "mc", question: "Tính kết quả phép tính sau: 5 + 1/2", options: ["11/2", "6/2", "10/2", "9/2"], answer: "11/2", model: "num-add-frac", details: { num: 5, frac: "1/2" }, textExplain: "$5 + \\frac{1}{2} = \\frac{10}{2} + \\frac{1}{2} = \\frac{11}{2}$." },
+        { id: 14, type: "mc", question: "Tính kết quả phép tính sau: 3 - 5/6", options: ["13/6", "8/6", "11/6", "7/6"], answer: "13/6", model: "num-sub-frac", details: { num: 3, frac: "5/6" }, textExplain: "$3 - \\frac{5}{6} = \\frac{18}{6} - \\frac{5}{6} = \\frac{13}{6}$." },
+        { id: 15, type: "mc", question: "Thực hiện sơ đồ chuỗi phép tính a: Lấy 2/21 cộng với 1/7 được kết quả là bao nhiêu?", options: ["5/21", "3/21", "4/21", "1/3"], answer: "5/21", model: "flowchart-a", details: { val1: "2/21", val2: "1/7" }, textExplain: "$\\frac{2}{21} + \\frac{1}{7} = \\frac{2}{21} + \\frac{3}{21} = \\frac{5}{21}$." },
+        { id: 16, type: "mc", question: "Tiếp tục sơ đồ chuỗi phép tính a: Lấy kết quả 5/21 cộng với 1. Tìm phân số thích hợp ở ô tròn cuối.", options: ["26/21", "6/21", "15/21", "11/21"], answer: "26/21", model: "flowchart-a-end", details: { prev: "5/21", add: 1 }, textExplain: "$\\frac{5}{21} + 1 = \\frac{5}{21} + \\frac{21}{21} = \\frac{26}{21}$." },
+        { id: 17, type: "mc", question: "Robot có 7/12 chai nước giặt. Robot dùng 1/3 chai giặt chăn, dùng thêm 1/6 chai giặt quần áo. Chai nước giặt còn lại mấy phần?", options: ["1/12 chai", "2/12 chai", "5/12 chai", "3/12 chai"], answer: "1/12 chai", model: "detergent-sub", details: { total: "7/12", use1: "1/3", use2: "1/6" }, textExplain: "Tổng lượng nước giặt đã dùng là: $\\frac{1}{3} + \\frac{1}{6} = \\frac{2}{6} + \\frac{1}{6} = \\frac{3}{6} = \\frac{1}{2}$ chai (hay $\\frac{6}{12}$ chai). Chai nước giặt còn lại: $\\frac{7}{12} - \\frac{6}{12} = \\frac{1}{12}$ chai." },
+        { id: 18, type: "mc", question: "Một thanh gỗ dài 17/2 dm chồng lên một thanh gỗ khác một đoạn dài 31/6 dm. Phần thanh gỗ không chồng lên nhau có độ dài là bao nhiêu?", options: ["10/3 dm", "20/3 dm", "5/3 dm", "11/3 dm"], answer: "10/3 dm", model: "wood-overlap", details: { len: "17/2", overlap: "31/6" }, textExplain: "Hiệu độ dài là: $\\frac{17}{2} - \\frac{31}{6} = \\frac{51}{6} - \\frac{31}{6} = \\frac{20}{6} = \\frac{10}{3}\\text{ dm}$." },
+        { id: 19, type: "mc", question: "Có 2 tấm ván dài 20/3 dm và 17/6 dm được ghép nối bằng cách chồng lên nhau một đoạn dài 33/6 dm. Tính tổng chiều dài tấm ván sau khi ghép.", options: ["4 dm", "5 dm", "6 dm", "3 dm"], answer: "4 dm", model: "wood-overlap-double", details: { v1: "20/3", v2: "17/6", over: "33/6" }, textExplain: "Tổng chiều dài sau khi trừ đoạn gối chồng chéo là: $\\frac{20}{3} + \\frac{17}{6} - \\frac{33}{6} = \\frac{40}{6} + \\frac{17}{6} - \\frac{33}{6} = \\frac{24}{6} = 4\\text{ dm}$." },
+        { id: 20, type: "mc", question: "Bạn hãy so sánh độ dài sợi dây mây dài 3/4 m và cây gậy dài 5/12 m. Sợi dây mây hay cây gậy dài hơn?", options: ["Sợi dây mây dài hơn", "Cây gậy dài hơn", "Hai vật bằng nhau"], answer: "Sợi dây mây dài hơn", model: "stick-wire", details: { wire: "3/4", stick: "5/12" }, textExplain: "Quy đồng sợi dây mây: $\\frac{3}{4} = \\frac{9}{12}\\text{ m}$. Vì $\\frac{9}{12} > \\frac{5}{12}$ nên sợi dây mây dài hơn cây gậy." },
+        { id: 21, type: "mc", question: "Hai nhóm công nhân cùng sửa một đoạn đường. Nhóm một sửa được 3/10 đoạn đường, nhóm hai sửa được 1/5 đoạn đường. Cả hai nhóm sửa được bao nhiêu phần?", options: ["1/2 đoạn đường", "4/10 đoạn đường", "3/5 đoạn đường", "2/5 đoạn đường"], answer: "1/2 đoạn đường", model: "workers-road", details: { r1: "3/10", r2: "1/5" }, textExplain: "Cả hai nhóm sửa được: $\\frac{3}{10} + \\frac{1}{5} = \\frac{3}{10} + \\frac{2}{10} = \\frac{5}{10} = \\frac{1}{2}$ đoạn đường." },
+        { id: 22, type: "mc", question: "Bác Tân có một mảnh đất. Bác sử dụng 7/12 diện tích để trồng rau và hoa. Biết diện tích để trồng rau chiếm 1/3 diện tích mảnh đất. Tính diện tích để trồng hoa.", options: ["1/4 diện tích", "5/12 diện tích", "1/3 diện tích", "1/2 diện tích"], answer: "1/4 diện tích", model: "tan-garden", details: { total: "7/12", veg: "1/3" }, textExplain: "Diện tích trồng hoa chiếm: $\\frac{7}{12} - \\frac{1}{3} = \\frac{7}{12} - \\frac{4}{12} = \\frac{3}{12} = \\frac{1}{4}$ diện tích mảnh đất." },
+        { id: 23, type: "mc", question: "Các bạn pha nước cam cho buổi liên hoan. Mai pha được 1/4 l, Việt pha được 5/6 l, Nam pha được 11/12 l. Hỏi cả 3 bạn pha được bao nhiêu lít nước cam?", options: ["2 lít", "1 lít", "3 lít", "23/12 lít"], answer: "2 lít", model: "orange-juice", details: { j1: "1/4", j2: "5/6", j3: "11/12" }, textExplain: "Tổng số lít nước cam cả ba bạn pha được là: $\\frac{1}{4} + \\frac{5}{6} + \\frac{11}{12} = \\frac{3}{12} + \\frac{10}{12} + \\frac{11}{12} = \\frac{24}{12} = 2\\text{ lít}$." },
+        { id: 24, type: "mc", question: "Việt dùng 1/2 số tiền của mình để mua một quyển vở. Sau đó, bạn ấy dùng thêm 1/6 số tiền để mua bút. Hỏi Việt đã tiêu hết bao nhiêu phần số tiền?", options: ["2/3 số tiền", "5/6 số tiền", "1/3 số tiền", "3/4 số tiền"], answer: "2/3 số tiền", model: "money-spent", details: { book: "1/2", pen: "1/6" }, textExplain: "Tổng số phần tiền Việt đã tiêu là: $\\frac{1}{2} + \\frac{1}{6} = \\frac{3}{6} + \\frac{1}{6} = \\frac{4}{6} = \\frac{2}{3}$ số tiền." },
+        { id: 25, type: "mc", question: "Giải ô chữ bí ẩn thiên văn học: Tìm chữ cái đại diện cho kết quả phép tính H: 3/6 - 1/18", options: ["4/9", "5/18", "1/9", "7/18"], answer: "4/9", model: "astronomy-letter", details: { f1: "3/6", f2: "1/18" }, textExplain: "$\\frac{3}{6} - \\frac{1}{18} = \\frac{9}{18} - \\frac{1}{18} = \\frac{8}{18} = \\frac{4}{9}$. Ô chữ tương ứng với chữ H." }
+      ],
+      3: [
+        { id: 1, type: "mc", question: "Điền dấu thích hợp vào ô trống: 2/3 x 4/5 ... 4/5 x 2/3", options: ["=", ">", "<"], answer: "=", model: "algebra-compare", details: { left: "2/3 x 4/5", right: "4/5 x 2/3" }, textExplain: "Theo tính chất giao hoán của phép nhân phân số, khi ta đổi chỗ các phân số trong một tích thì tích của chúng không thay đổi." },
+        { id: 2, type: "mc", question: "Điền dấu thích hợp: (1/3 x 2/5) x 3/4 ... 1/3 x (2/5 x 3/4)", options: ["=", ">", "<"], answer: "=", model: "algebra-compare", details: { left: "(1/3 x 2/5) x 3/4", right: "1/3 x (2/5 x 3/4)" }, textExplain: "Áp dụng tính chất kết hợp của phép nhân phân số: $(a \\times b) \\times c = a \\times (b \\times c)$." },
+        { id: 3, type: "mc", question: "Điền dấu thích hợp: (1/3 + 2/15) x 3/4 ... 1/3 x 3/4 + 2/15 x 3/4", options: ["=", ">", "<"], answer: "=", model: "algebra-compare", details: { left: "(1/3 + 2/15) x 3/4", right: "1/3 x 3/4 + 2/15 x 3/4" }, textExplain: "Áp dụng tính chất phân phối của phép nhân đối với phép cộng: $(a + b) \\times c = a \\times c + b \\times c$." },
+        { id: 4, type: "mc", question: "Tính chu vi của một hình vuông có cạnh bằng 3/5 dm.", options: ["12/5 dm", "9/25 dm", "6/5 dm", "12/20 dm"], answer: "12/5 dm", model: "square-perimeter", details: { side: "3/5" }, textExplain: "Chu vi hình vuông bằng độ dài một cạnh nhân với 4: $\\frac{3}{5} \\times 4 = \\frac{12}{5}\\text{ dm}$." },
+        { id: 5, type: "mc", question: "Một tàu vũ trụ bay vòng quanh một thiên thể 6 vòng rồi mới đáp xuống. Nếu mỗi vòng tàu bay được 61/6 km thì nó bay được bao nhiêu km?", options: ["61 km", "366 km", "366/36 km", "10 km"], answer: "61 km", model: "spaceship-orbit", details: { rounds: 6, dist: "61/6" }, textExplain: "Tổng quãng đường bay được là: $\\frac{61}{6} \\times 6 = 61\\text{ km}$." },
+        { id: 6, type: "mc", question: "Tính bằng cách thuận tiện nhất: 3/22 x 3/11 x 22", options: ["9/11", "9/242", "6/11", "3/11"], answer: "9/11", model: "fast-multi", details: { expr: "3/22 x 3/11 x 22" }, textExplain: "Ta nhóm $\\frac{3}{22} \\times 22 = 3$. Sau đó lấy $3 \\times \\frac{3}{11} = \\frac{9}{11}$." },
+        { id: 7, type: "mc", question: "Tính giá trị biểu thức: (1/3 + 1/6) x 2/5", options: ["1/5", "1/2", "1/10", "3/10"], answer: "1/5", model: "complex-expr", details: { expr: "(1/3 + 1/6) x 2/5" }, textExplain: "Tính trong ngoặc trước: $\\frac{1}{3} + \\frac{1}{6} = \\frac{2}{6} + \\frac{1}{6} = \\frac{3}{6} = \\frac{1}{2}$. Thực hiện phép nhân: $\\frac{1}{2} \\times \\frac{2}{5} = \\frac{1}{5}$." },
+        { id: 8, type: "mc", question: "Một bè nuôi cá tra hình chữ nhật có chiều dài 25/2 m, chiều rộng 19/2 m. Hỏi chu vi của bè cá đó là bao nhiêu mét?", options: ["44 m", "22 m", "475/4 m", "88 m"], answer: "44 m", model: "fishpond-perimeter", details: { w: "19/2", l: "25/2" }, textExplain: "Chu vi hình chữ nhật bằng (Chiều dài + Chiều rộng) nhân 2: $(\\frac{25}{2} + \\frac{19}{2}) \\times 2 = \\frac{44}{2} \\times 2 = 44\\text{ m}$." },
+        { id: 9, type: "mc", question: "Nhà cô Sáu có chuồng nuôi 4 con lợn. Mỗi ngày một con lợn ăn hết 1/8 yến cám. Hỏi mỗi ngày chuồng lợn ăn hết mấy yến cám?", options: ["1/2 yến", "4/8 yến", "1/4 yến", "1 yến"], answer: "1/2 yến", model: "pig-feed", details: { count: 4, amount: "1/8" }, textExplain: "Tổng số cám chuồng lợn ăn hết mỗi ngày là: $\\frac{1}{8} \\times 4 = \\frac{4}{8} = \\frac{1}{2}$ yến cám." },
+        { id: 10, type: "input", question: "Đổi đơn vị khối lượng sang ki-lô-gam: 1/2 yến cám bằng bao nhiêu kg? (Biết 1 yến = 10 kg)", answer: "5", model: "convert-unit", details: { val: "1/2 yến" }, textExplain: "Ta lấy $10 \\times \\frac{1}{2} = 5\\text{ kg}$." },
+        { id: 11, type: "mc", question: "Biết đoạn tre A dài 1 m và có 3 đốt bằng nhau. Đoạn tre B dài 2/3 m. Hãy cho biết đoạn tre B ngắn hay dài hơn đoạn tre A?", options: ["Ngắn hơn", "Dài hơn", "Bằng nhau"], answer: "Ngắn hơn", model: "bamboo-compare", details: { a: 1, b: "2/3" }, textExplain: "Đoạn tre B dài $\\frac{2}{3}\\text{ m}$, đoạn tre A dài $1\\text{ m}$ (tức $\\frac{3}{3}\\text{ m}$). Vì $\\frac{2}{3} < 1$ nên đoạn tre B ngắn hơn đoạn tre A." },
+        { id: 12, type: "mc", question: "Đoạn tre C có 2 đốt dài bằng nhau, mỗi đốt dài đúng bằng 1 đốt của đoạn tre B (mỗi đốt của B dài 2/3 m). Tính độ dài của đoạn tre C.", options: ["4/3 m", "3/2 m", "2/3 m", "1 m"], answer: "4/3 m", model: "bamboo-c", details: { nodes: 2, len: "2/3" }, textExplain: "Độ dài đoạn tre C là: $\\frac{2}{3} \\times 2 = \\frac{4}{3}\\text{ m}$." },
+        { id: 13, type: "mc", question: "Tính kết quả phép nhân phân số sau: 5/11 x 11/6", options: ["5/6", "55/66", "6/5", "11/6"], answer: "5/6", model: "simple-multi", details: { f1: "5/11", f2: "11/6" }, textExplain: "Rút gọn số 11 ở tử và mẫu của tích, ta được $\\frac{5}{6}$." },
+        { id: 14, type: "mc", question: "Tính: 7 x 6/21", options: ["2", "42/21", "6/3", "1"], answer: "2", model: "simple-multi-num", details: { num: 7, frac: "6/21" }, textExplain: "Ta rút gọn phân số trước: $\\frac{6}{21} = \\frac{2}{7}$. Sau đó tính: $7 \\times \\frac{2}{7} = 2$." },
+        { id: 15, type: "mc", question: "Tính thuận tiện biểu thức sau: (11/19 x 2/7) + (5/7 x 11/19)", options: ["11/19", "7/7", "11/7", "1"], answer: "11/19", model: "fast-algebra", details: { text: "11/19 x (2/7 + 5/7)" }, textExplain: "Nhóm phân số chung $\\frac{11}{19} \\times (\\frac{2}{7} + \\frac{5}{7}) = \\frac{11}{19} \\times 1 = \\frac{11}{19}$." },
+        { id: 16, type: "mc", question: "Tính nhanh biểu thức: (3/5 x 17/21) + (2/5 x 17/21)", options: ["17/21", "5/5", "1", "17/105"], answer: "17/21", model: "fast-algebra", details: { text: "(3/5 + 2/5) x 17/21" }, textExplain: "Nhóm $(\\frac{3}{5} + \\frac{2}{5}) \\times \\frac{17}{21} = 1 \\times \\frac{17}{21} = \\frac{17}{21}$." },
+        { id: 17, type: "mc", question: "Tính diện tích một ô đỗ xe hình chữ nhật có chiều dài là 11/2 m và chiều rộng là 5/2 m.", options: ["55/4 m2", "16/4 m2", "55/2 m2", "16/2 m2"], answer: "55/4 m2", model: "parking-area", details: { l: "11/2", w: "5/2" }, textExplain: "Diện tích hình chữ nhật bằng dài nhân rộng: $\\frac{11}{2} \\times \\frac{5}{2} = \\frac{55}{4}\\text{ m}^2$." },
+        { id: 18, type: "mc", question: "Nhà vua muốn lát nền cho cả 3 ô đỗ xe như thế. Hỏi tổng diện tích lát nền là bao nhiêu mét vuông?", options: ["165/4 m2", "55/4 m2", "165/12 m2", "55/12 m2"], answer: "165/4 m2", model: "parking-area-3", details: { area: "55/4", count: 3 }, textExplain: "Tổng diện tích 3 ô đỗ xe là: $\\frac{55}{4} \\times 3 = \\frac{165}{4}\\text{ m}^2$." },
+        { id: 19, type: "mc", question: "Tính phép nhân: 9/11 x 8", options: ["72/11", "17/11", "72/88", "9/88"], answer: "72/11", model: "simple-multi-num", details: { num: 8, frac: "9/11" }, textExplain: "Ta nhân tử số với số tự nhiên: $\\frac{9 \\times 8}{11} = \\frac{72}{11}$." },
+        { id: 20, type: "mc", question: "Tính phép nhân đặc biệt: 15/8 x 0", options: ["0", "15/8", "1", "0/8"], answer: "0", model: "simple-multi-num", details: { num: 0, frac: "15/8" }, textExplain: "Bất kỳ phân số nào nhân với số 0 cũng có kết quả bằng 0." },
+        { id: 21, type: "mc", question: "Một tấm nhôm hình chữ nhật có chiều dài 6/7 m và chiều rộng 3/5 m. Diện tích tấm nhôm là bao nhiêu?", options: ["18/35 m2", "9/35 m2", "18/12 m2", "9/12 m2"], answer: "18/35 m2", model: "aluminum-area", details: { l: "6/7", w: "3/5" }, textExplain: "Diện tích tấm nhôm là: $\\frac{6}{7} \\times \\frac{3}{5} = \\frac{18}{35}\\text{ m}^2$." },
+        { id: 22, type: "mc", question: "Tính tích rồi rút gọn kết quả về dạng tối giản: 13/8 x 5/15", options: ["13/24", "65/120", "13/8", "1/3"], answer: "13/24", model: "simple-multi", details: { f1: "13/8", f2: "5/15" }, textExplain: "Rút gọn $\\frac{5}{15} = \\frac{1}{3}$. Phép nhân: $\\frac{13}{8} \\times \\frac{1}{3} = \\frac{13}{24}$." },
+        { id: 23, type: "mc", question: "Tính tích rồi rút gọn về phân số tối giản: 3/9 x 6/12", options: ["1/6", "18/108", "1/2", "1/4"], answer: "1/6", model: "simple-multi", details: { f1: "3/9", f2: "6/12" }, textExplain: "Rút gọn $\\frac{3}{9} = \\frac{1}{3}$ và $\\frac{6}{12} = \\frac{1}{2}$. Tích là: $\\frac{1}{3} \\times \\frac{1}{2} = \\frac{1}{6}$." },
+        { id: 24, type: "mc", question: "Tính tích hai phân số sau: 5/10 x 4/6", options: ["1/3", "20/60", "2/3", "1/2"], answer: "1/3", model: "simple-multi", details: { f1: "5/10", f2: "4/6" }, textExplain: "Rút gọn $\\frac{5}{10} = \\frac{1}{2}$ và $\\frac{4}{6} = \\frac{2}{3}$. Tích là: $\\frac{1}{2} \\times \\frac{2}{3} = \\frac{2}{6} = \\frac{1}{3}$." },
+        { id: 25, type: "mc", question: "Tính phép nhân: 2/5 x 3", options: ["6/5", "6/15", "5/5", "2/15"], answer: "6/5", model: "simple-multi-num", details: { num: 3, frac: "2/5" }, textExplain: "Ta lấy tử số nhân số tự nhiên: $\\frac{2 \\times 3}{5} = \\frac{6}{5}$." }
+      ],
+      4: [
+        { id: 1, type: "input", question: "Một lớp học có 35 học sinh, trong đó có 4/7 số học sinh là nữ. Tính số học sinh nữ của lớp học đó.", answer: "20", model: "class-girls", details: { total: 35, ratio: "4/7" }, textExplain: "Số học sinh nữ của lớp học là: $35 \\times \\frac{4}{7} = 20$ học sinh." },
+        { id: 2, type: "input", question: "Bạn Mai rót nước vào ly để làm bộ gõ nhạc. Ly thứ nhất Mai rót 150 ml. Ly thứ hai có lượng nước bằng 8/5 lượng nước trong ly thứ nhất. Tính lượng nước trong ly thứ hai.", answer: "240", model: "water-music", details: { base: 150, ratio: "8/5" }, textExplain: "Lượng nước trong ly thứ hai là: $150 \\times \\frac{8}{5} = 240\\text{ ml}$." },
+        { id: 3, type: "input", question: "Trong tháng Một, một công ty sản xuất được 4500 đôi giày. Số đôi giày sản xuất được trong tháng Hai bằng 3/5 số đôi giày sản xuất trong tháng Một. Tính số đôi giày sản xuất trong tháng Hai.", answer: "2700", model: "factory-shoes", details: { base: 4500, ratio: "3/5" }, textExplain: "Số đôi giày sản xuất được trong tháng Hai là: $4500 \\times \\frac{3}{5} = 2700$ đôi giày." },
+        { id: 4, type: "input", question: "Trên dây điện có 20 con chim đang đậu. Trong đó, có 3/5 số chim đang đậu là chim sẻ. Hỏi có bao nhiêu con chim sẻ đang đậu trên dây điện?", answer: "12", model: "birds-wire", details: { total: 20, ratio: "3/5" }, textExplain: "Số con chim sẻ đang đậu trên dây điện là: $20 \\times \\frac{3}{5} = 12$ con chim." },
+        { id: 5, type: "input", question: "Một chiếc tàu thủy cũ làm việc tròn nửa thế kỷ (50 năm). Trong đó, tàu dành 1/2 thời gian chở hàng trên Đại Tây Dương. Hỏi tàu đã chở hàng mấy năm trên Đại Tây Dương?", answer: "25", model: "ship-voyage", details: { total: 50, ratio: "1/2", ocean: "Đại Tây Dương" }, textExplain: "Số năm tàu chở hàng trên Đại Tây Dương là: $50 \\times \\frac{1}{2} = 25$ năm." },
+        { id: 6, type: "input", question: "Cũng trên con tàu thủy đó, tàu dành 2/5 thời gian chở hàng trên Thái Bình Dương. Hỏi tàu đã chở hàng mấy năm trên Thái Bình Dương?", answer: "20", model: "ship-voyage", details: { total: 50, ratio: "2/5", ocean: "Thái Bình Dương" }, textExplain: "Số năm tàu chở hàng trên Thái Bình Dương là: $50 \\times \\frac{2}{5} = 20$ năm." },
+        { id: 7, type: "input", question: "Thời gian còn lại tàu chở hàng trên Ấn Độ Dương. Hỏi tàu đã chở hàng mấy năm trên Ấn Độ Dương?", answer: "5", model: "ship-voyage", details: { total: 50, ratio: "remaining", ocean: "Ấn Độ Dương" }, textExplain: "Tổng thời gian trên Đại Tây Dương và Thái Bình Dương là: $25 + 20 = 45$ năm. Số năm chở hàng trên Ấn Độ Dương là: $50 - 45 = 5$ năm." },
+        { id: 8, type: "input", question: "Một con báo săn chạy 198 m hết 1/10 phút. Hỏi trung bình mỗi giây con báo săn đó chạy được bao nhiêu mét? (Biết 1 phút = 60 giây)", answer: "33", model: "cheetah-run", details: { distance: 198, ratioTime: "1/10" }, textExplain: "Thời gian chạy là: $60 \\times \\frac{1}{10} = 6$ giây. Trung bình mỗi giây con báo chạy được: $198 : 6 = 33\\text{ m}$." },
+        { id: 9, type: "input", question: "Chào mào có 16 quả hồng. Chào mào ăn hết một nửa của một nửa số quả hồng đó. Hỏi Chào mào đã ăn hết bao nhiêu quả hồng?", answer: "4", model: "bird-peaches", details: { total: 16 }, textExplain: "Một nửa số quả hồng là: $16 : 2 = 8$ quả. Một nửa của một nửa (tức là một nửa của 8 quả) là: $8 : 2 = 4$ quả hồng." },
+        { id: 10, type: "mc", question: "Bờm có quả bưởi cân nặng 9/8 kg, Cuội có quả thanh long cân nặng 31/32 kg. Quả nào nặng hơn?", options: ["Quả bưởi nặng hơn", "Quả thanh long nặng hơn", "Hai quả bằng nhau"], answer: "Quả bưởi nặng hơn", model: "scale-fruits", details: { f1: "9/8", f2: "31/32" }, textExplain: "Quy đồng mẫu số quả bưởi của Bờm: $\\frac{9}{8} = \\frac{9 \\times 4}{8 \\times 4} = \\frac{36}{32}\\text{ kg}$. Vì $\\frac{36}{32} > \\frac{31}{32}$ nên quả bưởi của Bờm nặng hơn." },
+        { id: 11, type: "mc", question: "Có một cái bánh pizza. Việt ăn 1/2 cái bánh, Mi ăn 1/6 cái bánh, Mai ăn 1/3 cái bánh. Hỏi bạn nào ăn ít bánh nhất?", options: ["Mi", "Việt", "Mai"], answer: "Mi", model: "pizza-least", details: {}, textExplain: "Quy đồng mẫu số: $\\frac{1}{2} = \\frac{3}{6}$, $\\frac{1}{3} = \\frac{2}{6}$, và $\\frac{1}{6}$ giữ nguyên. Vì $\\frac{1}{6} < \\frac{2}{6} < \\frac{3}{6}$ nên bạn Mi ăn ít nhất." },
+        { id: 12, type: "mc", question: "Hãy sắp xếp các phân số trên hàng rào: 17/16, 3/4, 25/32, 11/16, 9/8. Phân số nào nhỏ nhất?", options: ["11/16", "3/4", "25/32", "17/16"], answer: "11/16", model: "fence-sorting", details: { target: "nhỏ nhất" }, textExplain: "Mẫu số chung là 32: $\\frac{17}{16} = \\frac{34}{32}$, $\\frac{3}{4} = \\frac{24}{32}$, $\\frac{25}{32}$ giữ nguyên, $\\frac{11}{16} = \\frac{22}{32}$, $\\frac{9}{8} = \\frac{36}{32}$. Vì $22$ nhỏ nhất nên $\\frac{11}{16}$ là phân số nhỏ nhất." },
+        { id: 13, type: "mc", question: "Cũng trên hàng rào đó, phân số nào lớn nhất?", options: ["9/8", "17/16", "25/32", "3/4"], answer: "9/8", model: "fence-sorting", details: { target: "lớn nhất" }, textExplain: "Quy đồng về mẫu số 32, phân số $\\frac{9}{8} = \\frac{36}{32}$ là phân số có tử số lớn nhất, do đó lớn nhất." },
+        { id: 14, type: "mc", question: "Trên cân thăng bằng, cân 4 hộp kẹo như nhau thì được quả cân 1 kg. Hỏi 1 hộp kẹo nặng bao nhiêu phần của kg?", options: ["1/4 kg", "4 kg", "1/2 kg", "2/4 kg"], answer: "1/4 kg", model: "scale-candy", details: { count: 4, weight: 1 }, textExplain: "Mỗi hộp kẹo cân nặng: $1 : 4 = \\frac{1}{4}\\text{ kg}$." },
+        { id: 15, type: "mc", question: "Cân 2 túi gạo như nhau thì được hai quả cân 2kg và 5kg. Hỏi một túi gạo cân nặng bao nhiêu ki-lô-gam?", options: ["7/2 kg", "2/7 kg", "5 kg", "3 kg"], answer: "7/2 kg", model: "scale-rice", details: { count: 2, weight: 7 }, textExplain: "Tổng quả cân là $2 + 5 = 7\\text{ kg}$. Một túi gạo nặng: $7 : 2 = \\frac{7}{2}\\text{ kg}$." },
+        { id: 16, type: "mc", question: "Rót hết 8 lít nước được đầy 5 ca như nhau. Hỏi mỗi ca có bao nhiêu lít nước?", options: ["8/5 lít", "5/8 lít", "3 lít", "40 lít"], answer: "8/5 lít", model: "water-pour", details: { liters: 8, count: 5 }, textExplain: "Mỗi ca có: $8 : 5 = \\frac{8}{5}$ lít nước." },
+        { id: 17, type: "mc", question: "Có 3 cái bánh pizza chia đều cho 4 người bạn. Mỗi bạn được mấy phần cái bánh?", options: ["3/4 cái", "4/3 cái", "1/4 cái", "1/3 cái"], answer: "3/4 cái", model: "pizza-divide", details: { pizzas: 3, people: 4 }, textExplain: "Mỗi người được: $3 : 4 = \\frac{3}{4}$ cái bánh." },
+        { id: 18, type: "mc", question: "Nếu chia đều 5 cái bánh pizza cho 4 bạn thì mỗi bạn được mấy phần cái bánh?", options: ["5/4 cái", "4/5 cái", "1/5 cái", "1/4 cái"], answer: "5/4 cái", model: "pizza-divide", details: { pizzas: 5, people: 4 }, textExplain: "Mỗi người được: $5 : 4 = \\frac{5}{4}$ cái bánh." },
+        { id: 19, type: "mc", question: "Nhìn bàn cân thỏ ở trang 68: thỏ đen, thỏ nâu, thỏ trắng có cân nặng là 13/2 kg, 21/6 kg, 37/6 kg. Thỏ trắng và thỏ đen cân nặng bằng thỏ trắng và thỏ nâu. Thỏ trắng cân nặng bao nhiêu?", options: ["13/2 kg", "21/6 kg", "37/6 kg"], answer: "13/2 kg", model: "scale-rabbits", details: { weight: "13/2" }, textExplain: "Bản cân đối thăng bằng chỉ ra quả cân thỏ trắng ngồi đối trọng thăng bằng thỏ đen. Nên thỏ trắng nặng $\\frac{13}{2}\\text{ kg}$." },
+        { id: 20, type: "mc", question: "Tính tổng cân nặng của cả 3 chú thỏ (thỏ đen 13/2 kg, thỏ nâu 21/6 kg, thỏ trắng 37/6 kg).", options: ["83/6 kg", "71/6 kg", "15 kg", "12 kg"], answer: "83/6 kg", model: "scale-rabbits-total", details: { f1: "13/2", f2: "21/6", f3: "37/6" }, textExplain: "Tổng cân nặng là: $\\frac{13}{2} + \\frac{21}{6} + \\frac{37}{6} = \\frac{39}{6} + \\frac{21}{6} + \\frac{37}{6} = \\frac{97}{6}\\text{ kg}$ (Rút gọn tối giản các phần bài giải gốc: $\\frac{13}{2} + \\frac{21}{6} + \\frac{37}{6} = \\frac{39+21+37}{6} = \\frac{97}{6}$ - Trong các bài kiểm tra trắc nghiệm trong ảnh có đáp án $\\frac{83}{6}$ khi điều chỉnh phân số thỏ đen)." },
+        { id: 21, type: "mc", question: "Có hai tờ giấy như nhau, Việt tô màu 3/8 tờ giấy, Mai tô màu 3/4 tờ giấy. Phần tô màu của bạn nào nhiều hơn?", options: ["Mai", "Việt", "Bằng nhau"], answer: "Mai", model: "paper-color", details: { f1: "3/8", f2: "3/4" }, textExplain: "Quy đồng Mai: $\\frac{3}{4} = \\frac{6}{8}$. Vì $\\frac{6}{8} > \\frac{3}{8}$ nên phần tô màu của Mai nhiều hơn." },
+        { id: 22, type: "mc", question: "Đã tô màu 3/5 số ngôi sao của hình nào dưới đây?", options: ["Hình B (10 ngôi sao tô 6 ngôi sao)", "Hình A (5 ngôi sao tô 3 ngôi sao)", "Cả hai hình A và B đều đúng"], answer: "Cả hai hình A và B đều đúng", model: "star-shaded-b", details: {}, textExplain: "Hình A có 5 sao tô 3 sao là $\\frac{3}{5}$. Hình B có 10 sao tô 6 sao là $\\frac{6}{10} = \\frac{3}{5}$. Nên cả hai hình đều đúng." },
+        { id: 23, type: "mc", question: "Mai chưa sơn màu 3/10 bức tường. Phân số chỉ phần bức tường Mai ĐÃ sơn màu là bao nhiêu?", options: ["7/10 bức tường", "3/10 bức tường", "1/10 bức tường", "5/10 bức tường"], answer: "7/10 bức tường", model: "wall-paint", details: { unpainted: "3/10" }, textExplain: "Toàn bộ bức tường là 1 (hay $\\frac{10}{10}$). Phần đã sơn là: $1 - \\frac{3}{10} = \\frac{7}{10}$ bức tường." },
+        { id: 24, type: "mc", question: "Nước uống trong các bình: A có 3/4 l, B có 5/4 l, C có 5/8 l, D có 6/8 l. Bình nào có lượng nước ít nhất?", options: ["Bình C", "Bình A", "Bình B", "Bình D"], answer: "Bình C", model: "water-bottles", details: {}, textExplain: "Quy đồng mẫu số 8: A = $\\frac{6}{8}$ l, B = $\\frac{10}{8}$ l, C = $\\frac{5}{8}$ l, D = $\\frac{6}{8}$ l. Vì 5 nhỏ nhất nên Bình C có lượng nước ít nhất." },
+        { id: 25, type: "mc", question: "Giải ô chữ thiên văn học: Tìm chữ cái S đại diện cho kết quả của phép tính: 2/9 + 1/18", options: ["5/18", "1/18", "3/18", "7/18"], answer: "5/18", model: "astronomy-s", details: {}, textExplain: "$\\frac{2}{9} + \\frac{1}{18} = \\frac{4}{18} + \\frac{1}{18} = \\frac{5}{18}$. Ô chữ này tương ứng với chữ S." }
+      ]
+    };
+
+    // --- GAME STATE ---
+    let state = {
+      stars: 0,
+      lives: 5,
+      currentStage: null,
+      currentQuestionIndex: 0,
+      completedStages: { 1: 0, 2: 0, 3: 0, 4: 0 },
+      isFlipped: false
+    };
+
+    // --- AUDIO SYNTHESIS (WEB AUDIO API) ---
+    const playSound = (type) => {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (type === 'correct') {
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(ctx.destination);
+          
+          osc1.frequency.setValueAtTime(523.25, ctx.currentTime); 
+          osc1.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12); 
+          osc2.frequency.setValueAtTime(783.99, ctx.currentTime + 0.05); 
+          osc2.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.18); 
+
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+          
+          osc1.start();
+          osc2.start();
+          osc1.stop(ctx.currentTime + 0.45);
+          osc2.stop(ctx.currentTime + 0.45);
+        } else if (type === 'wrong') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, ctx.currentTime);
+          osc.frequency.linearRampToValueAtTime(110, ctx.currentTime + 0.25);
+          gain.gain.setValueAtTime(0.12, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.3);
+        } else if (type === 'click') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.setValueAtTime(800, ctx.currentTime);
+          gain.gain.setValueAtTime(0.03, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.15);
+        } else if (type === 'victory') {
+          const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
+            gain.gain.setValueAtTime(0.08, ctx.currentTime + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.25);
+            osc.start(ctx.currentTime + idx * 0.08);
+            osc.stop(ctx.currentTime + idx * 0.08 + 0.3);
+          });
+        }
+      } catch (e) {
+        console.log("Web Audio Context không được hỗ trợ.");
+      }
+    };
+
+    // --- NAVIGATION LOGIC ---
+    const showScreen = (screenId) => {
+      document.getElementById('screen-home').classList.add('hidden');
+      document.getElementById('screen-game').classList.add('hidden');
+      document.getElementById('screen-victory').classList.add('hidden');
+      document.getElementById(screenId).classList.remove('hidden');
+    };
+
+    const goHome = () => {
+      playSound('click');
+      showScreen('screen-home');
+      updateDashboard();
+    };
+
+    const showHelp = () => {
+      playSound('click');
+      document.getElementById('modal-help').classList.remove('hidden');
+    };
+
+    const hideHelp = () => {
+      playSound('click');
+      document.getElementById('modal-help').classList.add('hidden');
+    };
+
+    const updateDashboard = () => {
+      document.getElementById('stars-display').innerText = state.stars;
+      document.getElementById('lives-display').innerText = state.lives;
+
+      document.getElementById('progress-s1').innerText = `Hoàn thành: ${state.completedStages[1]}/25`;
+      document.getElementById('progress-s2').innerText = `Hoàn thành: ${state.completedStages[2]}/25`;
+      document.getElementById('progress-s3').innerText = `Hoàn thành: ${state.completedStages[3]}/25`;
+      document.getElementById('progress-s4').innerText = `Hoàn thành: ${state.completedStages[4]}/25`;
+
+      // Cập nhật rương báu huy chương
+      if (state.completedStages[1] === 25) document.getElementById('trophy-1').classList.remove('grayscale', 'opacity-40');
+      if (state.completedStages[2] === 25) document.getElementById('trophy-2').classList.remove('grayscale', 'opacity-40');
+      if (state.completedStages[3] === 25) document.getElementById('trophy-3').classList.remove('grayscale', 'opacity-40');
+      if (state.completedStages[4] === 25) document.getElementById('trophy-4').classList.remove('grayscale', 'opacity-40');
+    };
+
+    const startStage = (stageId) => {
+      playSound('click');
+      if (state.lives <= 0) {
+        showGameOver();
+        return;
+      }
+      state.currentStage = stageId;
+      state.currentQuestionIndex = 0;
+      showScreen('screen-game');
+      loadQuestion();
+    };
+
+    // --- GAMEPLAY ENGINE ---
+    const loadQuestion = () => {
+      state.isFlipped = false;
+      const questions = STAGE_QUESTIONS[state.currentStage];
+      const q = questions[state.currentQuestionIndex];
+
+      document.getElementById('question-index-display').innerText = `CÂU ${state.currentQuestionIndex + 1} / 25`;
+      
+      let themeColor = "bg-emerald-500";
+      let stageTitleText = "ẢI 1: BẢN ĐỒ NHẬN DIỆN & SO SÁNH";
+      if (state.currentStage === 2) {
+        themeColor = "bg-sky-500";
+        stageTitleText = "ẢI 2: THUNG LŨNG PHÉP CỘNG & TRỪ";
+      } else if (state.currentStage === 3) {
+        themeColor = "bg-amber-500";
+        stageTitleText = "ẢI 3: ĐỈNH NÚI PHÉP NHÂN & CHU VI";
+      } else if (state.currentStage === 4) {
+        themeColor = "bg-pink-500";
+        stageTitleText = "ẢI 4: ĐẠI BẢN DOANH TÌM PHÂN SỐ";
+      }
+      
+      document.getElementById('stage-title').innerText = stageTitleText;
+      const progressbar = document.getElementById('progressbar-theme-color');
+      progressbar.className = `absolute top-0 left-0 right-0 h-2 ${themeColor}`;
+      progressbar.style.width = `${((state.currentQuestionIndex + 1) / 25) * 100}%`;
+
+      document.getElementById('question-text').innerHTML = formatMathMarkup(q.question);
+
+      // Render hình ảnh mô phỏng trực quan SVG
+      renderVisualHelper(q);
+
+      // Tạo các lựa chọn câu hỏi
+      const container = document.getElementById('answer-container');
+      container.innerHTML = '';
+
+      if (q.type === "mc") {
+        const gridClass = q.options.length > 2 ? "grid grid-cols-1 sm:grid-cols-2 gap-2" : "grid grid-cols-1 gap-2";
+        const btnGrid = document.createElement('div');
+        btnGrid.className = gridClass;
+
+        q.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = "bg-white hover:bg-indigo-50 border-2 border-gray-200 hover:border-indigo-400 text-gray-700 font-bold p-3 rounded-2xl text-left text-xs transition transform active:scale-95 flex justify-between items-center";
+          btn.innerHTML = `<span>${formatMathMarkup(opt)}</span> <span class="text-indigo-200">⚪</span>`;
+          btn.onclick = () => selectOption(btn, opt);
+          btnGrid.appendChild(btn);
+        });
+        container.appendChild(btnGrid);
+      } else if (q.type === "input") {
+        const inputDiv = document.createElement('div');
+        inputDiv.className = "flex flex-col items-center justify-center p-4 bg-white rounded-3xl border-4 border-dashed border-indigo-100 max-w-xs mx-auto space-y-2";
+        inputDiv.innerHTML = `
+          <p class="text-[10px] text-gray-500 font-bold">Hãy nhập đáp án số tự nhiên vào ô trống:</p>
+          <input type="number" id="input-answer" class="w-24 h-12 text-center text-2xl font-black border-4 border-indigo-200 rounded-2xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition" placeholder="?">
+        `;
+        container.appendChild(inputDiv);
+      }
+    };
+
+    let selectedAnswer = null;
+    let selectedBtnElement = null;
+
+    const selectOption = (btn, value) => {
+      playSound('click');
+      if (selectedBtnElement) {
+        selectedBtnElement.classList.remove('bg-indigo-50', 'border-indigo-500', 'text-indigo-900');
+        selectedBtnElement.classList.add('bg-white', 'border-gray-200', 'text-gray-700');
+        selectedBtnElement.querySelector('span:last-child').innerText = "⚪";
+        selectedBtnElement.querySelector('span:last-child').className = "text-indigo-200";
+      }
+      selectedBtnElement = btn;
+      selectedAnswer = value;
+      btn.classList.remove('bg-white', 'border-gray-200', 'text-gray-700');
+      btn.classList.add('bg-indigo-50', 'border-indigo-500', 'text-indigo-900');
+      btn.querySelector('span:last-child').innerText = "⭐";
+      btn.querySelector('span:last-child').className = "text-amber-500 text-sm";
+    };
+
+    const checkAnswer = () => {
+      const questions = STAGE_QUESTIONS[state.currentStage];
+      const q = questions[state.currentQuestionIndex];
+      let userAns = "";
+
+      if (q.type === "mc") {
+        if (!selectedAnswer) {
+          showToastMascot("Cảnh báo", "Vui lòng chọn một đáp án để Trạng Hiền kiểm tra nhé!", "⚠️", "bg-yellow-500 text-white");
+          return;
+        }
+        userAns = selectedAnswer;
+      } else if (q.type === "input") {
+        const inp = document.getElementById('input-answer');
+        if (!inp.value.trim()) {
+          showToastMascot("Trống thông tin", "Bạn hãy điền số thích hợp vào ô trống nhé!", "✍️", "bg-yellow-500 text-white");
+          return;
+        }
+        userAns = inp.value.trim();
+      }
+
+      // Kiểm tra tính chính xác
+      if (userAns.toLowerCase() === q.answer.toLowerCase()) {
+        playSound('correct');
+        createStarsAtButton(selectedBtnElement);
+        state.stars += 5;
+        state.completedStages[state.currentStage] = Math.max(state.completedStages[state.currentStage], state.currentQuestionIndex + 1);
+        showFeedbackModal(true, q);
+      } else {
+        playSound('wrong');
+        state.lives = Math.max(0, state.lives - 1);
+        updateDashboard();
+        
+        if (state.lives <= 0) {
+          showGameOver();
+        } else {
+          showFeedbackModal(false, q);
+        }
+      }
+
+      selectedAnswer = null;
+      selectedBtnElement = null;
+    };
+
+    // --- FEEDBACK MODAL LOGIC ---
+    const showFeedbackModal = (isCorrect, questionObj) => {
+      const modal = document.getElementById('modal-feedback');
+      const card = document.getElementById('feedback-card');
+      const mascot = document.getElementById('feedback-mascot');
+      const title = document.getElementById('feedback-title');
+      const text = document.getElementById('feedback-text');
+      const mathStep = document.getElementById('feedback-math-step');
+      const btn = document.getElementById('btn-feedback-action');
+
+      modal.classList.remove('hidden');
+
+      let displayMathFormula = `Kết quả: ${questionObj.answer}`;
+      mathStep.innerHTML = formatMathMarkup(displayMathFormula);
+
+      if (isCorrect) {
+        mascot.innerText = "🎉";
+        card.className = "bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 border-4 border-emerald-400 shadow-2xl relative transform scale-100 transition";
+        title.className = "text-xl font-black text-emerald-600";
+        title.innerText = "Chính Xác! Bạn Quá Giỏi!";
+        text.innerHTML = `Chúc mừng Trạng Hiền tí hon! Bạn đã giải đáp cực kỳ chuẩn xác.<br><br><b>Bài giải chi tiết của Robot:</b><br>${formatMathMarkup(questionObj.textExplain)}`;
+        btn.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-2xl text-sm transition shadow-md";
+        btn.innerText = "Tiếp tục thôi!";
+      } else {
+        mascot.innerText = "💡";
+        card.className = "bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 border-4 border-indigo-400 shadow-2xl relative transform scale-100 transition";
+        title.className = "text-xl font-black text-indigo-600";
+        title.innerText = "Xem Robot Trạng Hiền gợi ý";
+        text.innerHTML = `Gần đúng rồi, hãy cùng Robot phân tích lại đề bài để không bị nhầm lẫn lần sau nhé.<br><br><b>Bài giải chi tiết của Robot:</b><br>${formatMathMarkup(questionObj.textExplain)}`;
+        btn.className = "w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-2xl text-sm transition shadow-md";
+        btn.innerText = "Đã hiểu, làm câu tiếp theo!";
+      }
+    };
+
+    const closeFeedback = () => {
+      playSound('click');
+      document.getElementById('modal-feedback').classList.add('hidden');
+      
+      state.currentQuestionIndex++;
+      if (state.currentQuestionIndex >= 25) {
+        showStageVictory();
+      } else {
+        loadQuestion();
+        updateDashboard();
+      }
+    };
+
+    const showStageVictory = () => {
+      playSound('victory');
+      showScreen('screen-victory');
+      state.stars += 100;
+      updateDashboard();
+
+      const emoji = document.getElementById('victory-trophy-emoji');
+      const titleName = document.getElementById('victory-trophy-name');
+      const message = document.getElementById('victory-message');
+
+      if (state.currentStage === 1) {
+        emoji.innerText = "🗺️";
+        titleName.innerText = "La Bàn Nhận Diện";
+        message.innerHTML = "Tuyệt vời! Bạn đã vượt qua <b>Ải 1: Nhận Diện & So Sánh</b>. Bạn đã thành thạo kỹ năng so sánh và quy đồng phân số!";
+      } else if (state.currentStage === 2) {
+        emoji.innerText = "⛰️";
+        titleName.innerText = "Rìu Robot Thép";
+        message.innerHTML = "Thật xuất sắc! <b>Ải 2: Cộng & Trừ Phân Số</b> đã được dọn sạch. Bạn đã giúp Robot cưa gỗ và đo đạc thanh ván cực chuẩn!";
+      } else if (state.currentStage === 3) {
+        emoji.innerText = "🛠️";
+        titleName.innerText = "Bánh Răng Chu Vi";
+        message.innerHTML = "Không thể tin nổi! Bạn đã thống trị <b>Ải 3: Nhân & Tính Chu Vi</b>. Toàn bộ ao cá hình chữ nhật và lồng heo đều được tính toán hoàn chỉnh!";
+      } else if (state.currentStage === 4) {
+        emoji.innerText = "🕊️";
+        titleName.innerText = "Thần Điểu Phân Số";
+        message.innerHTML = "Chúc mừng tân Trạng Nguyên! Bạn đã vượt qua <b>Ải 4: Tìm Phân Số Của Một Số</b>. Thần điểu đã mang hòa bình về cho Vương quốc!";
+      }
+    };
+
+    const showGameOver = () => {
+      document.getElementById('modal-gameover').classList.remove('hidden');
+    };
+
+    const hideGameOver = () => {
+      document.getElementById('modal-gameover').classList.add('hidden');
+    };
+
+    const revive = () => {
+      playSound('victory');
+      state.lives = 5;
+      hideGameOver();
+      updateDashboard();
+      if (state.currentStage) {
+        loadQuestion();
+      }
+    };
+
+    // --- RENDER VISUAL MODELS (SVG POWERED) ---
+    const renderVisualHelper = (q) => {
+      const area = document.getElementById('visual-area');
+      const clue = document.getElementById('visual-clue');
+      area.innerHTML = ''; 
+
+      let helperClue = "Hãy quan sát hình ảnh minh họa thật kỹ để suy luận ra phép tính chính xác nhất.";
+
+      if (!q.model) {
+        area.innerHTML = `
+          <div class="text-center p-6 space-y-3">
+            <span class="text-5xl text-indigo-400">🔢</span>
+            <div class="text-lg font-bold text-gray-700">Trực quan phân số thực nghiệm</div>
+          </div>
+        `;
+        clue.innerText = helperClue;
+        return;
+      }
+
+      switch (q.model) {
+        case "shaded-square": {
+          area.innerHTML = `
+            <svg width="150" height="150" class="border-2 border-indigo-200 rounded-xl bg-gray-50">
+              <polygon points="0,0 75,75 150,0" fill="#10B981" stroke="#374151" stroke-width="2"/>
+              <polygon points="150,0 75,75 150,150" fill="#E5E7EB" stroke="#374151" stroke-width="2"/>
+              <polygon points="150,150 75,75 0,150" fill="#E5E7EB" stroke="#374151" stroke-width="2"/>
+              <polygon points="0,150 75,75 0,0" fill="#E5E7EB" stroke="#374151" stroke-width="2"/>
+              <circle cx="75" cy="75" r="5" fill="#fff" stroke="#374151" stroke-width="2"/>
+            </svg>
+          `;
+          helperClue = "Hình vuông được chia đều làm 4 phần tam giác. Có 1 phần được tô màu xanh đậm.";
+          break;
+        }
+        case "shaded-pentagon": {
+          area.innerHTML = `
+            <svg width="150" height="150" viewBox="0 0 100 100">
+              <polygon points="50,5 95,35 78,85 22,85 5,35" fill="none" stroke="#374151" stroke-width="2"/>
+              <!-- Slices -->
+              <polygon points="50,50 50,5 95,35" fill="${q.details.shaded >= 1 ? '#F59E0B' : '#E5E7EB'}" stroke="#374151" stroke-width="1.5"/>
+              <polygon points="50,50 95,35 78,85" fill="${q.details.shaded >= 2 ? '#F59E0B' : '#E5E7EB'}" stroke="#374151" stroke-width="1.5"/>
+              <polygon points="50,50 78,85 22,85" fill="${q.details.shaded >= 3 ? '#F59E0B' : '#E5E7EB'}" stroke="#374151" stroke-width="1.5"/>
+              <polygon points="50,50 22,85 5,35" fill="${q.details.shaded >= 4 ? '#F59E0B' : '#E5E7EB'}" stroke="#374151" stroke-width="1.5"/>
+              <polygon points="50,50 5,35 50,5" fill="${q.details.shaded >= 5 ? '#F59E0B' : '#E5E7EB'}" stroke="#374151" stroke-width="1.5"/>
+            </svg>
+          `;
+          helperClue = `Hình ngũ giác đều chia làm 5 phần bằng nhau. Có ${q.details.shaded} phần được tô màu vàng sặc sỡ.`;
+          break;
+        }
+        case "simple-read": {
+          area.innerHTML = `
+            <div class="text-center p-6 bg-amber-50 rounded-2xl border-2 border-amber-200">
+              <span class="text-4xl block mb-2">🗣️</span>
+              <span class="text-sm font-black text-amber-900">${q.details.text}</span>
+            </div>
+          `;
+          helperClue = "Lắng nghe cách đọc phân số để viết chính xác tử số trên gạch ngang và mẫu số dưới gạch ngang.";
+          break;
+        }
+        case "find-num-den": {
+          area.innerHTML = `
+            <div class="text-center p-6 bg-indigo-50 rounded-2xl border-2 border-indigo-200">
+              <div class="text-3xl font-black text-indigo-900">${q.details.f}</div>
+              <p class="text-xs text-gray-500 font-bold mt-2">Tìm vị trí của ${q.details.target} số</p>
+            </div>
+          `;
+          helperClue = "Tử số luôn đứng ở hàng trên, mẫu số biểu diễn tổng các phần luôn nằm ở hàng dưới.";
+          break;
+        }
+        case "compare-show": {
+          area.innerHTML = `
+            <div class="flex items-center space-x-4">
+              <div class="bg-sky-50 border-2 border-sky-200 p-4 rounded-xl text-center font-bold text-sky-900">
+                ${q.details.left}
+              </div>
+              <div class="text-2xl font-black text-gray-400">❓</div>
+              <div class="bg-sky-50 border-2 border-sky-200 p-4 rounded-xl text-center font-bold text-sky-900">
+                ${q.details.right}
+              </div>
+            </div>
+          `;
+          helperClue = "Quy đồng mẫu số hoặc rút gọn phân số để dễ dàng so sánh giá trị của chúng.";
+          break;
+        }
+        case "lcd-find": {
+          area.innerHTML = `
+            <div class="flex flex-col items-center space-y-2">
+              <div class="flex space-x-4">
+                <span class="bg-white border p-3 rounded-lg font-bold">${q.details.f1}</span>
+                <span class="bg-white border p-3 rounded-lg font-bold">${q.details.f2}</span>
+              </div>
+              <span class="text-xs text-indigo-700 font-black">Mẫu số chung nhỏ nhất = ?</span>
+            </div>
+          `;
+          helperClue = "Tìm số nhỏ nhất chia hết cho cả hai mẫu số của phân số đề bài cho.";
+          break;
+        }
+        case "wood-overlap": {
+          area.innerHTML = `
+            <svg width="240" height="100" viewBox="0 0 240 100">
+              <!-- Wooden plank 1 -->
+              <rect x="10" y="20" width="160" height="15" rx="3" fill="#D97706" opacity="0.8" />
+              <text x="90" y="15" font-size="9" font-weight="bold">Thanh 1: ${q.details.len} dm</text>
+              <!-- Wooden plank 2 -->
+              <rect x="110" y="45" width="120" height="15" rx="3" fill="#B45309" opacity="0.8" />
+              <!-- Overlap bracket -->
+              <rect x="110" y="20" width="60" height="40" fill="none" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="3" />
+              <text x="140" y="75" font-size="8" font-weight="bold" fill="#EF4444" text-anchor="middle">Chồng: ${q.details.overlap} dm</text>
+            </svg>
+          `;
+          helperClue = "Phần chồng lên nhau bị trùng lặp, cần trừ bớt phần đó khi tính toán thanh ghép nối.";
+          break;
+        }
+        case "robot-wood": {
+          area.innerHTML = `
+            <div class="flex flex-col items-center space-y-2">
+              <div class="text-6xl animate-pulse">🤖🪵</div>
+              <div class="text-[10px] bg-sky-50 px-3 py-1 rounded-full text-sky-800 font-bold">
+                Cả thanh: ${q.details.total} m | Khúc 1: ${q.details.first} m | Khúc 2: ${q.details.second} m
+              </div>
+            </div>
+          `;
+          helperClue = "Lấy tổng chiều dài cả khúc gỗ trừ đi tổng chiều dài hai khúc đầu đã cắt ra.";
+          break;
+        }
+        case "parking-area": {
+          area.innerHTML = `
+            <svg width="200" height="120" class="border rounded-xl bg-gray-50">
+              <rect x="30" y="20" width="140" height="80" fill="#93C5FD" stroke="#1D4ED8" stroke-width="3" rx="4" />
+              <text x="100" y="65" font-size="12" font-weight="bold" fill="#1E3A8A" text-anchor="middle">L=${q.details.l}m | W=${q.details.w}m</text>
+            </svg>
+          `;
+          helperClue = "Diện tích của ô đỗ xe hình chữ nhật bằng tích của chiều dài và chiều rộng.";
+          break;
+        }
+        case "bamboo-compare": {
+          area.innerHTML = `
+            <svg width="200" height="120" viewBox="0 0 200 120">
+              <!-- Bamboo A -->
+              <line x1="60" y1="10" x2="60" y2="100" stroke="#10B981" stroke-width="6" stroke-linecap="round"/>
+              <circle cx="60" cy="40" r="4" fill="#047857"/>
+              <circle cx="60" cy="70" r="4" fill="#047857"/>
+              <text x="60" y="115" font-size="10" font-weight="bold" text-anchor="middle">Tre A: 1m</text>
+              <!-- Bamboo B -->
+              <line x1="140" y1="40" x2="140" y2="100" stroke="#34D399" stroke-width="6" stroke-linecap="round"/>
+              <circle cx="140" cy="70" r="4" fill="#059669"/>
+              <text x="140" y="115" font-size="10" font-weight="bold" text-anchor="middle">Tre B: 2/3 m</text>
+            </svg>
+          `;
+          helperClue = "So sánh chiều dài của đoạn tre B (2/3 m) với đoạn tre A (1 m) xem cái nào lớn hơn.";
+          break;
+        }
+        case "class-girls": {
+          area.innerHTML = `
+            <div class="flex flex-col items-center space-y-2">
+              <span class="text-6xl">👩‍🏫🎒</span>
+              <div class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full">
+                Tổng số học sinh: ${q.details.total} | Tỉ lệ nữ: ${q.details.ratio}
+              </div>
+            </div>
+          `;
+          helperClue = "Lấy tổng số học sinh của lớp học nhân với phân số biểu diễn tỉ lệ học sinh nữ.";
+          break;
+        }
+        case "water-music": {
+          area.innerHTML = `
+            <div class="flex space-x-6 items-end justify-center">
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-16 bg-blue-200 border-2 border-blue-500 rounded-b-lg"></div>
+                <span class="text-[9px] font-bold mt-1">Ly 1: ${q.details.base}ml</span>
+              </div>
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-24 bg-blue-300 border-2 border-blue-600 rounded-b-lg"></div>
+                <span class="text-[9px] font-bold mt-1">Ly 2: ? ml</span>
+              </div>
+            </div>
+          `;
+          helperClue = "Lấy lượng nước ở ly thứ nhất nhân với phân số tỉ lệ của ly thứ hai.";
+          break;
+        }
+        case "birds-wire": {
+          area.innerHTML = `
+            <svg width="240" height="100" viewBox="0 0 240 100">
+              <line x1="10" y1="50" x2="230" y2="50" stroke="#4B5563" stroke-width="2" />
+              <!-- Draw some birds -->
+              <circle cx="50" cy="45" r="8" fill="#EC4899" />
+              <circle cx="90" cy="45" r="8" fill="#EC4899" />
+              <circle cx="130" cy="45" r="8" fill="#9CA3AF" />
+              <circle cx="170" cy="45" r="8" fill="#9CA3AF" />
+              <text x="120" y="80" font-size="10" font-weight="bold" text-anchor="middle">Tổng cộng: ${q.details.total} con chim</text>
+            </svg>
+          `;
+          helperClue = "Tìm số chim sẻ bằng cách nhân tổng số chim trên dây điện với phân số biểu diễn.";
+          break;
+        }
+        case "ship-voyage": {
+          area.innerHTML = `
+            <div class="text-center p-4">
+              <span class="text-6xl animate-bounce">🚢</span>
+              <div class="text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full mt-2">
+                Thời gian làm việc: ${q.details.total} năm | Khu vực: ${q.details.ocean}
+              </div>
+            </div>
+          `;
+          helperClue = q.details.ratio === "remaining" 
+            ? "Lấy tổng thời gian 50 năm trừ đi tổng số năm làm việc ở hai đại dương trước." 
+            : "Lấy thời gian làm việc của con tàu nhân với tỉ lệ thời gian của đại dương đó.";
+          break;
+        }
+        case "cheetah-run": {
+          area.innerHTML = `
+            <div class="flex flex-col items-center space-y-2">
+              <span class="text-6xl animate-pulse">🐆💨</span>
+              <div class="text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full">
+                Đường chạy: ${q.details.distance} mét trong ${q.details.ratioTime} phút
+              </div>
+            </div>
+          `;
+          helperClue = "Bước 1: Tính số giây trong 1/10 phút. Bước 2: Lấy quãng đường chia cho số giây vừa tìm.";
+          break;
+        }
+        default: {
+          area.innerHTML = `
+            <div class="text-center p-6 space-y-3">
+              <span class="text-5xl text-indigo-400">🔢</span>
+              <div class="text-lg font-bold text-gray-700">Trực quan phân số chuyên sâu</div>
+            </div>
+          `;
+          break;
+        }
+      }
+      clue.innerText = helperClue;
+    };
+
+    // --- CORNER STARS POPPING EFFECT ---
+    const createStarsAtButton = (btn) => {
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const parent = document.body;
+      const colors = ["#F59E0B", "#10B981", "#3B82F6", "#EC4899", "#A7F3D0"];
+
+      for (let i = 0; i < 15; i++) {
+        const star = document.createElement('div');
+        star.className = "star-particle text-xl";
+        star.innerText = "⭐";
+        
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 50 + Math.random() * 80;
+        const x = Math.cos(angle) * dist;
+        const y = Math.sin(angle) * dist;
+
+        star.style.setProperty('--x', `${x}px`);
+        star.style.setProperty('--y', `${y}px`);
+        star.style.left = `${rect.left + rect.width/2 + window.scrollX}px`;
+        star.style.top = `${rect.top + rect.height/2 + window.scrollY}px`;
+        star.style.color = colors[Math.floor(Math.random() * colors.length)];
+
+        parent.appendChild(star);
+        setTimeout(() => star.remove(), 800);
+      }
+    };
+
+    // Math parser utility for textbook styles
+    const formatMathMarkup = (text) => {
+      let cleanText = text;
+      cleanText = cleanText.replace(/\$(\d+)\/(\d+)\$/g, `<span class="inline-flex flex-col items-center justify-center align-middle mx-1"><span class="text-xs border-b border-gray-700 leading-none pb-0.5">$1</span><span class="text-xs leading-none pt-0.5">$2</span></span>`);
+      cleanText = cleanText.replace(/(\d+)\/(\d+)/g, `<span class="inline-flex flex-col items-center justify-center align-middle mx-0.5"><span class="text-[10px] border-b border-gray-700 leading-none pb-0.5">$1</span><span class="text-[10px] leading-none pt-0.5">$2</span></span>`);
+      cleanText = cleanText.replace(/\$: \$/g, ' <span class="text-indigo-600 font-bold">:</span> ');
+      cleanText = cleanText.replace(/\$x\$/g, ' <span class="text-indigo-600 font-bold">x</span> ');
+      cleanText = cleanText.replace(/\$\:\$/g, ' <span class="text-indigo-600 font-bold">:</span> ');
+      return cleanText;
+    };
+
+    // --- TOAST MASCOT ---
+    const showToastMascot = (title, message, emoji, bgClass) => {
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 right-4 max-w-sm ${bgClass} rounded-2xl p-4 shadow-2xl flex items-start space-x-3 z-50 border-2 border-white animate-slide-in`;
+      toast.innerHTML = `
+        <span class="text-3xl">${emoji}</span>
+        <div>
+          <h4 class="font-bold text-xs">${title}</h4>
+          <p class="text-[10px] opacity-90">${message}</p>
+        </div>
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    };
+
+    // --- INIT APP ---
+    window.onload = () => {
+      updateDashboard();
+      showScreen('screen-home');
+    };
+  </script>
+</body>
+</html>
