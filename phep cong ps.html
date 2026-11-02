@@ -3,600 +3,1717 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vương Quốc Phân Số - Thử Thách Lớp 4</title>
+    <title>Vương Quốc Phân Số Diệu Kỳ - Đấu Trường Pizza Sửa Đổi</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts Inter & Fredoka -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Canvas Confetti cho hiệu ứng pháo hoa -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Fredoka', 'Inter', sans-serif;
-            background: linear-gradient(135deg, #6EE7B7 0%, #3B82F6 100%);
-            min-height: 100vh;
+            font-family: 'Nunito', sans-serif;
+            background-color: #fefcf3; /* Warm milk yellow bg */
+            background-image: radial-gradient(#f1e1c6 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
         }
-        .castle-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 4px solid #F59E0B;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        .title-font {
+            font-family: 'Fredoka', sans-serif;
         }
-        .bounce-hover:hover {
-            transform: translateY(-3px);
-            transition: all 0.2s ease;
+        .wood-plate {
+            filter: drop-shadow(0 15px 15px rgba(100, 50, 20, 0.25));
         }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
+        .pizza-slice {
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.2) !important;
+            transform-origin: 150px 150px;
+        }
+        .pizza-slice.selected {
+            transform: scale(1.05) translate(2px, -2px);
+        }
+        /* Custom scrollbars */
+        .custom-scroll::-webkit-scrollbar {
             width: 8px;
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 99px;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #F59E0B;
-            border-radius: 4px;
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 99px;
         }
     </style>
 </head>
-<body class="text-gray-800 flex flex-col min-h-screen">
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden text-slate-800">
 
-    <!-- Header Vương Quốc -->
-    <header class="bg-amber-500 text-white py-4 px-6 shadow-lg border-b-4 border-amber-600 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+    <header class="bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 border-b-8 border-orange-500 shadow-xl p-4 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <span class="text-3xl animate-bounce">👑</span>
-                <div>
-                    <h1 class="text-2xl font-bold tracking-wide drop-shadow-md">VƯƠNG QUỐC PHÂN SỐ</h1>
-                    <p class="text-xs text-amber-100 font-semibold">Chinh Phục 5 Cửa Ái Phép Cộng Phân Số (Toán Lớp 4)</p>
+                <div class="bg-blue-600 text-white font-black text-xs md:text-sm px-3.5 py-2 rounded-full transform -rotate-3 border-2 border-white shadow-lg">
+                    🍕 TOÁN LỚP 4 GDPT 2018
                 </div>
+                <h1 class="title-font text-2xl md:text-3xl font-black text-amber-950 drop-shadow-md tracking-wider">
+                    ĐẤU TRƯỜNG PIZZA TOÁN HỌC
+                </h1>
             </div>
-            <div class="flex items-center gap-4 bg-amber-600 px-4 py-2 rounded-full border-2 border-amber-300 shadow-inner">
-                <div class="flex items-center gap-1.5 font-bold text-yellow-200 text-lg">
-                    <i class="fa-solid fa-star text-yellow-300 animate-spin" style="animation-duration: 4s;"></i>
-                    <span id="score-display">0</span> Điểm
+
+            <div class="flex items-center gap-3">
+                <div class="bg-white/95 px-4 py-2 rounded-2xl border-4 border-amber-500 font-black flex items-center gap-2 shadow-md">
+                    <span class="text-amber-500 text-xl">⭐</span>
+                    <span class="text-emerald-950 text-sm md:text-base">Điểm: <span id="game-score" class="text-lg text-emerald-600">0</span></span>
                 </div>
-                <div class="h-5 w-0.5 bg-amber-400"></div>
-                <div class="flex items-center gap-1.5 font-bold text-white text-sm">
-                    <i class="fa-solid fa-fire text-orange-300"></i>
-                    <span id="streak-display">0</span> Chuỗi đúng
-                </div>
+                <button onclick="goToHub()" id="btn-back-hub" class="hidden bg-rose-500 hover:bg-rose-600 text-white font-extrabold py-2 px-5 rounded-full border-b-4 border-rose-700 active:border-b-0 active:translate-y-1 transition-all text-sm shadow-md">
+                    🏠 Sảnh Chính
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="flex-grow max-w-5xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+    <!-- Main Game Container -->
+    <main class="max-w-6xl w-full mx-auto p-4 flex-grow flex flex-col justify-start">
 
-        <!-- MÀN HÌNH CHÀO (HOME) -->
-        <div id="screen-home" class="castle-card rounded-3xl p-6 sm:p-10 text-center max-w-2xl mx-auto my-auto animate-fadeIn">
-            <div class="text-6xl sm:text-7xl mb-4 animate-bounce">🏰✨</div>
-            <h2 class="text-3xl sm:text-4xl font-bold text-amber-600 mb-3">Chào Mừng Đến Vùng Đất Phân Số!</h2>
-            <p class="text-gray-600 mb-6 text-sm sm:text-base leading-relaxed">
-                Hôm nay các bạn nhỏ sẽ cùng Cú Thông Thái và các bạn nhỏ vượt qua <b>5 Cửa thử thách</b> về phép cộng phân số cùng mẫu số. Mỗi cửa gồm 2 câu hỏi thú vị để giành lấy kho báu vương quốc nhé!
-            </p>
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
-                <div class="bg-amber-100 p-3 rounded-xl border border-amber-300 text-xs font-bold text-amber-800">Cửa 1<br>Cộng cùng mẫu</div>
-                <div class="bg-emerald-100 p-3 rounded-xl border border-emerald-300 text-xs font-bold text-emerald-800">Cửa 2<br>Tìm số hợp lệ</div>
-                <div class="bg-sky-100 p-3 rounded-xl border border-sky-300 text-xs font-bold text-sky-800">Cửa 3<br>AI Nhầm (Cả tử mẫu)</div>
-                <div class="bg-purple-100 p-3 rounded-xl border border-purple-300 text-xs font-bold text-purple-800">Cửa 4<br>AI Nhầm (Cộng mẫu)</div>
-                <div class="bg-rose-100 p-3 rounded-xl border border-rose-300 text-xs font-bold text-rose-800 col-span-2 sm:col-span-1">Cửa 5<br>Thực tế</div>
-            </div>
-            <button onclick="startJourney()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg transform transition active:scale-95 bounce-hover flex items-center justify-center gap-2 mx-auto">
-                <i class="fa-solid fa-play"></i> Bắt Đầu Hành Trình Khám Phá
-            </button>
-        </div>
-
-        <!-- MÀN HÌNH THỬ THÁCH (QUIZ) -->
-        <div id="screen-quiz" class="hidden castle-card rounded-3xl p-5 sm:p-8 max-w-3xl mx-auto w-full">
-            <!-- Tiến độ cửa -->
-            <div class="flex justify-between items-center mb-6 pb-4 border-b-2 border-amber-200">
-                <div>
-                    <span id="gate-badge" class="bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow">CỬA 1</span>
-                    <h3 id="gate-title" class="text-xl sm:text-2xl font-bold text-gray-800 mt-2">Cộng cùng mẫu số</h3>
+        <section id="screen-welcome" class="space-y-8 py-8 text-center max-w-4xl mx-auto">
+            <div class="space-y-4">
+                <div class="inline-block bg-orange-100 text-orange-800 font-extrabold text-sm px-4 py-1.5 rounded-full border border-orange-200">
+                    🍕 KHÁM PHÁ TOÁN HỌC TRỰC QUAN THẬT VUI
                 </div>
-                <div class="text-right">
-                    <span class="text-xs font-semibold text-gray-500 uppercase">Câu hỏi</span>
-                    <div class="text-lg font-bold text-amber-600"><span id="current-q-num">1</span> / <span id="total-q-num">2</span></div>
-                </div>
-            </div>
-
-            <!-- Khu vực hình ảnh minh họa sinh động -->
-            <div id="illustration-container" class="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-4 border border-amber-200 flex items-center justify-center gap-4 min-h-[120px]">
-                <!-- Hình ảnh hoặc icon minh họa sẽ được render bằng JS -->
-            </div>
-
-            <!-- Nội dung câu hỏi -->
-            <div class="mb-6">
-                <p id="question-text" class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 leading-relaxed">
-                    <!-- Nội dung câu hỏi -->
+                <h2 class="title-font text-4xl md:text-6xl font-black text-orange-950 leading-tight">
+                    Chào Mừng Đến Với Vương Quốc Phân Số!
+                </h2>
+                <p class="text-slate-600 font-semibold text-base md:text-xl max-w-2xl mx-auto leading-relaxed">
+                    Đồng hành cùng hai bạn nhỏ Nam, Mai và chú Robot thông minh tự tay chia những chiếc bánh Pizza thơm nức bằng đồ họa lượng giác đỉnh cao!
                 </p>
-                
-                <!-- Khu vực lựa chọn câu trả lời (Render tùy dạng) -->
-                <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Các lựa chọn -->
+            </div>
+
+            <!-- Illustration Area -->
+            <div class="flex justify-center py-4">
+                <div class="bg-white p-6 rounded-3xl border-4 border-amber-400 shadow-xl max-w-md w-full relative">
+                    <div class="absolute -top-6 -left-6 bg-red-500 text-white font-black px-4 py-1 rounded-full text-xs shadow-md transform -rotate-12">
+                        SỬA ĐỔI 2026!
+                    </div>
+                    <!-- Intro Vector Pizza SVG representation -->
+                    <svg class="w-48 h-48 mx-auto" viewBox="0 0 300 300">
+                        <circle cx="150" cy="150" r="140" fill="#7c2d12" />
+                        <circle cx="150" cy="150" r="130" fill="#ea580c" />
+                        <circle cx="150" cy="150" r="115" fill="#fef08a" />
+                        <!-- Decorative Pepperonis -->
+                        <circle cx="95" cy="110" r="18" fill="#dc2626" />
+                        <circle cx="95" cy="110" r="4" fill="#ffffff" opacity="0.6" />
+                        <circle cx="195" cy="120" r="18" fill="#dc2626" />
+                        <circle cx="195" cy="120" r="4" fill="#ffffff" opacity="0.6" />
+                        <circle cx="140" cy="200" r="18" fill="#dc2626" />
+                        <circle cx="140" cy="200" r="4" fill="#ffffff" opacity="0.6" />
+                        <!-- Grid lines representing partitions -->
+                        <line x1="150" y1="10" x2="150" y2="290" stroke="#7c2d12" stroke-width="4" stroke-dasharray="8,8" />
+                        <line x1="10" y1="150" x2="290" y2="150" stroke="#7c2d12" stroke-width="4" stroke-dasharray="8,8" />
+                    </svg>
                 </div>
             </div>
 
-            <!-- Khu vực phản hồi / Giải thích -->
-            <div id="feedback-box" class="hidden rounded-2xl p-4 mb-6 text-sm sm:text-base border-2 animate-fadeIn">
-                <div class="font-bold flex items-center gap-2 mb-1" id="feedback-title"></div>
-                <p id="feedback-desc" class="text-gray-700"></p>
+            <!-- Play Controls -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+                <button onclick="startStoryIntro()" class="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xl py-4 px-10 rounded-2xl border-b-8 border-orange-700 active:border-b-0 active:translate-y-1 transition-all shadow-lg transform hover:scale-105">
+                    Đọc Truyện Khám Phá 📖
+                </button>
+                <button onclick="goToGameSelect()" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xl py-4 px-10 rounded-2xl border-b-8 border-emerald-700 active:border-b-0 active:translate-y-1 transition-all shadow-lg transform hover:scale-105">
+                    Vào Đấu Trường Game 🎮
+                </button>
+            </div>
+        </section>
+
+        <section id="screen-story" class="hidden space-y-6 py-6 max-w-4xl mx-auto">
+            <div class="bg-white rounded-3xl border-4 border-amber-400 p-6 shadow-xl relative overflow-hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="bg-amber-100 text-amber-800 font-extrabold text-xs px-3.5 py-1.5 rounded-full uppercase">
+                        Nhật Ký Phiêu Lưu: Trang <span id="story-page-num">1</span>/3
+                    </span>
+                    <button onclick="goToGameSelect()" class="text-sm font-black text-slate-400 hover:text-slate-600">
+                        Bỏ qua câu chuyện ⏩
+                    </button>
+                </div>
+
+                <!-- Active Illustration/Story frame -->
+                <div id="story-content" class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center min-h-[300px]">
+                    <!-- Injected dynamically -->
+                </div>
+
+                <!-- Page Nav buttons -->
+                <div class="flex justify-between items-center mt-8 border-t pt-4">
+                    <button id="btn-story-prev" onclick="changeStoryPage(-1)" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-black py-2 px-6 rounded-xl transition-all disabled:opacity-40">
+                        ⬅️ Trang trước
+                    </button>
+                    <button id="btn-story-next" onclick="changeStoryPage(1)" class="bg-amber-500 hover:bg-amber-600 text-white font-black py-2 px-6 rounded-xl border-b-4 border-amber-700 active:border-b-0 active:translate-y-0.5 transition-all">
+                        Trang tiếp theo ➡️
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-game-select" class="hidden space-y-8 py-6">
+            <div class="text-center max-w-2xl mx-auto space-y-3">
+                <h2 class="title-font text-3xl md:text-5xl font-black text-orange-950">Chọn Đấu Trường Pizza</h2>
+                <p class="text-slate-600 font-bold text-sm md:text-base">
+                    Các bạn nhỏ hãy lựa chọn đấu trường toán học phù hợp nhất với mạch bài học của mình nhé!
+                </p>
             </div>
 
-            <!-- Nút điều hướng -->
-            <div class="flex justify-between items-center pt-4 border-t border-gray-200">
-                <button onclick="goHome()" class="text-gray-500 hover:text-gray-700 font-semibold text-sm flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
-                    <i class="fa-solid fa-house"></i> Về trang chủ
-                </button>
-                <button id="next-btn" onclick="nextQuestion()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap-2">
-                    Câu tiếp theo <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-2">
+                <!-- Game 1 Card -->
+                <div class="bg-white rounded-3xl border-4 border-amber-400 p-6 shadow-xl hover:shadow-2xl transition-all flex flex-col justify-between relative overflow-hidden group">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-100 rounded-full opacity-60 group-hover:scale-125 transition-transform"></div>
+                    <div>
+                        <div class="bg-amber-100 text-amber-800 font-black text-xs px-3 py-1 rounded-full w-max mb-3 border border-amber-200">
+                            KHUNG SỐ 1
+                        </div>
+                        <h3 class="title-font text-2xl font-black text-amber-950 mb-3 flex items-center gap-1.5">
+                            🌈 Đại Lộ Cầu Vồng
+                        </h3>
+                        <p class="text-xs md:text-sm text-slate-600 font-bold mb-4 leading-relaxed">
+                            <strong>Mạch kiến thức: Phép cộng hai phân số CÙNG mẫu số.</strong><br>
+                            Tự tay chia lát bánh Pizza Pepperoni cổ điển, nhấp chuột phủ phô mai Mozzarella để cộng dồn các lát bánh thơm giòn!
+                        </p>
+                    </div>
+                    <button onclick="initGame1()" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-black py-3 px-6 rounded-2xl border-b-6 border-amber-700 active:border-b-0 active:translate-y-1 transition-all shadow-md">
+                        Mở Khóa Khung 1 🔓
+                    </button>
+                </div>
 
-        <!-- MÀN HÌNH KẾT QUẢ (RESULTS) -->
-        <div id="screen-result" class="hidden castle-card rounded-3xl p-6 sm:p-10 text-center max-w-2xl mx-auto my-auto animate-fadeIn">
-            <div class="text-6xl sm:text-7xl mb-4 animate-bounce">🏆🎉</div>
-            <h2 class="text-3xl font-bold text-amber-600 mb-2">Chúc Mừng Bạn Đã Hoàn Thành!</h2>
-            <p class="text-gray-600 mb-6">Bạn đã xuất sắc vượt qua toàn bộ 5 cửa thử thách trong Vương Quốc Phân Số.</p>
-            
-            <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 mb-6 max-w-md mx-auto">
-                <div class="text-sm font-semibold text-gray-500 uppercase">Tổng số điểm đạt được</div>
-                <div class="text-4xl font-extrabold text-amber-600 my-2"><span id="final-score">0</span> / 100</div>
-                <p id="result-message" class="text-sm font-medium text-amber-800 mt-2">Tuyệt vời! Bạn là Thần Đồng Toán Học!</p>
+                <!-- Game 2 Card -->
+                <div class="bg-white rounded-3xl border-4 border-blue-400 p-6 shadow-xl hover:shadow-2xl transition-all flex flex-col justify-between relative overflow-hidden group">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-blue-100 rounded-full opacity-60 group-hover:scale-125 transition-transform"></div>
+                    <div>
+                        <div class="bg-blue-100 text-blue-800 font-black text-xs px-3 py-1 rounded-full w-max mb-3 border border-blue-200">
+                            TRẮC NGHIỆM PHÉP THUẬT
+                        </div>
+                        <h3 class="title-font text-2xl font-black text-blue-950 mb-3 flex items-center gap-1.5">
+                            🧙‍♂️ Đấu Trường So Sánh
+                        </h3>
+                        <p class="text-xs md:text-sm text-slate-600 font-bold mb-4 leading-relaxed">
+                            <strong>Mạch kiến thức: Rèn luyện kỹ năng so sánh & quy đồng.</strong><br>
+                            Giải các câu đố quy đổi phân số nhịp độ nhanh để hạ gục những thử thách hóc búa từ chú Robot thông thái!
+                        </p>
+                    </div>
+                    <button onclick="initGame2()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-black py-3 px-6 rounded-2xl border-b-6 border-blue-700 active:border-b-0 active:translate-y-1 transition-all shadow-md">
+                        Mở Khóa Khung 2 🔓
+                    </button>
+                </div>
+
+                <!-- Game 3 Card -->
+                <div class="bg-white rounded-3xl border-4 border-purple-400 p-6 shadow-xl hover:shadow-2xl transition-all flex flex-col justify-between relative overflow-hidden group">
+                    <div class="absolute -top-12 -right-12 w-32 h-32 bg-purple-100 rounded-full opacity-60 group-hover:scale-125 transition-transform"></div>
+                    <div>
+                        <div class="bg-purple-100 text-purple-800 font-black text-xs px-3 py-1 rounded-full w-max mb-3 border border-purple-200">
+                            KHUNG SỐ 2
+                        </div>
+                        <h3 class="title-font text-2xl font-black text-purple-950 mb-3 flex items-center gap-1.5">
+                            🔮 Thung Lũng Phép Thuật
+                        </h3>
+                        <p class="text-xs md:text-sm text-slate-600 font-bold mb-4 leading-relaxed">
+                            <strong>Mạch kiến thức: Phép cộng hai phân số KHÁC mẫu số.</strong><br>
+                            Mở tiệm bánh ngọt kem dâu mứt việt quất ngũ sắc. Học cách tìm mẫu số chung, quy đồng và gộp bánh ngọt rực rỡ!
+                        </p>
+                    </div>
+                    <button onclick="initGame3()" class="w-full bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700 text-white font-black py-3 px-6 rounded-2xl border-b-6 border-purple-700 active:border-b-0 active:translate-y-1 transition-all shadow-md">
+                        Mở Khóa Khung 3 🔓
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-game1" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-6 py-4">
+            <!-- Sidebar levels -->
+            <div class="bg-white rounded-3xl border-4 border-slate-200 p-4 shadow-md flex flex-col justify-between h-fit lg:sticky lg:top-24">
+                <div>
+                    <h3 class="title-font font-black text-slate-700 text-lg mb-2 flex items-center gap-2 border-b pb-2">
+                        🗺️ Cấp Độ Khung 1
+                    </h3>
+                    <div id="game1-levels-grid" class="grid grid-cols-4 gap-2 max-h-[300px] overflow-y-auto pr-1 custom-scroll">
+                        <!-- Levels injected dynamically -->
+                    </div>
+                </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <button onclick="restartJourney()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-rotate-right"></i> Chơi Lại Từ Đầu
-                </button>
-                <button onclick="goHome()" class="bg-sky-500 hover:bg-sky-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-house"></i> Về Màn Hình Chính
-                </button>
+            <!-- Main workspace -->
+            <div class="lg:col-span-3 space-y-6">
+                <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-5 rounded-3xl shadow-lg">
+                    <span class="bg-white/20 text-white font-black text-xs px-3.5 py-1.5 rounded-full uppercase">
+                        ĐẠI LỘ CẦU VỒNG - CÙNG MẪU SỐ
+                    </span>
+                    <h2 id="g1-title" class="title-font text-xl md:text-2xl font-black mt-2">Cấp độ 1: Phân chia bánh ngọt</h2>
+                </div>
+
+                <!-- Story box -->
+                <div class="bg-amber-50/60 rounded-3xl border-2 border-dashed border-amber-300 p-5 flex items-center gap-4 shadow-sm">
+                    <div class="w-16 h-16 flex-shrink-0 bg-white rounded-2xl flex items-center justify-center text-4xl shadow-md border border-amber-200">🍕</div>
+                    <div class="space-y-1">
+                        <span class="text-xs font-extrabold text-amber-800 uppercase tracking-widest">TÌNH HUỐNG THỰC TẾ:</span>
+                        <p id="g1-story" class="text-sm md:text-base font-bold text-slate-700 leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <!-- Slicing Interactive Vector Pizza Area -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left: Pizza Canvas -->
+                    <div class="bg-white p-5 rounded-3xl border-4 border-amber-400 shadow-md flex flex-col items-center">
+                        <h4 class="font-black text-slate-800 text-sm mb-3">Tô màu bánh Pizza trực quan</h4>
+                        
+                        <!-- Tool selection -->
+                        <div class="flex gap-2 mb-4 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                            <button onclick="setGame1Brush('red')" id="btn-g1-brush-red" class="flex items-center gap-1.5 bg-rose-500 text-white text-xs font-black px-4 py-2 rounded-xl transition-all shadow-sm">
+                                🖍️ Đỏ (Cần: <span id="g1-target-red">1</span>)
+                            </button>
+                            <button onclick="setGame1Brush('blue')" id="btn-g1-brush-blue" class="flex items-center gap-1.5 bg-slate-200 text-slate-600 text-xs font-black px-4 py-2 rounded-xl transition-all shadow-sm">
+                                🖍️ Xanh (Cần: <span id="g1-target-blue">2</span>)
+                            </button>
+                        </div>
+
+                        <!-- Pizza plate & SVG canvas container -->
+                        <div class="relative w-72 h-72 md:w-80 md:h-80 flex items-center justify-center">
+                            <svg id="g1-pizza-svg" class="w-full h-full wood-plate" viewBox="0 0 300 300">
+                                <!-- Injected dynamically by trig script -->
+                            </svg>
+                        </div>
+
+                        <!-- Slice counting logs -->
+                        <div id="g1-pizza-feedback" class="mt-4 text-xs font-black px-5 py-2 rounded-full border bg-amber-50 border-amber-200 text-amber-800 transition-all shadow-sm">
+                            Đang chuẩn bị bánh...
+                        </div>
+                    </div>
+
+                    <!-- Right: Math equations submission -->
+                    <div class="bg-white p-5 rounded-3xl border-4 border-indigo-500 shadow-md flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-black text-slate-800 text-sm mb-4">Điền phép tính toán học</h4>
+                            <div id="g1-equation-container" class="bg-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-wrap items-center justify-center gap-4 shadow-inner">
+                                <!-- Equation form injected dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="mt-6 space-y-4">
+                            <button onclick="validateGame1Solution()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-lg py-4 rounded-2xl border-b-4 border-emerald-700 hover:border-emerald-800 active:border-b-0 active:translate-y-1 transition-all shadow-lg">
+                                Kiểm Tra Đáp Án ✨
+                            </button>
+                            <!-- Warning alerts -->
+                            <div id="g1-alert-feedback" class="hidden w-full p-4 rounded-2xl text-center font-bold text-sm border-2 transition-all shadow-md"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <section id="screen-game2" class="hidden max-w-4xl mx-auto py-6 space-y-6">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-5 rounded-3xl shadow-lg">
+                <span class="bg-white/20 text-white font-black text-xs px-3.5 py-1.5 rounded-full uppercase">
+                    ĐẤU TRƯỜNG PHÉP THUẬT - SO SÁNH & QUY ĐỒNG
+                </span>
+                <h2 class="title-font text-2xl font-black mt-2">Nhanh mắt nhanh trí!</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- SVG Dual Pizza Comparison side-by-side display -->
+                <div class="bg-white p-6 rounded-3xl border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center gap-4 min-h-[320px]">
+                    <h3 class="font-black text-slate-800 text-sm">Hình ảnh trực quan của câu hỏi</h3>
+                    <div class="flex justify-center items-center gap-6 w-full">
+                        <!-- Left Pizza comparison block -->
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-32 h-32 md:w-36 md:h-36">
+                                <svg id="g2-pizza-left" class="w-full h-full wood-plate" viewBox="0 0 300 300"></svg>
+                            </div>
+                            <!-- DYNAMIC LABEL INSTEAD OF HARDCODED ONES -->
+                            <span id="g2-fraction-left" class="text-xl font-black text-blue-800 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">1/2</span>
+                        </div>
+
+                        <!-- Middle comparison separator element or magic arrow symbol -->
+                        <div id="g2-comparer-symbol" class="text-4xl font-black text-slate-400">?</div>
+
+                        <!-- Right Pizza comparison block -->
+                        <div class="flex flex-col items-center gap-2">
+                            <div class="w-32 h-32 md:w-36 md:h-36">
+                                <svg id="g2-pizza-right" class="w-full h-full wood-plate" viewBox="0 0 300 300"></svg>
+                            </div>
+                            <!-- DYNAMIC LABEL INSTEAD OF HARDCODED ONES -->
+                            <span id="g2-fraction-right" class="text-xl font-black text-indigo-800 bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-200">2/4</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Answers Options & Streak stats box -->
+                <div class="bg-white p-6 rounded-3xl border-4 border-indigo-400 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-xs font-extrabold text-indigo-600 uppercase">Chọn một câu trả lời chính xác:</span>
+                            <div class="bg-orange-100 text-orange-800 font-extrabold text-xs px-3 py-1 rounded-full border border-orange-200">
+                                Chuỗi thắng: 🔥 <span id="g2-streak-count">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Question Prompt -->
+                        <h3 id="g2-question-prompt" class="text-lg font-black text-slate-800 mb-6 leading-relaxed">
+                            Hãy so sánh hai phân số biểu thị bánh pizza ở hình bên:
+                        </h3>
+
+                        <!-- Injected dynamic multiple choices button blocks -->
+                        <div id="g2-options-container" class="space-y-3">
+                            <!-- Injected from script -->
+                        </div>
+                    </div>
+
+                    <div id="g2-alert-feedback" class="hidden mt-4 w-full p-4 rounded-2xl text-center font-bold text-sm border-2 shadow-md"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-game3" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-6 py-4">
+            <!-- Sidebar levels list -->
+            <div class="bg-white rounded-3xl border-4 border-slate-200 p-4 shadow-md flex flex-col justify-between h-fit lg:sticky lg:top-24">
+                <div>
+                    <h3 class="title-font font-black text-slate-700 text-lg mb-2 flex items-center gap-2 border-b pb-2">
+                        🗺️ Cấp Độ Khung 2
+                    </h3>
+                    <div id="game3-levels-grid" class="grid grid-cols-4 gap-2 max-h-[300px] overflow-y-auto pr-1 custom-scroll">
+                        <!-- Levels injected dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Workspace of Advanced Different Denominator builder -->
+            <div class="lg:col-span-3 space-y-6">
+                <div class="bg-gradient-to-r from-purple-500 via-indigo-500 to-violet-600 text-white p-5 rounded-3xl shadow-lg">
+                    <span class="bg-white/20 text-white font-black text-xs px-3.5 py-1.5 rounded-full uppercase">
+                        THUNG LŨNG PHÉP THUẬT - KHÁC MẪU SỐ
+                    </span>
+                    <h2 id="g3-title" class="title-font text-xl md:text-2xl font-black mt-2">Cấp độ 1: Phép thuật quy đồng</h2>
+                </div>
+
+                <!-- Story box -->
+                <div class="bg-purple-50/60 rounded-3xl border-2 border-dashed border-purple-300 p-5 flex items-center gap-4 shadow-sm">
+                    <div class="w-16 h-16 flex-shrink-0 bg-white rounded-2xl flex items-center justify-center text-4xl shadow-md border border-purple-200">🧁</div>
+                    <div class="space-y-1">
+                        <span class="text-xs font-extrabold text-purple-800 uppercase tracking-widest">TÌNH HUỐNG THỰC TẾ:</span>
+                        <p id="g3-story" class="text-sm md:text-base font-bold text-slate-700 leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <!-- Side-by-side visualization area and workspace steps -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Dessert Pizza SVG Canvas representation with custom blueberry toppings -->
+                    <div class="bg-white p-5 rounded-3xl border-4 border-purple-400 shadow-md flex flex-col items-center">
+                        <h4 class="font-black text-slate-800 text-sm mb-3">Tô màu bánh Pizza Phép Thuật</h4>
+
+                        <!-- Brush select tools -->
+                        <div class="flex gap-2 mb-4 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                            <button onclick="setGame3Brush('red')" id="btn-g3-brush-red" class="flex items-center gap-1.5 bg-rose-500 text-white text-xs font-black px-4 py-2 rounded-xl transition-all shadow-sm">
+                                🖍️ Đỏ (Cần: <span id="g3-target-red">2</span>)
+                            </button>
+                            <button onclick="setGame3Brush('blue')" id="btn-g3-brush-blue" class="flex items-center gap-1.5 bg-slate-200 text-slate-700 text-xs font-black px-4 py-2 rounded-xl transition-all shadow-sm">
+                                🖍️ Xanh (Cần: <span id="g3-target-blue">1</span>)
+                            </button>
+                        </div>
+
+                        <!-- Render visual representation of common denominator divided pizza -->
+                        <div class="relative w-72 h-72 md:w-80 md:h-80 flex items-center justify-center">
+                            <svg id="g3-pizza-svg" class="w-full h-full wood-plate" viewBox="0 0 300 300">
+                                <!-- Injected dynamically by lượng giác script -->
+                            </svg>
+                        </div>
+
+                        <!-- Slice select count state readout logs -->
+                        <div id="g3-pizza-feedback" class="mt-4 text-xs font-black px-5 py-2 rounded-full border bg-purple-50 border-purple-200 text-purple-800 transition-all shadow-sm">
+                            Đang nướng bánh phép thuật...
+                        </div>
+                    </div>
+
+                    <!-- Step-by-step quy đồng wizard card -->
+                    <div class="bg-white p-5 rounded-3xl border-4 border-indigo-500 shadow-md flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-black text-slate-800 text-sm mb-4">Các bước giải toán cùng Robot</h4>
+                            <div id="g3-equation-container" class="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex flex-col items-center gap-4 shadow-inner">
+                                <!-- Steps and input forms injected dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="mt-6 space-y-4">
+                            <button onclick="validateGame3Solution()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-black text-lg py-4 rounded-2xl border-b-4 border-purple-700 hover:border-purple-800 active:border-b-0 active:translate-y-1 transition-all shadow-lg">
+                                Kiểm Tra Đáp Án ✨
+                            </button>
+                            <!-- Warnings alert board -->
+                            <div id="g3-alert-feedback" class="hidden w-full p-4 rounded-2xl text-center font-bold text-sm border-2 transition-all shadow-md"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="text-center py-4 text-white text-xs opacity-90 font-medium">
-        Vương Quốc Phân Số • Ứng dụng học Toán lớp 4 tương tác sinh động ✨
-    </footer>
+    <div id="explanation-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl border-4 border-indigo-400 p-6 md:p-8 max-w-lg w-full shadow-2xl relative">
+            <button onclick="closeExplanationModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl">
+                ✕
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-2xl">
+                    💡
+                </div>
+                <div>
+                    <h3 class="title-font text-xl font-black text-indigo-950">Bí kíp Giải thích từ Robot</h3>
+                    <p class="text-xs font-bold text-indigo-600/80 uppercase">HỌC TỪ LỖI SAI ĐỂ TIẾN BỘ</p>
+                </div>
+            </div>
+            
+            <!-- Injected detailed calculation guide -->
+            <div id="explanation-text" class="text-sm md:text-base font-bold text-slate-600 leading-relaxed space-y-3 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                <!-- Injected math guidance -->
+            </div>
 
-    <!-- Audio synthesizer bằng Web Audio API (Không cần file âm thanh ngoài) -->
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeExplanationModal()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-black py-2.5 px-6 rounded-xl border-b-4 border-indigo-700 active:border-b-0 active:translate-y-0.5 transition-all text-sm">
+                    Đã hiểu, em thử lại ngay! 💪
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="victory-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl border-4 border-amber-400 p-6 md:p-8 max-w-md w-full text-center shadow-2xl transform scale-95 transition-all space-y-5">
+            <div class="text-7xl" id="victory-emoji">🎉</div>
+            <h3 class="title-font text-2xl md:text-3xl font-black text-amber-950" id="victory-title">ĐÚNG RỒI! TUYỆT QUÁ!</h3>
+            <p class="text-sm md:text-base text-slate-600 font-bold leading-relaxed" id="victory-message">
+                Em đã giải quyết bài toán phân số vô cùng xuất sắc!
+            </p>
+            <div class="flex justify-center gap-2">
+                <div class="bg-amber-100 px-5 py-2 rounded-full font-black text-amber-950 text-xs flex items-center gap-1 shadow-sm">
+                    <span>Điểm cộng:</span>
+                    <span class="text-sm text-amber-600">+20⭐</span>
+                </div>
+            </div>
+            <button onclick="closeVictoryModal()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black py-4 rounded-2xl border-b-4 border-emerald-700 active:border-b-0 active:translate-y-1 transition-all shadow-md text-base">
+                Tiếp tục hành trình ➡️
+            </button>
+        </div>
+    </div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none w-full h-full z-50 hidden"></canvas>
+
     <script>
-        const SoundFX = {
-            playCorrect() {
-                try {
-                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(440, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
-                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.3);
-                } catch(e) {}
-            },
-            playWrong() {
-                try {
-                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, ctx.currentTime);
-                    osc.frequency.linearRampToValueAtTime(150, ctx.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
-                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start();
-                    osc.stop(ctx.currentTime + 0.3);
-                } catch(e) {}
+        class AudioEngine {
+            constructor() {
+                this.ctx = null;
             }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playTone(freq, type, duration, vol = 0.1) {
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    let osc = this.ctx.createOscillator();
+                    let gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch (e) { console.log(e); }
+            }
+            playClick() {
+                this.playTone(600, 'sine', 0.08, 0.12);
+            }
+            playSelect() {
+                this.playTone(850, 'sine', 0.1, 0.08);
+            }
+            playCorrect() {
+                this.playTone(523.25, 'triangle', 0.12, 0.15); // C5
+                setTimeout(() => this.playTone(659.25, 'triangle', 0.12, 0.15), 100); // E5
+                setTimeout(() => this.playTone(783.99, 'triangle', 0.25, 0.2), 200); // G5
+            }
+            playIncorrect() {
+                this.playTone(220, 'sawtooth', 0.35, 0.18); // Low buzz
+            }
+            playLevelUp() {
+                const now = this.ctx ? this.ctx.currentTime : 0;
+                this.playTone(440, 'sine', 0.15, 0.1);
+                setTimeout(() => this.playTone(554, 'sine', 0.15, 0.1), 80);
+                setTimeout(() => this.playTone(659, 'sine', 0.15, 0.1), 160);
+                setTimeout(() => this.playTone(880, 'sine', 0.3, 0.15), 240);
+            }
+        }
+        const audio = new AudioEngine();
+    </script>
+
+    <script>
+        const state = {
+            score: 0,
+            currentScreen: 'welcome',
+            storyIndex: 0,
+            game1: { level: 1, slicesSelected: [], targetNum1: 1, targetNum2: 2, targetDen: 5, brush: 'red' },
+            game2: { level: 1, streak: 0, currentQuestion: null, selectedAnswer: null },
+            game3: { level: 1, slicesSelected: [], num1: 1, den1: 2, num2: 1, den2: 4, commonDenom: 4, equivNum1: 2, equivNum2: 1, finalNum: 3, brush: 'red' }
         };
 
-        // Dữ liệu 5 cửa (Mỗi cửa 2 câu hỏi: Câu 1 gốc từ file, Câu 2 bổ sung mới)
-        const quizData = [
-            // CỬA 1
+        const progress = {
+            game1: Array(21).fill(false),
+            game3: Array(21).fill(false)
+        };
+
+        // --- STORY PAGES FOR READERS ---
+        const STORY_PAGES = [
             {
-                gateId: "Cửa 1",
-                gateTitle: "Cộng Cùng Mẫu Số (Cơ Bản)",
-                icon: "🍕",
-                questions: [
-                    {
-                        type: "mcq",
-                        question: "Tính phép tính phân số sau: <br><span class='text-2xl text-amber-600 font-bold'>$$\\frac{1}{5} + \\frac{2}{5} = ?$$</span>",
-                        illustration: `
-                            <div class="flex items-center gap-3">
-                                <div class="text-center"><span class="text-3xl">🍕</span><div class="text-xs font-bold text-gray-600">1 phần 5</div></div>
-                                <span class="text-xl font-bold text-amber-600">+</span>
-                                <div class="text-center"><span class="text-3xl">🍕🍕</span><div class="text-xs font-bold text-gray-600">2 phần 5</div></div>
-                                <span class="text-xl font-bold text-amber-600">=</span>
-                                <div class="text-center"><span class="text-3xl">🍕🍕🍕</span><div class="text-xs font-bold text-gray-600">?</div></div>
-                            </div>
-                        `,
-                        options: [
-                            { text: "A. \\(\\frac{3}{10}\\)", correct: false },
-                            { text: "B. \\(\\frac{3}{5}\\)", correct: true },
-                            { text: "C. \\(\\frac{2}{25}\\)", correct: false },
-                            { text: "D. \\(\\frac{1}{5}\\)", correct: false }
-                        ],
-                        explanation: "Khi cộng hai phân số cùng mẫu số, ta cộng hai tử số với nhau và giữ nguyên mẫu số: \\(1 + 2 = 3\\), giữ nguyên mẫu \\(5\\). Kết quả là \\(\\frac{3}{5}\\)."
-                    },
-                    {
-                        type: "mcq",
-                        question: "<b>Câu hỏi bổ sung:</b> Tính giá trị biểu thức: <br><span class='text-2xl text-amber-600 font-bold'>$$\\frac{3}{8} + \\frac{4}{8} = ?$$</span>",
-                        illustration: `
-                            <div class="flex items-center gap-3">
-                                <div class="text-center"><span class="text-3xl">🍰🍰🍰</span><div class="text-xs font-bold text-gray-600">3 phần 8</div></div>
-                                <span class="text-xl font-bold text-amber-600">+</span>
-                                <div class="text-center"><span class="text-3xl">🍰🍰🍰🍰</span><div class="text-xs font-bold text-gray-600">4 phần 8</div></div>
-                                <span class="text-xl font-bold text-amber-600">=</span>
-                                <div class="text-center"><span class="text-3xl">🍰...</span><div class="text-xs font-bold text-gray-600">?</div></div>
-                            </div>
-                        `,
-                        options: [
-                            { text: "A. \\(\\frac{7}{16}\\)", correct: false },
-                            { text: "B. \\(\\frac{7}{8}\\)", correct: true },
-                            { text: "C. \\(\\frac{12}{8}\\)", correct: false },
-                            { text: "D. \\(\\frac{1}{8}\\)", correct: false }
-                        ],
-                        explanation: "Cộng tử số: \\(3 + 4 = 7\\). Giữ nguyên mẫu số: \\(8\\). Vậy kết quả là \\(\\frac{7}{8}\\)."
-                    }
-                ]
+                text: "Ngày cuối tuần đẹp trời, Nam và Mai được mẹ dẫn đi ăn bữa tiệc tại Vương Quốc Pizza Diệu Kỳ. Hai bạn vô cùng thích thú khi nhìn thấy lò nướng bánh khổng lồ tỏa hương thơm phức!",
+                illustration: `
+                    <svg viewBox="0 0 200 200" class="w-48 h-48 mx-auto">
+                        <circle cx="100" cy="100" r="80" fill="#fef08a" stroke="#ea580c" stroke-width="4"/>
+                        <rect x="70" y="40" width="60" height="80" rx="6" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+                        <circle cx="100" cy="80" r="15" fill="#f97316"/>
+                        <text x="100" y="150" text-anchor="middle" font-family="'Nunito'" font-size="12" font-weight="900" fill="#7c2d12">LÒ PIZZA KỲ DIỆU</text>
+                    </svg>
+                `
             },
-            // CỬA 2
             {
-                gateId: "Cửa 2",
-                gateTitle: "Tìm Số Hợp Lệ Trong Phép Cộng",
-                icon: "🍏",
-                questions: [
-                    {
-                        type: "input",
-                        question: "Điền số thích hợp vào dấu hỏi chấm (?) để được đẳng thức đúng:<br><span class='text-xl text-emerald-700 font-bold'>$$\\frac{7}{15} + \\frac{?}{15} = \\frac{10}{15}$$</span>",
-                        illustration: `
-                            <div class="flex items-center gap-2">
-                                <span class="text-3xl">🍏🍏🍏🍏🍏🍏🍏</span>
-                                <span class="text-xl font-bold text-emerald-600">+ [ ? ] =</span>
-                                <span class="text-3xl">🍏🍏🍏🍏🍏🍏🍏🍏🍏🍏</span>
-                            </div>
-                        `,
-                        correctAnswer: "3",
-                        placeholder: "Nhập số vào đây...",
-                        explanation: "Vì mẫu số đã bằng nhau (\\(15\\)), ta tìm tử số còn thiếu: \\(7 + ? = 10\\). Suy ra \\(? = 10 - 7 = 3\\)."
-                    },
-                    {
-                        type: "input",
-                        question: "<b>Câu hỏi bổ sung:</b> Điền số thích hợp vào dấu ?:<br><span class='text-xl text-emerald-700 font-bold'>a) \\(\\frac{5}{12} + \\frac{?}{12} = \\frac{11}{12}\\)<br>b) \\(\\frac{4}{7} + \\frac{3}{?} = \\frac{7}{7}\\)</span><br><span class='text-sm text-gray-600 mt-2 block'>(Hãy nhập 2 số cách nhau bằng dấu phẩy, ví dụ: 6, 7)</span>",
-                        illustration: `
-                            <div class="flex items-center gap-2">
-                                <span class="text-3xl">🍉🍉🍉🍉🍉</span>
-                                <span class="text-xl font-bold text-emerald-600">+ [ ? ] = \\(\\frac{11}{12}\\) & \\(\\frac{4}{7} + \\frac{3}{?} = 1\\)</span>
-                            </div>
-                        `,
-                        correctAnswer: "6, 7",
-                        placeholder: "Ví dụ: 6, 7",
-                        explanation: "a) \\(5 + ? = 11\\) nên \\(? = 6\\). b) Tử cộng nhau là \\(4 + 3 = 7\\), mẫu giữ nguyên bằng \\(7\\) nên \\(? = 7\\). Đáp án điền là: 6, 7."
-                    }
-                ]
+                text: "Nam dõng dạc nói: 'Tớ sẽ ăn 1/5 chiếc bánh Pizza Pepperoni màu đỏ này!'. Mai mỉm cười và đáp lời: 'Vậy thì tớ sẽ ăn tiếp 2/5 chiếc bánh Pizza phô mai màu xanh nhé!'",
+                illustration: `
+                    <svg viewBox="0 0 200 200" class="w-48 h-48 mx-auto">
+                        <circle cx="100" cy="100" r="70" fill="#fde047" stroke="#ea580c" stroke-width="4" />
+                        <!-- Colored sectors representation -->
+                        <path d="M 100 100 L 100 30 A 70 70 0 0 1 166 122 Z" fill="#dc2626" opacity="0.8"/>
+                        <path d="M 100 100 L 166 122 A 70 70 0 0 1 141 160 Z" fill="#2563eb" opacity="0.8"/>
+                        <!-- Slice lines -->
+                        <line x1="100" y1="30" x2="100" y2="170" stroke="#7c2d12" stroke-width="2" stroke-dasharray="4,4"/>
+                        <text x="100" y="20" text-anchor="middle" font-size="10" font-weight="bold" fill="#dc2626">Nam: 1/5</text>
+                        <text x="175" y="150" text-anchor="middle" font-size="10" font-weight="bold" fill="#2563eb">Mai: 2/5</text>
+                    </svg>
+                `
             },
-            // CỬA 3
             {
-                gateId: "Cửa 3",
-                gateTitle: "Phát Hiện Lỗi Sai: AI Cộng Cả Tử Và Mẫu",
-                icon: "🤖",
-                questions: [
-                    {
-                        type: "mcq",
-                        question: "Bạn Robot giải phép tính: <br><span class='text-xl text-sky-800 font-bold'>$$\\frac{4}{9} + \\frac{1}{9} = \\frac{4+1}{9+9} = \\frac{5}{18}$$</span><br>Theo em, phép tính của Robot là <b>Đúng</b> hay <b>Sai</b>?",
-                        illustration: `
-                            <div class="flex items-center gap-3 bg-sky-50 p-3 rounded-xl border border-sky-200">
-                                <span class="text-4xl">🤖❓</span>
-                                <div class="text-sm text-sky-900 font-medium">Robot đã cộng cả mẫu số với mẫu số! Việc này có chính xác không nhỉ?</div>
-                            </div>
-                        `,
-                        options: [
-                            { text: "A. Đúng", correct: false },
-                            { text: "B. Sai", correct: true }
-                        ],
-                        explanation: "Sai hoàn toàn! Khi cộng phân số cùng mẫu, ta chỉ cộng tử số và <b>giữ nguyên mẫu số</b>. Phép tính đúng phải là \\(\\frac{4+1}{9} = \\frac{5}{9}\\)."
-                    },
-                    {
-                        type: "mcq",
-                        question: "<b>Câu hỏi bổ sung:</b> Robot lại tính tiếp:<br><span class='text-xl text-sky-800 font-bold'>$$\\frac{2}{7} + \\frac{3}{7} = \\frac{2+3}{7+7} = \\frac{5}{14}$$</span><br>Kết quả này Đúng hay Sai?",
-                        illustration: `
-                            <div class="flex items-center gap-3 bg-sky-50 p-3 rounded-xl border border-sky-200">
-                                <span class="text-4xl">🤖⚠️</span>
-                                <div class="text-sm text-sky-900 font-medium">Robot lại cộng mẫu số với nhau nữa rồi!</div>
-                            </div>
-                        `,
-                        options: [
-                            { text: "A. Đúng", correct: false },
-                            { text: "B. Sai", correct: true }
-                        ],
-                        explanation: "Sai! Mẫu số phải được giữ nguyên là \\(7\\), không được cộng mẫu với mẫu. Kết quả đúng phải là \\(\\frac{5}{7}\\)."
-                    }
-                ]
-            },
-            // CỬA 4
-            {
-                gateId: "Cửa 4",
-                gateTitle: "Phát Hiện Lỗi Sai: Cộng Mẫu Giữ Nguyên Tử",
-                icon: "🦉",
-                questions: [
-                    {
-                        type: "mcq",
-                        question: "Học sinh tò mò tính toán như sau: <br><span class='text-xl text-purple-800 font-bold'>$$\\frac{3}{5} + \\frac{3}{5} = \\frac{3}{5+5} = \\frac{3}{10}$$</span><br>Theo em kết quả này Đúng hay Sai?",
-                        illustration: `
-                            <div class="flex items-center gap-3 bg-purple-50 p-3 rounded-xl border border-purple-200">
-                                <span class="text-4xl">🦉🔍</span>
-                                <div class="text-sm text-purple-900 font-medium">Cộng mẫu số nhưng lại giữ nguyên tử số? Cú Thông Thái lắc đầu!</div>
-                            </div>
-                        `,
-                        options: [
-                            { text: "A. Đúng", correct: false },
-                            { text: "B. Sai", correct: true }
-                        ],
-                        explanation: "Sai! Quy tắc đúng là <b>cộng hai tử số với nhau và giữ nguyên mẫu số</b>. Phải là \\(\\frac{3+3}{5} = \\frac{6}{5}\\)."
-                    },
-                    {
-                        type: "mcq",
-                        question: "<b>Câu hỏi bổ sung:</b> Xem xét phép tính sau:<br><span class='text-xl text-purple-800 font-bold'>$$\\frac{2}{6} + \\frac{2}{6} = \\frac{2}{6+6} = \\frac{2}{12}$$</span><br>Phép tính này Đúng hay Sai?",
-                        illustration: `
-                            <div class="flex items-center gap-3 bg-purple-50 p-3 rounded-xl border border-purple-200">
-                                <span class="text-4xl">🦉💡</span>
-                                <div class="text-sm text-purple-900 font-medium">Hãy kiểm tra kỹ tử số và mẫu số nhé!</div>
-                            </div>
-                        `,
-                        options: [
-                            { text: "A. Đúng", correct: false },
-                            { text: "B. Sai", correct: true }
-                        ],
-                        explanation: "Sai! Tử số phải được cộng lại (\\(2 + 2 = 4\\)) và mẫu số giữ nguyên (\\(6\\)), kết quả đúng là \\(\\frac{4}{6}\\)."
-                    }
-                ]
-            },
-            // CỬA 5
-            {
-                gateId: "Cửa 5",
-                gateTitle: "Bài Toán Thực Tế Về Phân Số",
-                icon: "📚",
-                questions: [
-                    {
-                        type: "mcq",
-                        question: "Mai đọc sách: Ngày 1 Mai đọc được <span class='font-bold text-rose-600'>\\(\\frac{2}{7}\\)</span> cuốn sách, ngày 2 đọc được <span class='font-bold text-rose-600'>\\(\\frac{3}{7}\\)</span> cuốn sách. Hỏi cả hai ngày Mai đọc được bao nhiêu phần cuốn sách?",
-                        illustration: `
-                            <div class="flex items-center gap-3 bg-rose-50 p-3 rounded-xl border border-rose-200">
-                                <span class="text-4xl">📖👧</span>
-                                <div class="text-sm text-rose-900 font-medium">Ngày 1: 2/7 cuốn • Ngày 2: 3/7 cuốn. Tổng cộng là bao nhiêu phần?</div>
-                            </div>
-                        `,
-                        options: [
-                            { text: "A. \\(\\frac{5}{14}\\)", correct: false },
-                            { text: "B. \\(\\frac{5}{7}\\)", correct: true },
-                            { text: "C. \\(\\frac{1}{7}\\)", correct: false },
-                            { text: "D. \\(\\frac{6}{7}\\)", correct: false }
-                        ],
-                        explanation: "Lời giải: Cả hai ngày Mai đọc được số phần cuốn sách là:<br>\\(\\frac{2}{7} + \\frac{3}{7} = \\frac{2+3}{7} = \\frac{5}{7}\\) (cuốn sách)."
-                    },
-                    {
-                        type: "mcq",
-                        question: "<b>Câu hỏi bổ sung:</b> Vườn hoa hồng nhà Nam: ngày đầu tưới được <span class='font-bold text-rose-600'>\\(\\frac{3}{10}\\)</span> vườn, ngày thứ hai tưới được <span class='font-bold text-rose-600'>\\(\\frac{4}{10}\\)</span> vườn. Hỏi cả hai ngày Nam tưới được bao nhiêu phần của vườn hoa?",
-                        illustration: `
-                            <div class="flex items-center gap-3 bg-rose-50 p-3 rounded-xl border border-rose-200">
-                                <span class="text-4xl">🌷🌿</span>
-                                <div class="text-sm text-rose-900 font-medium">Ngày 1: 3/10 • Ngày 2: 4/10 vườn hoa hồng.</div>
-                            </div>
-                        `,
-                        options: [
-                            { text: "A. \\(\\frac{7}{20}\\)", correct: false },
-                            { text: "B. \\(\\frac{1}{10}\\)", correct: false },
-                            { text: "C. \\(\\frac{7}{10}\\)", correct: true },
-                            { text: "D. \\(\\frac{12}{10}\\)", correct: false }
-                        ],
-                        explanation: "Lời giải: Cả hai ngày Nam tưới được số phần vườn hoa là:<br>\\(\\frac{3}{10} + \\frac{4}{10} = \\frac{3+4}{10} = \\frac{7}{10}\\) (vườn hoa)."
-                    }
-                ]
+                text: "Chú Robot đầu bếp thông minh xuất hiện, chớp mắt tinh nghịch hỏi: 'Cả hai bạn đã tô màu và ăn tổng cộng bao nhiêu phần của chiếc bánh Pizza nào? Chúng ta cùng cộng lại nhé!'",
+                illustration: `
+                    <svg viewBox="0 0 200 200" class="w-48 h-48 mx-auto">
+                        <rect x="60" y="50" width="80" height="70" rx="12" fill="#cbd5e1" stroke="#475569" stroke-width="3"/>
+                        <rect x="75" y="65" width="50" height="25" rx="5" fill="#1e293b"/>
+                        <circle cx="88" cy="78" r="5" fill="#22c55e" class="animate-pulse"/>
+                        <circle cx="112" cy="78" r="5" fill="#22c55e" class="animate-pulse"/>
+                        <line x1="90" y1="105" x2="110" y2="105" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+                        <circle cx="100" cy="30" r="8" fill="#eab308"/>
+                        <line x1="100" y1="50" x2="100" y2="38" stroke="#475569" stroke-width="2"/>
+                    </svg>
+                `
             }
         ];
 
-        let currentGateIndex = 0;
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let streak = 0;
-        let answeredCurrent = false;
+        // --- GAME 1 PROBLEMS DATABASE (Cùng mẫu số) ---
+        const GAME1_PROBLEMS = [
+            { id: 1, num1: 1, num2: 2, denom: 5, emoji: "🍰", title: "Khởi động bánh dâu", story: "Mẹ chia chiếc bánh Pizza thành 5 phần đều nhau. Nam ăn 1/5 chiếc bánh, Mai ăn tiếp 2/5 chiếc bánh. Hỏi cả hai bạn ăn bao nhiêu phần?", unit: "chiếc bánh" },
+            { id: 2, num1: 2, num2: 1, denom: 4, emoji: "🍉", title: "Pizza Dưa hấu mát lạnh", story: "Chiếc bánh Pizza trái cây đặc biệt được cắt làm 4 miếng bằng nhau. Bạn Hải tô đỏ 2/4 chiếc bánh, Lan tô xanh tiếp 1/4 chiếc bánh. Hỏi cả hai tô bao nhiêu phần?", unit: "chiếc bánh" },
+            { id: 3, num1: 2, num2: 2, denom: 5, emoji: "🍫", title: "Thanh Sô-cô-la ngọt", story: "Mẹ nướng bánh Pizza sô-cô-la chia đều thành 5 miếng. Cường rắc cốm đỏ lên 2/5 chiếc bánh, rắc tiếp kẹo xanh lên 2/5 chiếc bánh. Hỏi tất cả kẹo rắc lên bao nhiêu phần?", unit: "chiếc bánh" },
+            { id: 4, num1: 1, num2: 3, denom: 6, emoji: "🎨", title: "Sắc màu dải lụa", story: "Mảnh bánh Pizza lớn có 6 lát. Robot tô sốt cà chua đỏ lên 1/6 bánh, tô phô mai xanh lên 3/6 bánh. Hỏi hai phần phủ sốt và phô mai chiếm bao nhiêu phần?", unit: "chiếc bánh" },
+            { id: 5, num1: 3, num2: 2, denom: 7, emoji: "🌸", title: "Vườn hoa hồng", story: "Chiếc bánh được cắt thành 7 phần. Vy ăn 3/7 chiếc bánh, An ăn tiếp 2/7 chiếc bánh. Hỏi hai bạn đã ăn tất cả bao nhiêu phần?", unit: "chiếc bánh" },
+            { id: 6, num1: 2, num2: 5, denom: 8, emoji: "🍕", title: "Đại tiệc Pizza nấm", story: "Một chiếc Pizza nấm được chia thành 8 miếng đều nhau. Nam ăn 2/8 chiếc bánh, Minh ăn tiếp 5/8 chiếc bánh. Hỏi cả hai ăn bao nhiêu phần bánh?", unit: "chiếc bánh" },
+            { id: 7, num1: 4, num2: 3, denom: 9, emoji: "📖", title: "Khám phá tủ sách", story: "Để chuẩn bị tiệc, đầu bếp cắt bánh thành 9 phần. Khách bàn A ăn 4/9 bánh, khách bàn B ăn 3/9 bánh. Hỏi hai bàn đã ăn tổng cộng bao nhiêu phần chiếc bánh?", unit: "chiếc bánh" },
+            { id: 8, num1: 3, num2: 4, denom: 10, emoji: "💧", title: "Dòng nước tươi mát", story: "Chiếc bánh nướng khổng lồ chia thành 10 phần bằng nhau. Sáng bếp bán được 3/10 bánh, chiều bán được 4/10 bánh. Hỏi cả ngày bán được mấy phần?", unit: "chiếc bánh" },
+            { id: 9, num1: 5, num2: 2, denom: 12, emoji: "🍪", title: "Khay bánh bơ giòn", story: "Bánh Pizza bơ tỏi được cắt thành 12 phần đều nhau. Nam tô đỏ 5/12 dải bánh, Mai tô xanh tiếp 2/12 dải bánh. Hỏi cả hai bạn đã tô bao nhiêu phần chiếc bánh?", unit: "chiếc bánh" },
+            { id: 10, num1: 1, num2: 3, denom: 5, emoji: "🎈", title: "Bóng bay ngày hội", story: "Mẹ mua chiếc bánh Pizza xúc xích chia đều thành 5 phần. Nam ăn 1/5 bánh, ba ăn 3/5 bánh. Hỏi cả hai người ăn hết bao nhiêu phần chiếc bánh?", unit: "chiếc bánh" },
+            { id: 11, num1: 2, num2: 3, denom: 6, emoji: "🎨", title: "Mỹ thuật sắc màu", story: "Bánh Pizza cầu vồng có 6 phần bằng nhau. Bạn Hoa dùng mứt dâu đỏ phủ lên 2/6 bánh, dùng mứt việt quất xanh phủ lên 3/6 bánh. Hỏi mứt phủ bao nhiêu phần?", unit: "chiếc bánh" },
+            { id: 12, num1: 4, num2: 3, denom: 8, emoji: "✏️", title: "Dụng cụ học tập", story: "Mẹ chia chiếc bánh phô mai làm 8 phần bằng nhau. Chị lấy 4/8 chiếc bánh, em lấy tiếp 3/8 chiếc bánh để chia cho bạn. Hỏi hai chị em đã lấy mấy phần?", unit: "chiếc bánh" },
+            { id: 13, num1: 5, num2: 2, denom: 10, emoji: "🏃", title: "Đường chạy thể thao", story: "Bánh Pizza hải sản chia làm 10 miếng. Sáng bán được 5/10 bánh, chiều bán tiếp 2/10 bánh. Hỏi tiệm bánh đã bán được bao nhiêu phần bánh?", unit: "chiếc bánh" },
+            { id: 14, num1: 6, num2: 5, denom: 12, emoji: "🧁", title: "Tiệm bánh ngọt nhỏ", story: "Ổ bánh kem hình tròn được cắt làm 12 phần đều nhau. Khách ăn hết 6/12 bánh lúc trưa và ăn thêm 5/12 bánh lúc tối. Hỏi cả ngày khách ăn mấy phần?", unit: "chiếc bánh" },
+            { id: 15, num1: 1, num2: 1, denom: 4, emoji: "🍀", title: "Cỏ bốn lá may mắn", story: "Chiếc bánh chay được chia làm 4 phần bằng nhau. Ba ăn 1/4 bánh, mẹ ăn tiếp 1/4 bánh. Hỏi cả ba và mẹ đã ăn bao nhiêu phần của chiếc bánh?", unit: "chiếc bánh" },
+            { id: 16, num1: 2, num2: 4, denom: 7, emoji: "📚", title: "Kệ truyện tranh", story: "Bánh bông lan tròn chia làm 7 lát. Bé Vy ăn 2/7 chiếc bánh, bé Hải ăn tiếp 4/7 chiếc bánh đó. Hỏi hai bạn đã ăn hết bao nhiêu phần chiếc bánh?", unit: "chiếc bánh" },
+            { id: 17, num1: 3, num2: 5, denom: 9, emoji: "🥚", title: "Trứng gà bổ dưỡng", story: "Bánh Pizza trứng muối đặc biệt chia làm 9 miếng. Bữa sáng nhà mình ăn 3/9 bánh, bữa tối ăn thêm 5/9 bánh. Hỏi cả nhà ăn bao nhiêu phần khay bánh?", unit: "chiếc bánh" },
+            { id: 18, num1: 1, num2: 4, denom: 8, emoji: "🍭", title: "Kẹo mút dâu tây", story: "Chiếc bánh kẹo ngọt hình tròn chia làm 8 phần. Lâm ăn 1/8 bánh, Mai ăn tiếp 4/8 bánh đó. Hỏi cả hai đã thưởng thức bao nhiêu phần chiếc bánh?", unit: "chiếc bánh" },
+            { id: 19, num1: 4, num2: 5, denom: 11, emoji: "📿", title: "Vòng hạt lấp lánh", story: "Chiếc Pizza chay nấm chia làm 11 lát bằng nhau. Nam ăn 4/11 bánh, Mai ăn tiếp 5/11 bánh đó. Hỏi cả hai ăn tất cả bao nhiêu phần chiếc bánh?", unit: "chiếc bánh" },
+            { id: 20, num1: 5, num2: 7, denom: 15, emoji: "🕯️", title: "Ngọn nến lung linh", story: "Khay bánh nướng hình tròn chia thành 15 phần đều nhau. Buổi sáng bán được 5/15 bánh, buổi chiều bán được 7/15 bánh. Hỏi cửa hàng bán được mấy phần?", unit: "chiếc bánh" }
+        ];
 
-        function startJourney() {
-            currentGateIndex = 0;
-            currentQuestionIndex = 0;
-            score = 0;
-            streak = 0;
-            updateStats();
-            document.getElementById('screen-home').classList.add('hidden');
-            document.getElementById('screen-result').classList.add('hidden');
-            document.getElementById('screen-quiz').classList.remove('hidden');
-            loadQuestion();
-        }
+        // --- GAME 3 PROBLEMS DATABASE (Khác mẫu số - Quy đồng) ---
+        const GAME3_PROBLEMS = [
+            { id: 1, num1: 1, denom1: 2, num2: 1, denom2: 4, commonDenom: 4, equivNum1: 2, equivNum2: 1, finalNum: 3, emoji: "🍕", title: "Mảnh bánh Pizza bơ", story: "Đầu bếp làm chiếc Pizza phô mai bơ tỏi. Nam ăn 1/2 chiếc bánh, Mai ăn thêm 1/4 chiếc bánh đó. Hỏi hai bạn ăn tất cả bao nhiêu phần?", unit: "chiếc bánh" },
+            { id: 2, num1: 1, denom1: 3, num2: 1, denom2: 6, commonDenom: 6, equivNum1: 2, equivNum2: 1, finalNum: 3, emoji: "🍫", title: "Pizza Sô-cô-la", story: "Nam ăn 1/3 ổ bánh ngọt nhân sô-cô-la hạnh nhân, Vy ăn thêm 1/6 ổ bánh ngọt ngon bùi này. Hỏi cả hai ăn hết bao nhiêu phần ổ bánh?", unit: "ổ bánh" },
+            { id: 3, num1: 1, denom1: 4, num2: 3, denom2: 8, commonDenom: 8, equivNum1: 2, equivNum2: 3, finalNum: 5, emoji: "🥤", title: "Nước cam ngọt mát", story: "Vy uống hết 1/4 bình nước dưa hấu mát lạnh lúc trưa, chiều tối Vy uống tiếp 3/8 bình nước dưa hấu đó. Hỏi Vy đã uống mấy phần bình?", unit: "bình" },
+            { id: 4, num1: 1, denom1: 5, num2: 3, denom2: 10, commonDenom: 10, equivNum1: 2, equivNum2: 3, finalNum: 5, emoji: "🌸", title: "Trồng hoa tặng mẹ", story: "Để làm bánh ngọt, bác dùng 1/5 khay phủ dâu tây chín đỏ, dùng 3/10 khay phủ việt quất. Hỏi hai loại quả này phủ bao nhiêu phần khay?", unit: "khay bánh" },
+            { id: 5, num1: 1, denom1: 2, num2: 3, denom2: 8, commonDenom: 8, equivNum1: 4, equivNum2: 3, finalNum: 7, emoji: "🖍️", title: "Trang trí bảng tin", story: "Nam ăn 1/2 chiếc Pizza lụa, Mai ăn thêm 3/8 chiếc Pizza lụa đó. Hỏi cả hai bạn đã ăn hết tổng cộng bao nhiêu phần của chiếc bánh?", unit: "chiếc bánh" },
+            { id: 6, num1: 1, denom1: 3, num2: 2, denom2: 9, commonDenom: 9, equivNum1: 3, equivNum2: 2, finalNum: 5, emoji: "🍎", title: "Táo đỏ giòn ngon", story: "Đầu bếp cắt bánh Pizza táo thành many miếng. Bàn một ăn 1/3 bánh, bàn hai ăn thêm 2/9 bánh nữa. Hỏi hai bàn đã ăn bao nhiêu phần bánh táo?", unit: "chiếc bánh" },
+            { id: 7, num1: 1, denom1: 4, num2: 5, denom2: 12, commonDenom: 12, equivNum1: 3, equivNum2: 5, finalNum: 8, emoji: "🥛", title: "Sữa tươi mát lành", story: "Anh uống 1/4 bình trà sữa trân châu mật ong, em uống thêm 5/12 bình nữa. Hỏi cả hai anh em đã uống bao nhiêu phần bình trà sữa?", unit: "bình" },
+            { id: 8, num1: 1, denom1: 2, num2: 1, denom2: 6, commonDenom: 6, equivNum1: 3, equivNum2: 1, finalNum: 4, emoji: "🍰", title: "Bánh sinh nhật dâu", story: "Bé My ăn 1/2 chiếc Pizza dâu tây ngọt, mẹ ăn tiếp 1/6 chiếc bánh. Hỏi hai mẹ con ăn hết bao nhiêu phần của chiếc bánh Pizza ngọt ngào này?", unit: "chiếc bánh" },
+            { id: 9, num1: 2, denom1: 5, num2: 4, denom2: 10, commonDenom: 10, equivNum1: 4, equivNum2: 4, finalNum: 8, emoji: "🧩", title: "Lắp ráp Lego", story: "Lâm ăn 2/5 chiếc bánh Pizza chay, Nhi ăn tiếp 4/10 chiếc bánh Pizza đó. Hỏi cả hai bạn đã ăn bao nhiêu phần của chiếc bánh Pizza chay?", unit: "chiếc bánh" },
+            { id: 10, num1: 1, denom1: 3, num2: 1, denom2: 2, commonDenom: 6, equivNum1: 2, equivNum2: 3, finalNum: 5, emoji: "🍉", title: "Trái cây ngày hè", story: "Bàn tiệc ăn hết 1/3 quả dưa hấu mát ngọt vào buổi trưa, ăn tiếp 1/2 quả dưa vào buổi chiều. Hỏi cả ngày đã ăn bao nhiêu phần quả dưa hấu?", unit: "quả dưa" },
+            { id: 11, num1: 2, denom1: 3, num2: 1, denom2: 4, commonDenom: 12, equivNum1: 8, equivNum2: 3, finalNum: 11, emoji: "📖", title: "Quyển vở sạch đẹp", story: "Vy viết bài tập tiếng Việt hết 2/3 quyển vở viết sạch đẹp, viết tiếp toán hết 1/4 quyển vở đó. Hỏi Vy viết hết mấy phần quyển vở?", unit: "quyển vở" },
+            { id: 12, num1: 1, denom1: 5, num2: 1, denom2: 2, commonDenom: 10, equivNum1: 2, equivNum2: 5, finalNum: 7, emoji: "🌾", title: "Cánh đồng lúa vàng", story: "Tuần đầu người ta cấy được 1/5 diện tích cánh đồng, tuần sau cấy tiếp được 1/2 diện tích. Hỏi cả hai tuần đã cấy bao nhiêu phần cánh đồng?", unit: "cánh đồng" },
+            { id: 13, num1: 1, denom1: 4, num2: 1, denom2: 3, commonDenom: 12, equivNum1: 3, equivNum2: 4, finalNum: 7, emoji: "🍬", title: "Kẹo dẻo ngọt ngào", story: "Lâm ăn 1/4 hộp kẹo dẻo hương trái cây tươi, Nhi lấy ăn tiếp 1/3 hộp kẹo dẻo thơm ngọt này. Hỏi hai bạn đã lấy đi mấy phần hộp kẹo?", unit: "hộp kẹo" },
+            { id: 14, num1: 2, denom1: 7, num2: 3, denom2: 14, commonDenom: 14, equivNum1: 4, equivNum2: 3, finalNum: 7, emoji: "🥕", title: "Luống cà rốt nhỏ", story: "Robot tưới được 2/7 luống cà rốt ngon mát buổi sáng, thỏ trắng tưới thêm 3/14 luống buổi chiều. Hỏi cả hai tưới được mấy phần luống?", unit: "luống" },
+            { id: 15, num1: 1, denom1: 6, num2: 5, denom2: 12, commonDenom: 12, equivNum1: 2, equivNum2: 5, finalNum: 7, emoji: "🧺", title: "Rổ mận chín quả", story: "Vy ăn 1/6 số quả mận chín đỏ ngọt thơm trong rổ buổi sáng, tối Vy ăn thêm 5/12 số mận đó. Hỏi cả ngày Vy ăn hết bao nhiêu phần?", unit: "số mận" },
+            { id: 16, num1: 3, denom1: 5, num2: 1, denom2: 15, commonDenom: 15, equivNum1: 9, equivNum2: 1, finalNum: 10, emoji: "📚", title: "Kệ truyện thám tử", story: "Lâm cho Trung mượn 3/5 tủ truyện tranh thám tử, cho Vy mượn tiếp 1/15 tủ truyện đó nữa. Hỏi Lâm đã cho các bạn mượn mấy phần tủ truyện?", unit: "tủ truyện" },
+            { id: 17, num1: 3, denom1: 8, num2: 1, denom2: 4, commonDenom: 8, equivNum1: 3, equivNum2: 2, finalNum: 5, emoji: "🍳", title: "Trứng gà rán bơ", story: "Đầu bếp dùng 3/8 khay trứng gà làm bánh nướng ngọt, dùng tiếp 1/4 khay trứng làm bánh quy. Hỏi cả hai lần dùng hết bao nhiêu phần khay?", unit: "khay trứng" },
+            { id: 18, num1: 1, denom1: 2, num2: 2, denom2: 10, commonDenom: 10, equivNum1: 5, equivNum2: 2, finalNum: 7, emoji: "🍵", title: "Trà chanh sả đá", story: "Ly nước trà chanh mát lạnh đầy ắp. Minh uống 1/2 cốc lúc trưa, uống tiếp 2/10 cốc lúc chiều muộn. Hỏi Minh đã uống bao nhiêu phần cốc nước?", unit: "cốc nước" },
+            { id: 19, num1: 2, denom1: 3, num2: 1, denom2: 6, commonDenom: 6, equivNum1: 4, equivNum2: 1, finalNum: 5, emoji: "🧶", title: "Cuộn len đan thảm", story: "Bà nội dùng 2/3 cuộn len dệt tấm thảm trải sàn phòng ngủ, dùng tiếp 1/6 cuộn dệt đường viền thảm. Hỏi bà đã dùng bao nhiêu phần cuộn len?", unit: "cuộn len" },
+            { id: 20, num1: 3, denom1: 4, num2: 1, denom2: 12, commonDenom: 12, equivNum1: 9, equivNum2: 1, finalNum: 10, emoji: "🍋", title: "Nước chanh mật ong", story: "Chị Hoa lấy 3/4 bình nước chanh mật ong mát lành thết khách, sau đó lấy thêm 1/12 bình cho ông uống ấm. Hỏi chị dùng bao nhiêu phần bình nước?", unit: "bình nước" }
+        ];
+    </script>
 
-        function goHome() {
-            document.getElementById('screen-quiz').classList.add('hidden');
-            document.getElementById('screen-result').classList.add('hidden');
-            document.getElementById('screen-home').classList.remove('hidden');
-        }
+    <script>
+        const GAME2_QUESTIONS = [
+            { id: 1, type: 'compare', leftNum: 3, leftDen: 5, rightNum: 2, rightDen: 5, prompt: "Hãy so sánh hai phân số biểu thị dải bánh Pizza ở hình bên:", options: ["3/5 > 2/5", "3/5 < 2/5", "3/5 = 2/5"], correct: 0, explain: "Hai phân số này có cùng mẫu số là 5. Phân số bên trái có tử số là 3 lớn hơn tử số bên phải là 2. Vì vậy 3/5 > 2/5." },
+            { id: 2, type: 'compare', leftNum: 1, leftDen: 4, rightNum: 3, rightDen: 4, prompt: "Hãy so sánh hai phân số biểu thị dải bánh Pizza phô mai ở hình bên:", options: ["1/4 > 3/4", "1/4 < 3/4", "1/4 = 3/4"], correct: 1, explain: "Cùng mẫu số là 4. Phân số bên trái có tử số là 1 nhỏ hơn tử số bên phải là 3. Vì vậy 1/4 < 3/4." },
+            { id: 3, type: 'compare', leftNum: 4, leftDen: 7, rightNum: 5, rightDen: 7, prompt: "Hãy so sánh hai dải bánh Pizza dâu tây bên dưới:", options: ["4/7 > 5/7", "4/7 < 5/7", "4/7 = 5/7"], correct: 1, explain: "Cùng mẫu số là 7, tử số 4 nhỏ hơn tử số 5 nên phân số 4/7 < 5/7." },
+            { id: 4, type: 'compare', leftNum: 2, leftDen: 3, rightNum: 1, rightDen: 3, prompt: "Hãy so sánh hai phân số biểu thị dải bánh Pizza bên dưới:", options: ["2/3 > 1/3", "2/3 < 1/3", "2/3 = 1/3"], correct: 0, explain: "Cùng mẫu số là 3, tử số 2 lớn hơn 1 nên phân số 2/3 > 1/3." },
+            { id: 5, type: 'compare', leftNum: 5, leftDen: 8, rightNum: 3, rightDen: 8, prompt: "So sánh lượng bánh Pizza của hai bạn bên dưới:", options: ["5/8 > 3/8", "5/8 < 3/8", "5/8 = 3/8"], correct: 0, explain: "Cùng mẫu số là 8, tử số 5 lớn hơn tử số 3 nên phân số 5/8 > 3/8." },
+            { id: 6, type: 'compare', leftNum: 1, leftDen: 2, rightNum: 2, rightDen: 4, prompt: "So sánh trực quan hai chiếc bánh Pizza bên dưới (Quy đồng để so sánh):", options: ["1/2 > 2/4", "1/2 < 2/4", "1/2 = 2/4"], correct: 2, explain: "Phân số 1/2 quy đồng nhân cả tử và mẫu với 2 ta được 2/4. Do đó 1/2 bằng 2/4." },
+            { id: 7, type: 'compare', leftNum: 1, leftDen: 3, rightNum: 2, rightDen: 6, prompt: "Hãy so sánh hai chiếc bánh ngọt thơm bùi sau khi quy đồng mẫu số:", options: ["1/3 > 2/6", "1/3 < 2/6", "1/3 = 2/6"], correct: 2, explain: "Ta quy đồng 1/3 bằng cách nhân cả tử và mẫu với 2: (1x2)/(3x2) = 2/6. Do đó 1/3 = 2/6." },
+            { id: 8, type: 'compare', leftNum: 3, leftDen: 4, rightNum: 6, rightDen: 8, prompt: "Hãy so sánh hai dải bánh Pizza phô mai béo ngậy:", options: ["3/4 > 6/8", "3/4 < 6/8", "3/4 = 6/8"], correct: 2, explain: "Quy đồng 3/4 về mẫu số 8 bằng cách nhân cả tử và mẫu cho 2 ta được: 6/8. Vì vậy hai chiếc bánh bằng nhau!" },
+            { id: 9, type: 'compare', leftNum: 2, leftDen: 5, rightNum: 4, rightDen: 10, prompt: "Quy đồng mẫu số và so sánh hai khay bánh dâu tây:", options: ["2/5 > 4/10", "2/5 < 4/10", "2/5 = 4/10"], correct: 2, explain: "Nhân cả tử số và mẫu số của 2/5 với 2 ta được: (2x2)/(5x2) = 4/10. Vậy 2/5 = 4/10." },
+            { id: 10, type: 'compare', leftNum: 1, leftDen: 4, rightNum: 2, rightDen: 8, prompt: "Xem xét hình vẽ hai chiếc bánh Pizza ăn sáng và so sánh:", options: ["1/4 > 2/8", "1/4 < 2/8", "1/4 = 2/8"], correct: 2, explain: "Quy đồng 1/4 lên mẫu số 8: (1x2)/(4x2) = 2/8. Do đó 1/4 = 2/8." }
+        ];
+    </script>
 
-        function restartJourney() {
-            startJourney();
-        }
+    <script>
+        function getWedgePath(cx, cy, rInner, rOuter, startAngle, endAngle) {
+            // Offset angles by -90 deg to make first slice start at top (12 o'clock)
+            const angleOffset = -90;
+            const sAngle = startAngle + angleOffset;
+            const eAngle = endAngle + angleOffset;
 
-        function updateStats() {
-            document.getElementById('score-display').innerText = score;
-            document.getElementById('streak-display').innerText = streak;
-        }
-
-        function loadQuestion() {
-            answeredCurrent = false;
-            const gate = quizData[currentGateIndex];
-            const q = gate.questions[currentQuestionIndex];
-
-            document.getElementById('gate-badge').innerText = gate.gateId;
-            document.getElementById('gate-title').innerText = gate.gateTitle;
-            document.getElementById('current-q-num').innerText = currentQuestionIndex + 1;
-            document.getElementById('total-q-num').innerText = gate.questions.length;
-            document.getElementById('illustration-container').innerHTML = q.illustration;
-            document.getElementById('question-text').innerHTML = q.question;
-
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-
-            if (q.type === 'mcq') {
-                q.options.forEach((opt, idx) => {
-                    const btn = document.createElement('button');
-                    btn.className = "p-4 text-left font-semibold text-gray-800 bg-white border-2 border-amber-200 rounded-2xl hover:bg-amber-50 hover:border-amber-400 transition shadow-sm flex items-center justify-between group";
-                    btn.innerHTML = `<span>${opt.text}</span><span class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center text-xs group-hover:border-amber-500 group-hover:text-amber-500">${String.fromCharCode(65 + idx)}</span>`;
-                    btn.onclick = () => handleMCQAnswer(opt.correct, btn, q.options);
-                    optionsContainer.appendChild(btn);
-                });
-            } else if (q.type === 'input') {
-                const wrapper = document.createElement('div');
-                wrapper.className = "flex flex-col sm:flex-row gap-3 col-span-2";
-                wrapper.innerHTML = `
-                    <input type="text" id="user-input-answer" placeholder="${q.placeholder}" class="flex-grow p-4 border-2 border-emerald-300 rounded-2xl focus:outline-none focus:border-emerald-500 font-semibold text-lg bg-white">
-                    <button onclick="checkInputAnswer()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 py-4 rounded-2xl shadow transition">Nộp Bài</button>
-                `;
-                optionsContainer.appendChild(wrapper);
-            }
-
-            document.getElementById('feedback-box').classList.add('hidden');
-            document.getElementById('next-btn').classList.add('hidden');
-        }
-
-        function handleMCQAnswer(isCorrect, selectedBtn, options) {
-            if (answeredCurrent) return;
-            answeredCurrent = true;
-
-            const allBtns = document.getElementById('options-container').querySelectorAll('button');
-            allBtns.forEach(b => b.disabled = true);
-
-            const gate = quizData[currentGateIndex];
-            const q = gate.questions[currentQuestionIndex];
-
-            if (isCorrect) {
-                selectedBtn.classList.remove('bg-white', 'border-amber-200');
-                selectedBtn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
-                score += 10;
-                streak += 1;
-                SoundFX.playCorrect();
-                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
-                showFeedback(true, q.explanation);
-            } else {
-                selectedBtn.classList.remove('bg-white', 'border-amber-200');
-                selectedBtn.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-900');
-                
-                // Highlight đáp án đúng
-                allBtns.forEach((b, idx) => {
-                    if (q.options[idx].correct) {
-                        b.classList.remove('bg-white', 'border-amber-200');
-                        b.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
-                    }
-                });
-
-                streak = 0;
-                SoundFX.playWrong();
-                showFeedback(false, q.explanation);
-            }
-            updateStats();
-            document.getElementById('next-btn').classList.remove('hidden');
-        }
-
-        function checkInputAnswer() {
-            if (answeredCurrent) return;
-            const inputVal = document.getElementById('user-input-answer').value.trim();
-            if (!inputVal) return;
-
-            answeredCurrent = true;
-            document.getElementById('user-input-answer').disabled = true;
-
-            const gate = quizData[currentGateIndex];
-            const q = gate.questions[currentQuestionIndex];
-
-            // So sánh chuỗi (chuẩn hóa bỏ khoảng trắng)
-            const userNorm = inputVal.replace(/\s+/g, '').toLowerCase();
-            const correctNorm = q.correctAnswer.replace(/\s+/g, '').toLowerCase();
-
-            if (userNorm === correctNorm) {
-                score += 10;
-                streak += 1;
-                SoundFX.playCorrect();
-                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
-                showFeedback(true, q.explanation);
-            } else {
-                streak = 0;
-                SoundFX.playWrong();
-                showFeedback(false, `Chưa chính xác! Đáp án đúng là: <b>${q.correctAnswer}</b>.<br>` + q.explanation);
-            }
-            updateStats();
-            document.getElementById('next-btn').classList.remove('hidden');
-        }
-
-        function showFeedback(isCorrect, explanationText) {
-            const fbBox = document.getElementById('feedback-box');
-            fbBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-300', 'text-emerald-900', 'bg-rose-50', 'border-rose-300', 'text-rose-900');
+            const radStart = (sAngle * Math.PI) / 180;
+            const radEnd = (eAngle * Math.PI) / 180;
             
-            const titleEl = document.getElementById('feedback-title');
-            const descEl = document.getElementById('feedback-desc');
-
-            if (isCorrect) {
-                fbBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
-                titleEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i> Chính xác tuyệt vời!`;
+            const xStartOuter = cx + rOuter * Math.cos(radStart);
+            const yStartOuter = cy + rOuter * Math.sin(radStart);
+            const xEndOuter = cx + rOuter * Math.cos(radEnd);
+            const yEndOuter = cy + rOuter * Math.sin(radEnd);
+            
+            if (rInner === 0) {
+                // Return SVG wedge slice path
+                return `M ${cx} ${cy} L ${xStartOuter} ${yStartOuter} A ${rOuter} ${rOuter} 0 0 1 ${xEndOuter} ${yEndOuter} Z`;
             } else {
-                fbBox.classList.add('bg-rose-50', 'border-rose-300', 'text-rose-900');
-                titleEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 text-lg"></i> Cần lưu ý hơn nhé!`;
-            }
-            descEl.innerHTML = explanationText;
-        }
-
-        function nextQuestion() {
-            currentQuestionIndex++;
-            const gate = quizData[currentGateIndex];
-            if (currentQuestionIndex < gate.questions.length) {
-                loadQuestion();
-            } else {
-                // Chuyển sang cửa tiếp theo
-                currentGateIndex++;
-                currentQuestionIndex = 0;
-                if (currentGateIndex < quizData.length) {
-                    loadQuestion();
-                } else {
-                    // Hoàn thành toàn bộ 5 cửa
-                    showResults();
-                }
-            }
-        }
-
-        function showResults() {
-            document.getElementById('screen-quiz').classList.add('hidden');
-            document.getElementById('screen-result').classList.remove('hidden');
-            document.getElementById('final-score').innerText = score;
-
-            const resMsg = document.getElementById('result-message');
-            if (score === 100) {
-                resMsg.innerText = "🏆 Xuất sắc tuyệt đối! Bạn là Thần Đồng Phân Số thực thụ!";
-                confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
-            } else if (score >= 70) {
-                resMsg.innerText = "🌟 Rất tốt! Bạn đã nắm vững kiến thức cộng phân số cùng mẫu!";
-            } else {
-                resMsg.innerText = "💡 Hãy cố gắng ôn tập thêm lý thuyết cộng phân số cùng mẫu nhé!";
+                // Ring sector wedge path
+                const xStartInner = cx + rInner * Math.cos(radStart);
+                const yStartInner = cy + rInner * Math.sin(radStart);
+                const xEndInner = cx + rInner * Math.cos(radEnd);
+                const yEndInner = cy + rInner * Math.sin(radEnd);
+                return `M ${xStartInner} ${yStartInner} L ${xStartOuter} ${yStartOuter} A ${rOuter} ${rOuter} 0 0 1 ${xEndOuter} ${yEndOuter} L ${xEndInner} ${yEndInner} A ${rInner} ${rInner} 0 0 0 ${xStartInner} ${yStartInner} Z`;
             }
         }
     </script>
+
+    <script>
+        // Generate a detailed SVG representation of a single Pizza wedge
+        function buildPizzaWedgeSvg(index, totalSlices, isSelected, brushColor, isDessert = false) {
+            const cx = 150;
+            const cy = 150;
+            const rCrust = 130;
+            const rSauce = 115;
+            const rInner = 0;
+
+            const anglePerSlice = 360 / totalSlices;
+            const startAngle = index * anglePerSlice;
+            const endAngle = (index + 1) * anglePerSlice;
+            const midAngle = startAngle + (anglePerSlice / 2);
+
+            let wedgeG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            wedgeG.setAttribute("class", `pizza-slice ${isSelected ? 'selected' : ''}`);
+
+            // 1. Đế bánh nướng giòn (Crust layer)
+            const crustPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            crustPath.setAttribute("d", getWedgePath(cx, cy, rInner, rCrust, startAngle, endAngle));
+            crustPath.setAttribute("fill", "#ea580c"); // Crust orange
+            crustPath.setAttribute("stroke", "#7c2d12");
+            crustPath.setAttribute("stroke-width", "2");
+            wedgeG.appendChild(crustPath);
+
+            // 2. Sốt cà chua / mứt việt quất nền (Base sauce layer)
+            const saucePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            saucePath.setAttribute("d", getWedgePath(cx, cy, rInner, rSauce, startAngle, endAngle));
+            saucePath.setAttribute("fill", isDessert ? "#c084fc" : "#dc2626"); // Purple blueberry or red tomato
+            wedgeG.appendChild(saucePath);
+
+            // 3. Phủ Phô Mai / Kem Ngọt (Cheese/Cream layer if painted)
+            if (isSelected) {
+                const cheesePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                cheesePath.setAttribute("d", getWedgePath(cx, cy, rInner, rSauce - 6, startAngle, endAngle));
+                
+                // Color based on brush
+                if (brushColor === 'red') {
+                    cheesePath.setAttribute("fill", "#fecdd3"); // Rose pink cheese
+                } else if (brushColor === 'blue') {
+                    cheesePath.setAttribute("fill", "#bae6fd"); // Sky blue cheese
+                } else {
+                    cheesePath.setAttribute("fill", "#fef08a"); // Classical mozzarella yellow
+                }
+                wedgeG.appendChild(cheesePath);
+            }
+
+            // 4. Topping Pepperoni / Kẹo cốm ngọt (Sắp xếp nổi lên trên cùng của Cheese/Sauce)
+            const toppingDistance = rSauce - 40;
+            const radMid = ((midAngle - 90) * Math.PI) / 180;
+            const tx = cx + toppingDistance * Math.cos(radMid);
+            const ty = cy + toppingDistance * Math.sin(radMid);
+
+            if (!isDessert) {
+                // Traditional Pepperoni sausage slice
+                const pepperoni = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                pepperoni.setAttribute("cx", tx);
+                pepperoni.setAttribute("cy", ty);
+                pepperoni.setAttribute("r", "16");
+                // Tăng độ tương phản màu xúc xích pepperoni để nổi bật trên nền phô mai khác màu
+                pepperoni.setAttribute("fill", isSelected ? "#e11d48" : "#991b1b");
+                pepperoni.setAttribute("stroke", "#7c2d12");
+                pepperoni.setAttribute("stroke-width", "2");
+                wedgeG.appendChild(pepperoni);
+
+                // Highlight shine for 3D effect
+                const shine = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                shine.setAttribute("cx", tx - 5);
+                shine.setAttribute("cy", ty - 5);
+                shine.setAttribute("r", "4");
+                shine.setAttribute("fill", "#ffffff");
+                shine.setAttribute("opacity", "0.7");
+                wedgeG.appendChild(shine);
+            } else {
+                // Dessert sweet toppings sprinkles
+                const sweet = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                sweet.setAttribute("cx", tx);
+                sweet.setAttribute("cy", ty);
+                sweet.setAttribute("r", "12");
+                sweet.setAttribute("fill", isSelected ? "#db2777" : "#be185d"); // Sweet pink berry
+                sweet.setAttribute("stroke", "#701a75");
+                sweet.setAttribute("stroke-width", "1.5");
+                wedgeG.appendChild(sweet);
+
+                const shine = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                shine.setAttribute("cx", tx - 4);
+                shine.setAttribute("cy", ty - 4);
+                shine.setAttribute("r", "3");
+                shine.setAttribute("fill", "#ffffff");
+                shine.setAttribute("opacity", "0.8");
+                wedgeG.appendChild(shine);
+            }
+
+            // 5. MÀNG HITBOX TÀNG HÌNH TRÊN CÙNG (Hitbox layer on top to handle clean touch clicks)
+            const hitboxPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            hitboxPath.setAttribute("d", getWedgePath(cx, cy, rInner, rCrust, startAngle, endAngle));
+            hitboxPath.setAttribute("fill", "transparent");
+            hitboxPath.setAttribute("pointer-events", "all");
+            hitboxPath.style.cursor = "pointer";
+
+            wedgeG.appendChild(hitboxPath);
+
+            return { group: wedgeG, hitbox: hitboxPath };
+        }
+    </script>
+
+    <script>
+        function goToScreen(screenId) {
+            audio.playClick();
+            
+            // Hide all screen sections
+            document.getElementById('screen-welcome').classList.add('hidden');
+            document.getElementById('screen-story').classList.add('hidden');
+            document.getElementById('screen-game-select').classList.add('hidden');
+            document.getElementById('screen-game1').classList.add('hidden');
+            document.getElementById('screen-game2').classList.add('hidden');
+            document.getElementById('screen-game3').classList.add('hidden');
+
+            // Show targets
+            const target = document.getElementById(`screen-${screenId}`);
+            if (target) {
+                target.classList.remove('hidden');
+            }
+
+            state.currentScreen = screenId;
+
+            // Handle sảnh chính button indicator visibility
+            const btnBack = document.getElementById('btn-back-hub');
+            if (screenId === 'welcome' || screenId === 'game-select') {
+                btnBack.classList.add('hidden');
+            } else {
+                btnBack.classList.remove('hidden');
+            }
+        }
+
+        function goToHub() {
+            goToScreen('game-select');
+        }
+
+        function startStoryIntro() {
+            state.storyIndex = 0;
+            goToScreen('story');
+            renderStoryPage();
+        }
+
+        function goToGameSelect() {
+            goToScreen('game-select');
+        }
+    </script>
+
+    <script>
+        function renderStoryPage() {
+            const page = STORY_PAGES[state.storyIndex];
+            const content = document.getElementById('story-content');
+            document.getElementById('story-page-num').textContent = state.storyIndex + 1;
+
+            content.innerHTML = `
+                <div class="flex justify-center p-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                    ${page.illustration}
+                </div>
+                <div class="space-y-4">
+                    <h4 class="title-font text-2xl font-black text-orange-900">Cuộc phiêu lưu bắt đầu!</h4>
+                    <p class="text-slate-600 font-bold text-base md:text-lg leading-relaxed">
+                        "${page.text}"
+                    </p>
+                </div>
+            `;
+
+            // Adjust buttons state
+            document.getElementById('btn-story-prev').disabled = (state.storyIndex === 0);
+            const btnNext = document.getElementById('btn-story-next');
+            if (state.storyIndex === STORY_PAGES.length - 1) {
+                btnNext.textContent = "Bắt đầu chơi game! 🚀";
+            } else {
+                btnNext.textContent = "Trang tiếp theo ➡️";
+            }
+        }
+
+        function changeStoryPage(direction) {
+            state.storyIndex += direction;
+            if (state.storyIndex < 0) {
+                state.storyIndex = 0;
+            } else if (state.storyIndex >= STORY_PAGES.length) {
+                goToGameSelect();
+            } else {
+                audio.playClick();
+                renderStoryPage();
+            }
+        }
+    </script>
+
+    <script>
+        function initGame1() {
+            state.game1.level = 1;
+            goToScreen('game1');
+            renderGame1LevelsGrid();
+            loadGame1Level(1);
+        }
+
+        function renderGame1LevelsGrid() {
+            const grid = document.getElementById('game1-levels-grid');
+            grid.innerHTML = '';
+            GAME1_PROBLEMS.forEach((prob) => {
+                const btn = document.createElement('button');
+                const isCompleted = progress.game1[prob.id];
+                const isActive = (prob.id === state.game1.level);
+
+                let btnClass = "h-12 rounded-xl font-black text-sm transition-all flex items-center justify-center border-2 ";
+                if (isActive) {
+                    btnClass += "bg-amber-500 text-white border-amber-600 shadow-md ring-4 ring-amber-100 scale-105";
+                } else if (isCompleted) {
+                    btnClass += "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100";
+                } else {
+                    btnClass += "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
+                }
+
+                btn.className = btnClass;
+                btn.innerHTML = `<span>${prob.id}</span>${isCompleted ? '<span class="ml-1 text-[10px]">⭐</span>' : ''}`;
+                btn.onclick = () => {
+                    audio.playClick();
+                    loadGame1Level(prob.id);
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function loadGame1Level(levelId) {
+            state.game1.level = levelId;
+            const prob = GAME1_PROBLEMS[levelId - 1];
+
+            renderGame1LevelsGrid();
+
+            document.getElementById('g1-title').textContent = `Cấp độ ${levelId}: ${prob.title}`;
+            document.getElementById('g1-story').textContent = prob.story;
+            document.getElementById('g1-target-red').textContent = prob.num1;
+            document.getElementById('g1-target-blue').textContent = prob.num2;
+
+            document.getElementById('g1-alert-feedback').classList.add('hidden');
+
+            // Reset state
+            state.game1.targetNum1 = prob.num1;
+            state.game1.targetNum2 = prob.num2;
+            state.game1.targetDen = prob.denom;
+            state.game1.slicesSelected = Array(prob.denom).fill('none');
+
+            setGame1Brush('red');
+            drawGame1Pizza();
+            updateGame1Feedback();
+            buildGame1Equation();
+        }
+
+        function setGame1Brush(color) {
+            audio.playClick();
+            state.game1.brush = color;
+            const btnRed = document.getElementById('btn-g1-brush-red');
+            const btnBlue = document.getElementById('btn-g1-brush-blue');
+
+            if (color === 'red') {
+                btnRed.className = "flex items-center gap-1.5 bg-rose-500 text-white text-xs font-black px-4 py-2 rounded-xl transition-all shadow-md ring-4 ring-rose-200";
+                btnBlue.className = "flex items-center gap-1.5 bg-slate-200 text-slate-600 text-xs font-black px-4 py-2 rounded-xl transition-all shadow-sm";
+            } else {
+                btnRed.className = "flex items-center gap-1.5 bg-slate-200 text-slate-600 text-xs font-black px-4 py-2 rounded-xl transition-all shadow-sm";
+                btnBlue.className = "flex items-center gap-1.5 bg-sky-500 text-white text-xs font-black px-4 py-2 rounded-xl transition-all shadow-md ring-4 ring-sky-200";
+            }
+        }
+
+        function drawGame1Pizza() {
+            const svg = document.getElementById('g1-pizza-svg');
+            svg.innerHTML = '';
+
+            // Draw Wood plate base back circle
+            const plate = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            plate.setAttribute("cx", "150");
+            plate.setAttribute("cy", "150");
+            plate.setAttribute("r", "145");
+            plate.setAttribute("fill", "#78350f"); // Mahogany plate color
+            svg.appendChild(plate);
+
+            const total = state.game1.targetDen;
+            for (let i = 0; i < total; i++) {
+                const sliceState = state.game1.slicesSelected[i];
+                const isSelected = (sliceState !== 'none');
+                
+                const { group, hitbox } = buildPizzaWedgeSvg(i, total, isSelected, sliceState, false);
+                svg.appendChild(group);
+
+                // Setup unified touch interaction logic for hitbox
+                let touched = false;
+                const handleWedgeTap = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (e.type === 'touchend') {
+                        touched = true;
+                        setTimeout(() => { touched = false; }, 300);
+                    } else if (e.type === 'click' && touched) {
+                        return;
+                    }
+
+                    audio.playSelect();
+                    // Toggle state logic
+                    if (state.game1.slicesSelected[i] === state.game1.brush) {
+                        state.game1.slicesSelected[i] = 'none';
+                    } else {
+                        state.game1.slicesSelected[i] = state.game1.brush;
+                    }
+
+                    drawGame1Pizza();
+                    updateGame1Feedback();
+                };
+
+                hitbox.addEventListener('click', handleWedgeTap);
+                hitbox.addEventListener('touchend', handleWedgeTap, { passive: false });
+            }
+        }
+
+        function updateGame1Feedback() {
+            const currentRed = state.game1.slicesSelected.filter(c => c === 'red').length;
+            const currentBlue = state.game1.slicesSelected.filter(c => c === 'blue').length;
+            const feedback = document.getElementById('g1-pizza-feedback');
+
+            const tRed = state.game1.targetNum1;
+            const tBlue = state.game1.targetNum2;
+
+            if (currentRed === tRed && currentBlue === tBlue) {
+                feedback.className = "mt-4 text-xs font-black px-5 py-2 rounded-full border bg-emerald-100 border-emerald-300 text-emerald-800 transition-all pulse-soft";
+                feedback.innerHTML = `🎉 Tuyệt hảo! Đã chuẩn bị đủ: ${currentRed}/${tRed} đỏ, ${currentBlue}/${tBlue} xanh. Hãy tính kết quả!`;
+            } else {
+                feedback.className = "mt-4 text-xs font-bold px-5 py-2 rounded-full border bg-amber-50 border-amber-200 text-amber-800 transition-all";
+                feedback.innerHTML = `Mục tiêu dải màu: Đỏ (${currentRed}/${tRed}) | Xanh (${currentBlue}/${tBlue})`;
+            }
+        }
+
+        function buildGame1Equation() {
+            const container = document.getElementById('g1-equation-container');
+            const prob = GAME1_PROBLEMS[state.game1.level - 1];
+
+            container.innerHTML = `
+                <!-- Fraction 1 -->
+                <div class="flex flex-col items-center bg-white px-3 py-2 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xl md:text-2xl font-black text-rose-500">${prob.num1}</span>
+                    <div class="w-12 h-1 bg-slate-700 my-1 rounded"></div>
+                    <span class="text-xl md:text-2xl font-black text-slate-700">${prob.denom}</span>
+                </div>
+
+                <div class="text-3xl font-black text-slate-400">+</div>
+
+                <!-- Fraction 2 -->
+                <div class="flex flex-col items-center bg-white px-3 py-2 rounded-2xl border border-slate-200 shadow-sm">
+                    <span class="text-xl md:text-2xl font-black text-sky-500">${prob.num2}</span>
+                    <div class="w-12 h-1 bg-slate-700 my-1 rounded"></div>
+                    <span class="text-xl md:text-2xl font-black text-slate-700">${prob.denom}</span>
+                </div>
+
+                <div class="text-3xl font-black text-slate-400">=</div>
+
+                <!-- Result Inputs box -->
+                <div class="bg-amber-100/70 p-4 rounded-3xl border-2 border-dashed border-amber-300 flex flex-col items-center shadow-md">
+                    <label class="text-[10px] uppercase tracking-widest font-black text-amber-800 mb-1">Đáp Số</label>
+                    <input type="number" id="g1-ans-num" placeholder="?" min="0" max="99" 
+                           class="w-16 h-12 text-center text-xl font-black text-emerald-800 bg-white border-2 border-emerald-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-100 transition-all shadow-inner" />
+                    <div class="w-16 h-1 bg-slate-700 my-2 rounded"></div>
+                    <input type="number" id="g1-ans-denom" placeholder="?" min="1" max="99" 
+                           class="w-16 h-12 text-center text-xl font-black text-slate-700 bg-white border-2 border-slate-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all shadow-inner" />
+                </div>
+            `;
+        }
+
+        function validateGame1Solution() {
+            const currentRed = state.game1.slicesSelected.filter(c => c === 'red').length;
+            const currentBlue = state.game1.slicesSelected.filter(c => c === 'blue').length;
+
+            const tRed = state.game1.targetNum1;
+            const tBlue = state.game1.targetNum2;
+
+            const alertBox = document.getElementById('g1-alert-feedback');
+            alertBox.classList.remove('hidden');
+
+            // 1. Check visual slices coverage
+            if (currentRed !== tRed || currentBlue !== tBlue) {
+                audio.playIncorrect();
+                alertBox.className = "w-full p-4 rounded-2xl text-center font-bold text-sm border-2 bg-rose-50 border-rose-200 text-rose-800 shadow-md";
+                alertBox.innerHTML = `⚠️ <strong>Vẽ sai số lát bánh:</strong> Hãy điều chỉnh số lát phô mai phủ đúng ${tRed} Đỏ và ${tBlue} Xanh trên bánh Pizza trước đã nhé!`;
+                return;
+            }
+
+            // 2. Check fractions calculations
+            const userNum = parseInt(document.getElementById('g1-ans-num').value);
+            const userDenom = parseInt(document.getElementById('g1-ans-denom').value);
+
+            if (isNaN(userNum) || isNaN(userDenom)) {
+                audio.playIncorrect();
+                alertBox.className = "w-full p-4 rounded-2xl text-center font-bold text-sm border-2 bg-amber-50 border-amber-200 text-amber-800 shadow-md";
+                alertBox.innerHTML = `✍️ Bạn nhỏ ơi! Hãy điền đầy đủ cả Tử số và Mẫu số của kết quả bánh nhé!`;
+                return;
+            }
+
+            const correctNum = tRed + tBlue;
+            const correctDenom = state.game1.targetDen;
+
+            if (userNum === correctNum && userDenom === correctDenom) {
+                // Correct
+                audio.playCorrect();
+                triggerConfetti();
+
+                // Save progress stats
+                const isFirstTime = !progress.game1[state.game1.level];
+                if (isFirstTime) {
+                    state.score += 20;
+                    document.getElementById('game-score').textContent = state.score;
+                    progress.game1[state.game1.level] = true;
+                }
+
+                showVictoryModal("g1");
+            } else {
+                // Incorrect - Pedagogical feedback
+                audio.playIncorrect();
+                
+                let explainHTML = "";
+                if (userDenom === (correctDenom + correctDenom)) {
+                    explainHTML = `
+                        <p>💡 <strong>LỖI SƯ PHẠM ĐIỂN HÌNH: Cộng dồn cả mẫu số!</strong></p>
+                        <p>Khi thực hiện phép tính cộng hai phân số cùng mẫu số, em nhớ giữ nguyên mẫu số là <strong>${correctDenom}</strong> chứ không cộng mẫu số nhé!</p>
+                        <p>Ta chỉ thực hiện phép cộng trên các tử số: <strong>${tRed} + ${tBlue} = ${correctNum}</strong>.</p>
+                        <p>Kết quả chính xác phải là: <strong>${correctNum}/${correctDenom}</strong>.</p>
+                    `;
+                } else {
+                    explainHTML = `
+                        <p>Phép cộng hai phân số cùng mẫu số:</p>
+                        <p class="text-center font-black text-lg">${tRed}/${correctDenom} + ${tBlue}/${correctDenom} = (${tRed} + ${tBlue})/${correctDenom} = ${correctNum}/${correctDenom}</p>
+                        <p>Mẫu số được giữ nguyên là <strong>${correctDenom}</strong>. Em hãy tính toán lại tử số xem sao nhé!</p>
+                    `;
+                }
+
+                showExplanationModal(explainHTML);
+            }
+        }
+    </script>
+
+    <script>
+        function initGame2() {
+            state.game2.streak = 0;
+            document.getElementById('g2-streak-count').textContent = state.game2.streak;
+            goToScreen('game2');
+            loadGame2Question();
+        }
+
+        function loadGame2Question() {
+            document.getElementById('g2-alert-feedback').classList.add('hidden');
+            
+            // Randomly select one question from database
+            const qIndex = Math.floor(Math.random() * GAME2_QUESTIONS.length);
+            const question = GAME2_QUESTIONS[qIndex];
+            state.game2.currentQuestion = question;
+
+            // Render compared dual SVGs (Includes fixing the hardcoded fraction label rendering bug)
+            drawGame2DualPizzas(question);
+
+            document.getElementById('g2-question-prompt').textContent = question.prompt;
+
+            // Render buttons options
+            const optContainer = document.getElementById('g2-options-container');
+            optContainer.innerHTML = '';
+
+            question.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-slate-50 hover:bg-slate-100 text-slate-800 text-left font-extrabold p-4 rounded-2xl border-2 border-slate-200 transition-all active:translate-y-0.5 shadow-sm flex items-center justify-between";
+                btn.innerHTML = `<span>${optText}</span><span class="text-indigo-500 font-bold">👉 Chọn</span>`;
+                btn.onclick = () => {
+                    validateGame2Answer(idx);
+                };
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function drawGame2DualPizzas(q) {
+            const svgLeft = document.getElementById('g2-pizza-left');
+            const svgRight = document.getElementById('g2-pizza-right');
+
+            svgLeft.innerHTML = '';
+            svgRight.innerHTML = '';
+
+            // SỬA LỖI ĐỒNG BỘ NHÃN PHÂN SỐ (Drawn Dynamically based on database instead of hardcoded 1/2 and 2/4)
+            document.getElementById('g2-fraction-left').textContent = `${q.leftNum}/${q.leftDen}`;
+            document.getElementById('g2-fraction-right').textContent = `${q.rightNum}/${q.rightDen}`;
+
+            // Draw left plate and slices
+            const pl1 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pl1.setAttribute("cx", "150"); pl1.setAttribute("cy", "150"); pl1.setAttribute("r", "145");
+            pl1.setAttribute("fill", "#78350f"); svgLeft.appendChild(pl1);
+
+            // Draw right plate and slices
+            const pl2 = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            pl2.setAttribute("cx", "150"); pl2.setAttribute("cy", "150"); pl2.setAttribute("r", "145");
+            pl2.setAttribute("fill", "#78350f"); svgRight.appendChild(pl2);
+
+            // SỬA LỖI TÔ MÀU ĐỒ HỌA TRỰC QUAN: 
+            // - Left Pizza wedges: Selected slices painted 'red' (pink) up to leftNum
+            for (let i = 0; i < q.leftDen; i++) {
+                const isSelected = (i < q.leftNum);
+                const color = isSelected ? 'red' : 'none';
+                const { group } = buildPizzaWedgeSvg(i, q.leftDen, isSelected, color, false);
+                svgLeft.appendChild(group);
+            }
+
+            // - Right Pizza wedges: Selected slices painted 'blue' up to rightNum
+            for (let i = 0; i < q.rightDen; i++) {
+                const isSelected = (i < q.rightNum);
+                const color = isSelected ? 'blue' : 'none';
+                const { group } = buildPizzaWedgeSvg(i, q.rightDen, isSelected, color, false);
+                svgRight.appendChild(group);
+            }
+        }
+
+        function validateGame2Answer(selectedIndex) {
+            const q = state.game2.currentQuestion;
+            const isCorrect = (selectedIndex === q.correct);
+
+            if (isCorrect) {
+                audio.playCorrect();
+                triggerConfetti();
+
+                state.game2.streak += 1;
+                document.getElementById('g2-streak-count').textContent = state.game2.streak;
+
+                state.score += 10;
+                document.getElementById('game-score').textContent = state.score;
+
+                // Simple alert and transition to next fast-paced question
+                const alertBox = document.getElementById('g2-alert-feedback');
+                alertBox.classList.remove('hidden');
+                alertBox.className = "w-full p-4 rounded-2xl text-center font-bold text-sm border-2 bg-emerald-50 border-emerald-200 text-emerald-800 shadow-md";
+                alertBox.innerHTML = `🎉 <strong>Chính xác!</strong> Cộng thêm +10 điểm. Sẵn sàng câu kế tiếp...`;
+
+                setTimeout(() => {
+                    stopConfetti();
+                    loadGame2Question();
+                }, 1500);
+            } else {
+                audio.playIncorrect();
+                state.game2.streak = 0;
+                document.getElementById('g2-streak-count').textContent = state.game2.streak;
+
+                // Show modal explanations immediately
+                const explanation = `
+                    <p>🤔 <strong>Rất tiếc, câu trả lời chưa chính xác!</strong></p>
+                    <p>${q.explain}</p>
+                    <p>Hãy xem hình minh họa Pizza trực quan để thấy rõ tỷ lệ chiếc bánh nào lớn hơn nhé!</p>
+                `;
+                showExplanationModal(explanation);
+            }
+        }
+    </script>
+
+    <script>
+        function initGame3() {
+            state.game3.level = 1;
+            goToScreen('game3');
+            renderGame3LevelsGrid();
+            loadGame3Level(1);
+        }
+
+        function renderGame3LevelsGrid() {
+            const grid = document.getElementById('game3-levels-grid');
+            grid.innerHTML = '';
+            GAME3_PROBLEMS.forEach((prob) => {
+                const btn = document.createElement('button');
+                const isCompleted = progress.game3[prob.id];
+                const isActive = (prob.id === state.game3.level);
+
+                let btnClass = "h-12 rounded-xl font-black text-sm transition-all flex items-center justify-center border-2 ";
+                if (isActive) {
+                    btnClass += "bg-purple-600 text-white border-purple-700 shadow-md ring-4 ring-purple-100 scale-105";
+                } else if (isCompleted) {
+                    btnClass += "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100";
+                } else {
+                    btnClass += "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
+                }
+
+                btn.className = btnClass;
+                btn.innerHTML = `<span>${prob.id}</span>${isCompleted ? '<span class="ml-1 text-[10px]">⭐</span>' : ''}`;
+                btn.onclick = () => {
+                    audio.playClick();
+                    loadGame3Level(prob.id);
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function loadGame3Level(levelId) {
+            state.game3.level = levelId;
+            const prob = GAME3_PROBLEMS[levelId - 1];
+
+            renderGame3LevelsGrid();
+
+            document.getElementById('g3-title').textContent = `Cấp độ ${levelId}: ${prob.title}`;
+            document.getElementById('g3-story').textContent = prob.story;
+            document.getElementById('g3-target-red').textContent = prob.equivNum1;
+            document.getElementById('g3-target-blue').textContent = prob.equivNum2;
+
+            document.getElementById('g3-alert-feedback').classList.add('hidden');
+
+            // Advanced fractions attributes
+            state.game3.num1 = prob.num1;
+            state.game3.den1 = prob.denom1;
+            state.game3.num2 = prob.num2;
+            state.game3.den2 = prob.denom2;
+            state.game3.commonDenom = prob.commonDenom;
+            state.game3.equivNum1 = prob.equivNum1;
+            state.game3.equivNum2 = prob.equivNum2;
+            state.game3.finalNum = prob.finalNum;
+
+            state.game3.slicesSelected = Array(prob.commonDenom).fill('none');
+
+            setGame3Brush('red');
+            drawGame3Pizza();
+            updateGame3Feedback();
+            buildGame3Equation();
+        }
+
+        function setGame3Brush(color) {
+            audio.playClick();
+            state.game3.brush = color;
+            const btnRed = document.getElementById('btn-g3-brush-red');
+            const btnBlue = document.getElementById('btn-g3-brush-blue');
+
+            if (color === 'red') {
+                btnRed.className = "flex items-center gap-1.5 bg-rose-500 text-white text-xs font-black px-4 py-2 rounded-xl transition-all shadow-md ring-4 ring-rose-200";
+                btnBlue.className = "flex items-center gap-1.5 bg-slate-200 text-slate-600 text-xs font-black px-4 py-2 rounded-xl transition-all shadow-sm";
+            } else {
+                btnRed.className = "flex items-center gap-1.5 bg-slate-200 text-slate-600 text-xs font-black px-4 py-2 rounded-xl transition-all shadow-sm";
+                btnBlue.className = "flex items-center gap-1.5 bg-sky-500 text-white text-xs font-black px-4 py-2 rounded-xl transition-all shadow-md ring-4 ring-sky-200";
+            }
+        }
+
+        function drawGame3Pizza() {
+            const svg = document.getElementById('g3-pizza-svg');
+            svg.innerHTML = '';
+
+            // Draw Plate Base back circle
+            const plate = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            plate.setAttribute("cx", "150"); plate.setAttribute("cy", "150"); plate.setAttribute("r", "145");
+            plate.setAttribute("fill", "#78350f"); svg.appendChild(plate);
+
+            const total = state.game3.commonDenom;
+            for (let i = 0; i < total; i++) {
+                const sliceState = state.game3.slicesSelected[i];
+                const isSelected = (sliceState !== 'none');
+
+                const { group, hitbox } = buildPizzaWedgeSvg(i, total, isSelected, sliceState, true); // true: sweet dessert pizza
+                svg.appendChild(group);
+
+                // Touch and Click handle actions
+                let touched = false;
+                const handleWedgeTap = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (e.type === 'touchend') {
+                        touched = true;
+                        setTimeout(() => { touched = false; }, 300);
+                    } else if (e.type === 'click' && touched) {
+                        return;
+                    }
+
+                    audio.playSelect();
+                    // Toggle state logic
+                    if (state.game3.slicesSelected[i] === state.game3.brush) {
+                        state.game3.slicesSelected[i] = 'none';
+                    } else {
+                        state.game3.slicesSelected[i] = state.game3.brush;
+                    }
+
+                    drawGame3Pizza();
+                    updateGame3Feedback();
+                };
+
+                hitbox.addEventListener('click', handleWedgeTap);
+                hitbox.addEventListener('touchend', handleWedgeTap, { passive: false });
+            }
+        }
+
+        function updateGame3Feedback() {
+            const currentRed = state.game3.slicesSelected.filter(c => c === 'red').length;
+            const currentBlue = state.game3.slicesSelected.filter(c => c === 'blue').length;
+            const feedback = document.getElementById('g3-pizza-feedback');
+
+            const tRed = state.game3.equivNum1;
+            const tBlue = state.game3.equivNum2;
+
+            if (currentRed === tRed && currentBlue === tBlue) {
+                feedback.className = "mt-4 text-xs font-black px-5 py-2 rounded-full border bg-emerald-100 border-emerald-300 text-emerald-800 transition-all pulse-soft";
+                feedback.innerHTML = `🎉 Phép thuật hoàn thành! Đã tô đủ dải bánh: ${currentRed} đỏ, ${currentBlue} xanh. Hãy giải quy đồng!`;
+            } else {
+                feedback.className = "mt-4 text-xs font-bold px-5 py-2 rounded-full border bg-purple-50 border-purple-200 text-purple-800 transition-all";
+                feedback.innerHTML = `Mục tiêu dải bánh (Mẫu số chung): Đỏ (${currentRed}/${tRed}) | Xanh (${currentBlue}/${tBlue})`;
+            }
+        }
+
+        function buildGame3Equation() {
+            const container = document.getElementById('g3-equation-container');
+            const prob = GAME3_PROBLEMS[state.game3.level - 1];
+
+            container.innerHTML = `
+                <!-- 1. Original unequal fractions -->
+                <div class="flex items-center gap-2 px-3 py-2 bg-slate-200/50 rounded-2xl border border-slate-300">
+                    <div class="flex flex-col items-center">
+                        <span class="text-base font-extrabold text-rose-500">${prob.num1}</span>
+                        <div class="w-8 h-0.5 bg-slate-600 my-1 rounded"></div>
+                        <span class="text-base font-extrabold text-slate-700">${prob.denom1}</span>
+                    </div>
+                    <div class="text-lg font-black text-slate-400">+</div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-base font-extrabold text-sky-500">${prob.num2}</span>
+                        <div class="w-8 h-0.5 bg-slate-600 my-1 rounded"></div>
+                        <span class="text-base font-extrabold text-slate-700">${prob.denom2}</span>
+                    </div>
+                </div>
+
+                <!-- Step arrow -->
+                <div class="text-xs font-black text-purple-700 flex flex-col items-center">
+                    <span>Quy đồng</span>
+                    <span>➡️</span>
+                </div>
+
+                <!-- 2. Interactive Intermediate converted fractions -->
+                <div class="flex items-center gap-2 bg-purple-100/60 p-3 rounded-2xl border border-purple-200">
+                    <!-- Conversion Box 1 -->
+                    <div class="flex flex-col items-center">
+                        <input type="number" id="g3-equiv-num-1" placeholder="?" min="1" max="99" 
+                               class="w-12 h-10 text-center text-sm font-black text-rose-600 bg-white border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all" />
+                        <div class="w-10 h-0.5 bg-slate-600 my-1.5 rounded"></div>
+                        <input type="number" id="g3-equiv-denom-1" placeholder="?" min="1" max="99" 
+                               class="w-12 h-10 text-center text-sm font-black text-slate-700 bg-white border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all" />
+                    </div>
+
+                    <div class="text-lg font-black text-purple-400">+</div>
+
+                    <!-- Conversion Box 2 -->
+                    <div class="flex flex-col items-center">
+                        <input type="number" id="g3-equiv-num-2" placeholder="?" min="1" max="99" 
+                               class="w-12 h-10 text-center text-sm font-black text-sky-600 bg-white border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all" />
+                        <div class="w-10 h-0.5 bg-slate-600 my-1.5 rounded"></div>
+                        <input type="number" id="g3-equiv-denom-2" placeholder="?" min="1" max="99" 
+                               class="w-12 h-10 text-center text-sm font-black text-slate-700 bg-white border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all" />
+                    </div>
+                </div>
+
+                <div class="text-lg font-black text-slate-400">=</div>
+
+                <!-- 3. Final Result combined -->
+                <div class="bg-amber-100/70 p-3 rounded-2xl border-2 border-dashed border-amber-400 flex flex-col items-center shadow-md">
+                    <label class="text-[9px] uppercase tracking-wider font-extrabold text-amber-800 mb-1">Cộng lại</label>
+                    <input type="number" id="g3-ans-num" placeholder="?" min="1" max="99" 
+                           class="w-14 h-11 text-center text-base font-black text-emerald-800 bg-white border-2 border-emerald-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-100 transition-all" />
+                    <div class="w-14 h-0.5 bg-slate-700 my-1.5 rounded"></div>
+                    <input type="number" id="g3-ans-denom" placeholder="?" min="1" max="99" 
+                           class="w-14 h-11 text-center text-base font-black text-slate-700 bg-white border-2 border-slate-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all" />
+                </div>
+            `;
+        }
+
+        function validateGame3Solution() {
+            const currentRed = state.game3.slicesSelected.filter(c => c === 'red').length;
+            const currentBlue = state.game3.slicesSelected.filter(c => c === 'blue').length;
+
+            const tRed = state.game3.equivNum1;
+            const tBlue = state.game3.equivNum2;
+
+            const alertBox = document.getElementById('g3-alert-feedback');
+            alertBox.classList.remove('hidden');
+
+            // 1. Slices painted correctly checker
+            if (currentRed !== tRed || currentBlue !== tBlue) {
+                audio.playIncorrect();
+                alertBox.className = "w-full p-4 rounded-2xl text-center font-bold text-sm border-2 bg-rose-50 border-rose-200 text-rose-800 shadow-md";
+                alertBox.innerHTML = `⚠️ <strong>Vẽ dải màu chưa đúng:</strong> Em nhớ phủ đúng số lát màu dâu tây (${tRed}) và màu việt quất (${tBlue}) lên chiếc bánh Pizza ngọt ngào trước đã nhé!`;
+                return;
+            }
+
+            // 2. Converted fraction validation (Quy đồng)
+            const eqNum1 = parseInt(document.getElementById('g3-equiv-num-1').value);
+            const eqDenom1 = parseInt(document.getElementById('g3-equiv-denom-1').value);
+            const eqNum2 = parseInt(document.getElementById('g3-equiv-num-2').value);
+            const eqDenom2 = parseInt(document.getElementById('g3-equiv-denom-2').value);
+
+            if (isNaN(eqNum1) || isNaN(eqDenom1) || isNaN(eqNum2) || isNaN(eqDenom2)) {
+                audio.playIncorrect();
+                alertBox.className = "w-full p-4 rounded-2xl text-center font-bold text-sm border-2 bg-purple-50 border-purple-200 text-purple-800 shadow-md";
+                alertBox.innerHTML = `✍️ Bạn ơi hãy hoàn thành tất cả các bước quy đồng mẫu số trung gian nhé!`;
+                return;
+            }
+
+            const cDenom = state.game3.commonDenom;
+
+            if (eqNum1 !== tRed || eqDenom1 !== cDenom || eqNum2 !== tBlue || eqDenom2 !== cDenom) {
+                audio.playIncorrect();
+                
+                let explainHTML = "";
+                if (eqDenom1 !== cDenom || eqDenom2 !== cDenom) {
+                    explainHTML = `
+                        <p>💡 <strong>GỢI Ý TỪ ROBOT VỀ MẪU SỐ CHUNG:</strong></p>
+                        <p>Mẫu số chung nhỏ nhất của hai phân số ${state.game3.num1}/${state.game3.den1} và ${state.game3.num2}/${state.game3.den2} là <strong>${cDenom}</strong>.</p>
+                        <p>Cả hai phân số quy đồng trung gian đều phải có mẫu số bằng <strong>${cDenom}</strong> nhé!</p>
+                    `;
+                } else if (eqNum1 !== tRed) {
+                    explainHTML = `
+                        <p>💡 <strong>HƯỚNG DẪN QUY ĐỒNG PHÂN SỐ 1:</strong></p>
+                        <p>Ta biến đổi phân số đầu tiên: <strong>${state.game3.num1}/${state.game3.den1}</strong>.</p>
+                        <p>Nhân cả tử số và mẫu số với <strong>${cDenom / state.game3.den1}</strong>: (${state.game3.num1} x ${cDenom / state.game3.den1}) / (${state.game3.den1} x ${cDenom / state.game3.den1}) = <strong>${tRed}/${cDenom}</strong>.</p>
+                    `;
+                } else {
+                    explainHTML = `
+                        <p>💡 <strong>HƯỚNG DẪN QUY ĐỒNG PHÂN SỐ 2:</strong></p>
+                        <p>Ta biến đổi phân số thứ hai: <strong>${state.game3.num2}/${state.game3.den2}</strong>.</p>
+                        <p>Nhân cả tử số và mẫu số với <strong>${cDenom / state.game3.den2}</strong>: (${state.game3.num2} x ${cDenom / state.game3.den2}) / (${state.game3.den2} x ${cDenom / state.game3.den2}) = <strong>${tBlue}/${cDenom}</strong>.</p>
+                    `;
+                }
+
+                showExplanationModal(explainHTML);
+                return;
+            }
+
+            // 3. Final Answer calculation check
+            const userNum = parseInt(document.getElementById('g3-ans-num').value);
+            const userDenom = parseInt(document.getElementById('g3-ans-denom').value);
+
+            if (isNaN(userNum) || isNaN(userDenom)) {
+                audio.playIncorrect();
+                alertBox.className = "w-full p-4 rounded-2xl text-center font-bold text-sm border-2 bg-amber-50 border-amber-200 text-amber-800 shadow-md";
+                alertBox.innerHTML = `✍️ Bạn nhỏ ơi! Hãy điền kết quả cộng phân số sau khi đã quy đồng nhé!`;
+                return;
+            }
+
+            const correctNum = state.game3.finalNum;
+
+            if (userNum === correctNum && userDenom === cDenom) {
+                // Correct
+                audio.playCorrect();
+                triggerConfetti();
+
+                const isFirstTime = !progress.game3[state.game3.level];
+                if (isFirstTime) {
+                    state.score += 20;
+                    document.getElementById('game-score').textContent = state.score;
+                    progress.game3[state.game3.level] = true;
+                }
+
+                showVictoryModal("g3");
+            } else {
+                audio.playIncorrect();
+                let explainHTML = "";
+                if (userDenom === (cDenom + cDenom)) {
+                    explainHTML = `
+                        <p>💡 <strong>LỖI CỘNG DỒN MẪU SỐ!</strong></p>
+                        <p>Sau khi đã quy đồng hai phân số về cùng mẫu số chung là <strong>${cDenom}</strong>:</p>
+                        <p class="text-center font-black text-lg">${tRed}/${cDenom} + ${tBlue}/${cDenom} = (${tRed} + ${tBlue})/${cDenom} = ${correctNum}/${cDenom}</p>
+                        <p>Em nhớ <strong>giữ nguyên mẫu số chung</strong> trong kết quả cuối cùng chứ không cộng mẫu số lại nhé!</p>
+                    `;
+                } else {
+                    explainHTML = `
+                        <p>Phép cộng hai phân số sau khi quy đồng:</p>
+                        <p class="text-center font-black text-lg">${tRed}/${cDenom} + ${tBlue}/${cDenom} = (${tRed} + ${tBlue})/${cDenom} = ${correctNum}/${cDenom}</p>
+                        <p>Em hãy kiểm tra lại kết quả cộng tử số của hai phân số quy đồng trung gian nhé!</p>
+                    `;
+                }
+                showExplanationModal(explainHTML);
+            }
+        }
+    </script>
+
+    <script>
+        function showExplanationModal(htmlContent) {
+            const textContainer = document.getElementById('explanation-text');
+            textContainer.innerHTML = htmlContent;
+            document.getElementById('explanation-modal').classList.remove('hidden');
+        }
+
+        function closeExplanationModal() {
+            audio.playClick();
+            document.getElementById('explanation-modal').classList.add('hidden');
+        }
+
+        function showVictoryModal(gameType) {
+            const emoji = document.getElementById('victory-emoji');
+            const title = document.getElementById('victory-title');
+            const message = document.getElementById('victory-message');
+
+            const currentLvl = (gameType === 'g1') ? state.game1.level : state.game3.level;
+            const probList = (gameType === 'g1') ? GAME1_PROBLEMS : GAME3_PROBLEMS;
+            const prob = probList[currentLvl - 1];
+
+            emoji.textContent = "🏆";
+            title.textContent = "CỘNG PHÂN SỐ THÀNH CÔNG!";
+            
+            if (gameType === 'g1') {
+                const totalSum = prob.num1 + prob.num2;
+                message.innerHTML = `Bạn nhỏ đã tô vẽ và tính đúng bài toán: <strong>${prob.title}</strong>.<br><br>Kết quả phép cộng: <span class="text-emerald-600 font-extrabold text-2xl">${totalSum}/${prob.denom}</span> ${prob.unit}!`;
+            } else {
+                message.innerHTML = `Bạn nhỏ đã quy đồng và gộp mứt thành công: <strong>${prob.title}</strong>.<br><br>Kết quả phép cộng: <span class="text-purple-600 font-extrabold text-2xl">${prob.finalNum}/${prob.commonDenom}</span> ${prob.unit}!`;
+            }
+
+            // Gắn thuộc tính tạm để xử lý khi click nút Tiếp tục
+            document.getElementById('victory-modal').dataset.gameType = gameType;
+            document.getElementById('victory-modal').classList.remove('hidden');
+        }
+
+        function closeVictoryModal() {
+            stopConfetti();
+            document.getElementById('victory-modal').classList.add('hidden');
+            const gameType = document.getElementById('victory-modal').dataset.gameType;
+
+            if (gameType === 'g1') {
+                if (state.game1.level < 20) {
+                    loadGame1Level(state.game1.level + 1);
+                } else {
+                    audio.playLevelUp();
+                    alert("🎉 Thật phi thường! Bạn đã hoàn thành xuất sắc tất cả 20 thử thách ở Khung 1: Đại Lộ Cầu Vồng!");
+                    goToHub();
+                }
+            } else {
+                if (state.game3.level < 20) {
+                    loadGame3Level(state.game3.level + 1);
+                } else {
+                    audio.playLevelUp();
+                    alert("🔮 Quá xuất sắc! Bạn đã biến đổi và quy đồng thành công 20 thử thách khó nhất ở Khung 2: Thung Lũng Phép Thuật!");
+                    goToHub();
+                }
+            }
+        }
+    </script>
+
+    <script>
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animationId = null;
+
+        function resizeConfetti() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function triggerConfetti() {
+            canvas.classList.remove('hidden');
+            resizeConfetti();
+            window.addEventListener('resize', resizeConfetti);
+
+            particles = [];
+            const colors = ['#f43f5e', '#3b82f6', '#10b981', '#fbbf24', '#a855f7', '#f97316'];
+            for (let i = 0; i < 90; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speed: Math.random() * 4 + 3,
+                    angle: Math.random() * 360,
+                    rotationSpeed: Math.random() * 6 - 3
+                });
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let active = false;
+
+            particles.forEach(p => {
+                p.y += p.speed;
+                p.angle += p.rotationSpeed;
+                
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.angle * Math.PI / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                ctx.restore();
+
+                if (p.y < canvas.height) {
+                    active = true;
+                }
+            });
+
+            if (active) {
+                animationId = requestAnimationFrame(animateConfetti);
+            }
+        }
+
+        function stopConfetti() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.classList.add('hidden');
+            window.removeEventListener('resize', resizeConfetti);
+        }
+
+        // Khởi chạy vòng lặp chính khi toàn bộ trang được tải xong
+        window.onload = function () {
+            audio.init();
+        }
+    </script>
+
+    <!-- Footer block -->
+    <footer class="bg-amber-100 border-t-4 border-amber-300 py-6 px-4 text-center mt-12">
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3 text-left">
+                <span class="text-3xl">🍕</span>
+                <div class="space-y-0.5">
+                    <p class="text-sm text-amber-950 font-black">Vương Quốc Phân Số Diệu Kỳ: Đấu Trường Pizza Toán Học</p>
+                    <p class="text-xs text-amber-900/80 font-bold">Chương trình học tập toán số lớp 4 tương tác thực tế sinh động.</p>
+                </div>
+            </div>
+            <p class="text-xs text-amber-900/70 font-semibold">Bản quyền trò chơi thuộc về Hệ thống Giáo dục Sáng tạo © 2026.</p>
+        </div>
+    </footer>
+
 </body>
 </html>
