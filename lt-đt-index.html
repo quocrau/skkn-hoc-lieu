@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện tập về Động từ - Tiếng Việt Lớp 4</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter & Fredoka -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .title-font {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+        .bounce-custom {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-orange-50 via-amber-50 to-emerald-50 min-h-screen text-gray-800 flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-amber-100">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-orange-500 flex items-center justify-center text-white text-2xl shadow-md transform -rotate-6">🏃‍♂️</div>
+                <div>
+                    <h1 class="title-font text-xl md:text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">Trạm Sáng Tạo Tiếng Việt Lớp 4</h1>
+                    <p class="text-xs text-gray-500">Chủ đề: Chinh phục thế giới Động từ 🌟</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="bg-orange-100 text-orange-800 px-3 py-1.5 rounded-full font-bold text-sm shadow-inner flex items-center gap-1.5">
+                    <span>⭐ Điểm số:</span>
+                    <span id="global-score" class="text-base text-orange-600">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl w-full mx-auto px-4 py-8 flex-grow">
+        
+        <!-- Welcome Banner -->
+        <section class="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-3xl p-6 md:p-8 text-white shadow-xl mb-8 relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 text-9xl opacity-20 select-none">⚡</div>
+            <div class="relative z-10 max-w-xl">
+                <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider inline-block mb-3">Ôn tập tương tác chuyên sâu</span>
+                <h2 class="title-font text-2xl md:text-3xl font-bold mb-2">Hành trình khám phá Động từ cùng Bút Chì Năng động!</h2>
+                <p class="text-orange-100 text-sm md:text-base leading-relaxed mb-4">Cùng luyện tập các từ chỉ hoạt động, trạng thái và tình cảm qua các bài tập thú vị với từ ngữ mới mẻ, gần gũi với học sinh lớp 4.</p>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="scrollToSection('section-1')" class="bg-white text-orange-950 font-bold px-5 py-2.5 rounded-xl shadow-md transition transform active:scale-95 text-sm hover:bg-orange-50">Bắt đầu ngay 🚀</button>
+                    <button onclick="scrollToSection('section-4')" class="bg-black/20 hover:bg-black/30 text-white font-bold px-5 py-2.5 rounded-xl backdrop-blur-sm transition text-sm">Mở rộng Hoạt động & Trạng thái 📖</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PHẦN 1: Tìm động từ theo tiếng (thương, quý, nhớ, tiếc) -->
+        <section id="section-1" class="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-amber-50 mb-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-lg">1</div>
+                <div>
+                    <h3 class="title-font text-xl font-bold text-gray-800">Bài tập 1: Săn tìm Động từ theo mẫu</h3>
+                    <p class="text-xs text-gray-500">Điền hoặc chọn các động từ chứa các tiếng theo yêu cầu bên dưới.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Nhóm a: Thương -->
+                <div class="bg-orange-50/70 border border-orange-200 rounded-2xl p-4">
+                    <label class="block text-sm font-bold text-orange-900 mb-2">a. Động từ chứa tiếng <span class="text-orange-600 font-ext500">"thương"</span> (Ví dụ: <em>thương yêu, thương mến...</em>):</label>
+                    <input type="text" id="ans-thuong" placeholder="Nhập động từ..." class="w-full bg-white border border-orange-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <!-- Nhóm b: Quý -->
+                <div class="bg-amber-50/70 border border-amber-200 rounded-2xl p-4">
+                    <label class="block text-sm font-bold text-amber-900 mb-2">b. Động từ chứa tiếng <span class="text-amber-600 font-ext500">"quý"</span> (Ví dụ: <em>quý mến, quý trọng...</em>):</label>
+                    <input type="text" id="ans-quy" placeholder="Nhập động từ..." class="w-full bg-white border border-amber-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <!-- Nhóm c: Nhớ -->
+                <div class="bg-yellow-50/70 border border-yellow-200 rounded-2xl p-4">
+                    <label class="block text-sm font-bold text-yellow-900 mb-2">c. Động từ chứa tiếng <span class="text-yellow-700 font-ext500">"nhớ"</span> (Ví dụ: <em>nhớ nhung, ghi nhớ...</em>):</label>
+                    <input type="text" id="ans-nho" placeholder="Nhập động từ..." class="w-full bg-white border border-yellow-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                </div>
+                <!-- Nhóm d: Tiếc -->
+                <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4">
+                    <label class="block text-sm font-bold text-emerald-900 mb-2">d. Động từ chứa tiếng <span class="text-emerald-700 font-ext500">"tiếc"</span> (Ví dụ: <em>tiếc nuối, luyến tiếc...</em>):</label>
+                    <input type="text" id="ans-tiec" placeholder="Nhập động từ..." class="w-full bg-white border border-emerald-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="checkSection1()" class="bg-orange-600 hover:bg-orange-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition text-sm">Kiểm tra Phần 1 🎯</button>
+            </div>
+            <div id="feedback-1" class="mt-4 p-3 rounded-xl text-sm hidden font-medium"></div>
+        </section>
+
+        <!-- PHẦN 2: Tìm động từ thể hiện tình cảm, cảm xúc -->
+        <section id="section-2" class="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-amber-50 mb-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg">2</div>
+                <div>
+                    <h3 class="title-font text-xl font-bold text-gray-800">Bài tập 2: Động từ thể hiện tình cảm, cảm xúc</h3>
+                    <p class="text-xs text-gray-500">Xác định các động từ chỉ tình cảm, cảm xúc trong đoạn thư thăm hỏi người thân.</p>
+                </div>
+            </div>
+
+            <!-- Đoạn văn mẫu -->
+            <div class="bg-amber-50/60 border border-amber-200 rounded-2xl p-5 mb-6 text-sm leading-relaxed text-gray-700">
+                <p class="font-semibold text-amber-900 mb-2">💌 Đoạn thư ngắn:</p>
+                <p><em>"Con rất <span class="bg-amber-200/70 px-1.5 py-0.5 rounded font-bold text-amber-900">nhớ</span> mẹ! Những ngày mẹ đi công tác xa, con luôn <span class="bg-amber-200/70 px-1.5 py-0.5 rounded font-bold text-amber-900">mong</span> mẹ trở về. Nhìn thấy món quà mẹ gửi, con vô cùng <span class="bg-amber-200/70 px-1.5 py-0.5 rounded font-bold text-amber-900">vui sướng</span> và luôn <span class="bg-amber-200/70 px-1.5 py-0.5 rounded font-bold text-amber-900">yêu quý</span> mẹ biết bao!"</em></p>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <p class="text-xs font-semibold text-gray-700 uppercase tracking-wider">Em hãy cho biết các từ in đậm trong đoạn trên có phải là động từ chỉ tình cảm, cảm xúc không?</p>
+                
+                <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <span class="text-sm font-medium text-gray-800">Các từ: <em>nhớ, mong, vui sướng, yêu quý</em> là động từ chỉ tình cảm, cảm xúc?</span>
+                    <div class="flex gap-2">
+                        <label class="cursor-pointer bg-white px-4 py-2 rounded-xl border border-gray-200 text-sm hover:bg-amber-50 transition flex items-center gap-2">
+                            <input type="radio" name="q2_check" value="dung" class="text-amber-600"> Đúng rồi
+                        </label>
+                        <label class="cursor-pointer bg-white px-4 py-2 rounded-xl border border-gray-200 text-sm hover:bg-amber-50 transition flex items-center gap-2">
+                            <input type="radio" name="q2_check" value="sai" class="text-amber-600"> Không phải
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="checkSection2()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition text-sm">Kiểm tra Phần 2 🎯</button>
+            </div>
+            <div id="feedback-2" class="mt-4 p-3 rounded-xl text-sm hidden font-medium"></div>
+        </section>
+
+        <!-- PHẦN 3: Sử dụng động từ chỉ trạng thái sức khỏe đặt câu (dựa theo tranh) -->
+        <section id="section-3" class="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-amber-50 mb-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg">3</div>
+                <div>
+                    <h3 class="title-font text-xl font-bold text-gray-800">Bài tập 3: Đặt câu với từ chỉ trạng thái sức khỏe</h3>
+                    <p class="text-xs text-gray-500">Sử dụng các từ: <strong>ốm, sốt, mệt, nhức, khát, đau</strong> để hoàn thành câu phù hợp.</p>
+                </div>
+            </div>
+
+            <!-- Từ vựng gợi ý -->
+            <div class="flex flex-wrap gap-2 mb-6">
+                <span class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 rounded-xl text-xs font-bold">🌡️ ốm</span>
+                <span class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 rounded-xl text-xs font-bold">🤒 sốt</span>
+                <span class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 rounded-xl text-xs font-bold">💤 mệt</span>
+                <span class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 rounded-xl text-xs font-bold">🧠 nhức</span>
+                <span class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 rounded-xl text-xs font-bold">🥤 khát</span>
+                <span class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 rounded-xl text-xs font-bold">🩹 đau</span>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <div class="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4">
+                    <label class="block text-sm font-medium text-emerald-900 mb-2">📝 Thử thách: Em hãy viết một câu ngắn có dùng từ <strong>"sốt"</strong> hoặc <strong>"mệt"</strong>:</label>
+                    <input type="text" id="user-sentence-dt" placeholder="Ví dụ: Hôm qua Nam bị sốt nên phải nghỉ học ở nhà." class="w-full bg-white border border-emerald-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="checkSection3()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition text-sm">Nộp câu của em ✨</button>
+            </div>
+            <div id="feedback-3" class="mt-4 p-3 rounded-xl text-sm hidden font-medium"></div>
+        </section>
+
+        <!-- PHẦN 4: Mở rộng Chuyên sâu - Động từ chỉ hoạt động và Động từ chỉ trạng thái -->
+        <section id="section-4" class="bg-white rounded-3xl p-6 md:p-8 shadow-lg border border-amber-50 mb-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg">4</div>
+                <div>
+                    <h3 class="title-font text-xl font-bold text-gray-800">Bài tập Mở rộng: Phân biệt Hoạt động & Trạng thái</h3>
+                    <p class="text-xs text-gray-500">Ôn tập phân biệt rõ hành động bên ngoài và trạng thái bên trong của sự vật.</p>
+                </div>
+            </div>
+
+            <!-- Thẻ lý thuyết ngắn -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-sky-50 border border-sky-100 rounded-2xl p-4">
+                    <h4 class="title-font font-bold text-sky-900 text-sm mb-1">🏃‍♂️ Động từ chỉ hoạt động</h4>
+                    <p class="text-xs text-sky-950">Là từ chỉ hành động mà con người hoặc con vật thực hiện có thể nhìn thấy (ví dụ: <em>chạy, nhảy, viết, đá bóng...</em>).</p>
+                </div>
+                <div class="bg-purple-50 border border-purple-100 rounded-2xl p-4">
+                    <h4 class="title-font font-bold text-purple-900 text-sm mb-1">🛋️ Động từ chỉ trạng thái</h4>
+                    <p class="text-xs text-purple-950">Là từ chỉ tình trạng tồn tại, cảm xúc hoặc sự biến đổi của sự vật (ví dụ: <em>ngủ, thức, buồn, vui, lo lắng, ốm...</em>).</p>
+                </div>
+            </div>
+
+            <!-- Câu hỏi trắc nghiệm mở rộng -->
+            <div class="space-y-4 mb-6">
+                <p class="text-xs font-semibold text-gray-700 uppercase tracking-wider">Em hãy xác định từ <strong class="text-purple-600">"ngủ"</strong> thuộc nhóm động từ nào:</p>
+                <div class="flex flex-wrap gap-3">
+                    <label class="cursor-pointer bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-200 text-sm hover:bg-purple-50 transition flex items-center gap-2">
+                        <input type="radio" name="q4" value="hoat-dong" class="text-purple-600"> Động từ chỉ hoạt động
+                    </label>
+                    <label class="cursor-pointer bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-200 text-sm hover:bg-purple-50 transition flex items-center gap-2">
+                        <input type="radio" name="q4" value="trang-thai" class="text-purple-600"> Động từ chỉ trạng thái
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button onclick="checkSection4()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition text-sm">Kiểm tra Phần Mở rộng 🎯</button>
+            </div>
+            <div id="feedback-4" class="mt-4 p-3 rounded-xl text-sm hidden font-medium"></div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 py-6 text-center text-xs text-gray-400">
+        <p>Ứng dụng hỗ trợ học tập Tiếng Việt Lớp 4 - Chuyên đề Luyện tập về Động từ 🌟</p>
+    </footer>
+
+    <!-- JavaScript Xử lý logic và Âm thanh -->
+    <script>
+        let totalScore = 0;
+        function updateScore(points) {
+            totalScore += points;
+            document.getElementById('global-score').innerText = totalScore;
+            playAudio(points > 0 ? 'correct' : 'incorrect');
+        }
+
+        // Web Audio API Sound Effects
+        function playAudio(type) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log('Audio blocked or not supported');
+            }
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- Logic Phần 1 ---
+        function checkSection1() {
+            const t = document.getElementById('ans-thuong').value.trim();
+            const q = document.getElementById('ans-quy').value.trim();
+            const n = document.getElementById('ans-nho').value.trim();
+            const ti = document.getElementById('ans-tiec').value.trim();
+            let feedbackEl = document.getElementById('feedback-1');
+
+            feedbackEl.classList.remove('hidden');
+
+            if (!t || !q || !n || !ti) {
+                feedbackEl.className = 'mt-4 p-4 rounded-xl text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200';
+                feedbackEl.innerHTML = `⚠️ Em hãy điền đầy đủ các ô động từ cho cả 4 câu a, b, c, d nhé!`;
+                playAudio('incorrect');
+                return;
+            }
+
+            feedbackEl.className = 'mt-4 p-4 rounded-xl text-sm font-medium bg-emerald-100 text-emerald-800 border border-emerald-200';
+            feedbackEl.innerHTML = `🎉 Tuyệt vời! Em đã tìm được các động từ rất chính xác và phong phú. Nhận +20 điểm! ⭐`;
+            updateScore(20);
+        }
+
+        // --- Logic Phần 2 ---
+        function checkSection2() {
+            const val = document.querySelector('input[name="q2_check"]:checked');
+            let feedbackEl = document.getElementById('feedback-2');
+            feedbackEl.classList.remove('hidden');
+
+            if (!val) {
+                feedbackEl.className = 'mt-4 p-4 rounded-xl text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200';
+                feedbackEl.innerHTML = `⚠️ Em hãy chọn đáp án trước khi kiểm tra nhé!`;
+                playAudio('incorrect');
+                return;
+            }
+
+            if (val.value === 'dung') {
+                feedbackEl.className = 'mt-4 p-4 rounded-xl text-sm font-medium bg-emerald-100 text-emerald-800 border border-emerald-200';
+                feedbackEl.innerHTML = `🌟 Chính xác! Các từ ngữ đó thể hiện rất rõ tình cảm, cảm xúc của con đối với mẹ. Nhận +15 điểm! 🚀`;
+                updateScore(15);
+            } else {
+                feedbackEl.className = 'mt-4 p-4 rounded-xl text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200';
+                feedbackEl.innerHTML = `💪 Chưa chính xác lắm. Hãy nhớ các từ chỉ tình cảm như nhớ, mong, yêu quý chính là động từ tình cảm nhé!`;
+                playAudio('incorrect');
+            }
+        }
+
+        // --- Logic Phần 3 ---
+        function checkSection3() {
+            const sentence = document.getElementById('user-sentence-dt').value.trim();
+            let feedbackEl = document.getElementById('feedback-3');
+            feedbackEl.classList.remove('hidden');
+
+            if (sentence.length < 5) {
+                feedbackEl.className = 'mt-4 p-4 rounded-xl text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200';
+                feedbackEl.innerHTML = `⚠️ Em hãy viết một câu hoàn chỉnh có chứa từ chỉ trạng thái sức khỏe nhé!`;
+                playAudio('incorrect');
+                return;
+            }
+
+            feedbackEl.className = 'mt-4 p-4 rounded-xl text-sm font-medium bg-emerald-100 text-emerald-800 border border-emerald-200';
+            feedbackEl.innerHTML = `🌟 Xuất sắc! Câu của em: <em>"${sentence}"</em> sử dụng động từ trạng thái rất chuẩn xác. Nhận +15 điểm! 🎉`;
+            updateScore(15);
+        }
+
+        // --- Logic Phần 4 (Mở rộng) ---
+        function checkSection4() {
+            const val = document.querySelector('input[name="q4"]:checked');
+            let feedbackEl = document.getElementById('feedback-4');
+            feedbackEl.classList.remove('hidden');
+
+            if (!val) {
+                feedbackEl.className = 'mt-4 p-4 rounded-xl text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200';
+                feedbackEl.innerHTML = `⚠️ Em hãy chọn đáp án cho từ "ngủ" nhé!`;
+                playAudio('incorrect');
+                return;
+            }
+
+            if (val.value === 'trang-thai') {
+                feedbackEl.className = 'mt-4 p-4 rounded-xl text-sm font-medium bg-emerald-100 text-emerald-800 border border-emerald-200';
+                feedbackEl.innerHTML = `🎉 Quá đỉnh! "Ngủ" là động từ chỉ trạng thái tồn tại của cơ thể. Nhận +15 điểm phần mở rộng! 🌟`;
+                updateScore(15);
+            } else {
+                feedbackEl.className = 'mt-4 p-4 rounded-xl text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200';
+                feedbackEl.innerHTML = `💪 Chưa đúng em nhé. Ngủ không phải là hoạt động tác động ra bên ngoài mà là trạng thái nghỉ ngơi!`;
+                playAudio('incorrect');
+            }
+        }
+    </script>
+</body>
+</html>
